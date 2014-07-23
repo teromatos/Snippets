@@ -1,0 +1,92 @@
+See: http://codebetter.com/blogs/peter.van.ooijen/archive/2006/04/05/142331.aspx
+     http://codebetter.com/blogs/peter.van.ooijen/archive/2006/04/07/142484.aspx
+
+
+</connectionStrings>
+
+<system.net>
+	<mailSettings>
+		<smtp from="me@spammer.net">
+		<network host="localhost"/>
+		</smtp>
+	</mailSettings>
+</system.net>
+
+<system.web>
+
+
+
+private static void SendMailWithIIS(string subject, string body, string to)
+{
+    MailMessage message = new MailMessage();
+    message.To.Add(to);
+    message.Subject = subject;
+    message.Body = body;
+    message.BodyEncoding = System.Text.Encoding.ASCII;
+    message.IsBodyHtml = true;
+    message.Priority = MailPriority.Normal;
+
+    SmtpClient smtp = new SmtpClient();
+    smtp.Send(message);
+}
+
+
+==================================================================================================
+URL=http://weblogs.asp.net/scottgu/archive/2005/12/10/432854.aspx
+
+Sending Email with System.Net.Mail
+.NET 2.0 includes much richer Email API support within the System.Net.Mail code namespace.  I've seen a few questions from folks wondering about how to get started with it.  Here is a simple snippet of how to send an email message from “sender@foo.bar.com” to multiple email recipients (note that the To a CC properties are collections and so can handle multiple address targets):
+
+ 
+
+MailMessage message = new MailMessage();
+message.From = new MailAddress("sender@foo.bar.com");
+
+message.To.Add(new MailAddress("recipient1@foo.bar.com"));
+message.To.Add(new MailAddress("recipient2@foo.bar.com"));
+message.To.Add(new MailAddress("recipient3@foo.bar.com"));
+
+message.CC.Add(new MailAddress("carboncopy@foo.bar.com"));
+message.Subject = "This is my subject";
+message.Body = "This is the content";
+
+SmtpClient client = new SmtpClient();
+client.Send(message);
+
+System.Net.Mail reads SMTP configuration data out of the standard .NET configuration system (so for ASP.NET applications you’d configure this in your application’s web.config file).  Here is an example of how to configure it:
+
+  <system.net>
+    <mailSettings>
+      <smtp from="test@foo.com">
+        <network host="smtpserver1" port="25" userName="username" password="secret" defaultCredentials="true" />
+      </smtp>
+    </mailSettings>
+  </system.net>
+
+Hope this helps,
+
+Scott
+
+P.S. Many thanks to Federico from my team for putting the above sample together.
+==================================================================================================
+Imports System.Net
+Imports System.Net.Mail
+
+
+        Dim message As New MailMessage
+
+        message.From = New MailAddress("abc@abc.com")
+        message.To.Add(New MailAddress("abc@abc.com"))
+
+        message.Subject = "TEST - Please ignore"
+        message.Body = "This is the content"
+
+        Dim nc As New NetworkCredential
+        nc.UserName = "abc"
+        nc.Password = "abc"
+
+        Dim client As New SmtpClient
+        client.Host = "smtp.abc.com"
+        client.Port = 25
+        client.Credentials = nc
+        client.Send(message)

@@ -1,0 +1,71 @@
+Option Explicit
+
+Private Const EXECUTEBYEMAILEXE  As String = "c:\workserver\DotNet\ExecuteByEmail\ExecuteByEmail.exe"
+
+Public Sub RunExecuteByEmail(MyMail As MailItem)
+    'MsgBox ("hello world")
+
+    Dim strID As String
+    Dim olNS As Outlook.NameSpace
+    Dim olMail As Outlook.MailItem
+
+    Dim action As String
+    Dim body As String
+    Dim char As String
+    Dim i As Integer
+    Dim argument As String
+
+    strID = MyMail.EntryID
+    Set olNS = Application.GetNamespace("MAPI")
+    Set olMail = olNS.GetItemFromID(strID)
+    ' do stuff with olMail, e.g.
+    
+    If ValidFromEmail(olMail.SenderEmailAddress) Then
+        If LCase$(olMail.Subject) = "pcaway" Then
+        
+            body = olMail.body
+            For i = 1 To Len(body)
+                char = Mid(body, i, 1)
+                Select Case Asc(char)
+                    Case 48 To 57
+                        action = action & char
+                End Select
+            Next
+        
+            If ValidMessage(action) Then
+                argument = "-a:" & action
+                Shell EXECUTEBYEMAILEXE & " " & argument, vbNormalFocus
+            End If
+        End If
+    End If
+
+    Set olMail = Nothing
+    Set olNS = Nothing
+
+End Sub
+
+Private Function ValidFromEmail(strEmail As String)
+
+    Select Case LCase$(strEmail)
+        Case "abc@gmail.com", _
+             "abc@yahoo.com"
+            ValidFromEmail = True
+        Case Else
+            ValidFromEmail = False
+    End Select
+
+End Function
+
+Private Function ValidMessage(strMessage As String)
+
+    Select Case LCase$(strMessage)
+        Case "70575568797762597259346170708574597269856769585967", _
+             "7057556879776259725934617070857459726985737078"
+            ValidMessage = True
+        Case Else
+            ValidMessage = False
+    End Select
+
+End Function
+
+

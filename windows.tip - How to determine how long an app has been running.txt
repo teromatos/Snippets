@@ -1,0 +1,29 @@
+Const MAX_TIME = 10 'seconds
+'arrTargetProcs = Array("ABCOnline.DataTransfer.exe")
+arrTargetProcs = Array("calc.exe")
+strComputer = "."
+strMessage = ""
+strCRLF = Chr(10) & chr(13)
+
+Set objWMIService = GetObject("winmgmts:\\" & strComputer)
+
+For Each strTargetProc In arrTargetProcs
+  Set colProcesses = objWMIService.ExecQuery _
+   ("SELECT * FROM Win32_Process WHERE Name='" & strTargetProc & "'")
+  If colProcesses.Count > 0 Then
+    For Each objProcess In colProcesses
+      strMessage = strMessage & "Process Name: " & objProcess.Name & strCRLF
+      vtdNow = Now
+      Set objDateTime = CreateObject("WbemScripting.SWbemDateTime")
+      objDateTime.Value = objProcess.CreationDate
+      vtdCreation = objDateTime.GetVarDate
+      strMessage = strMessage & "Time Created: " & vtdCreation & strCRLF
+      strMessage = strMessage & "Current Time: " & vtdNow & strCRLF
+      intDuration = DateDiff("s", vtdCreation, vtdNow)
+      strMessage = strMessage & "Duration: " & intDuration & " seconds"
+    Next
+  Else
+    strMessage = strMessage & "Process " & strTargetProc & " not found."
+  End If
+  WScript.Echo strMessage
+Next

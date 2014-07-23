@@ -1,0 +1,10 @@
+tfs
+
+Create repository in tfs.visualstudio.com
+Open VS
+In Team Explorer, point to correct repository online
+In Team Explorer, point to correct local repository
+Open Solution
+Commit -> Push
+publish to remote repository (under commits)
+  https://abc.visualstudio.com/DefaultCollection/_git/<project_name_goes_here>

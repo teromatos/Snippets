@@ -1,0 +1,4 @@
+How to use Like clause within a table.select statement
+
+dim qt as string = "'"
+"CarBrand Like " & qt & carBrand & qt & " + " & qt & "*" & qt

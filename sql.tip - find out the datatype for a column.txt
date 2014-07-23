@@ -1,0 +1,5 @@
+find out the datatype for a column (sql 2005+)
+
+select * 
+from INFORMATION_SCHEMA.COLUMNS 
+where TABLE_NAME='hst' and COLUMN_NAME in ('col_ref')

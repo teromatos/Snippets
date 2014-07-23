@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+	<appSettings>
+		<add key="Tero.Email.EMailServices.MappingFile" value="J:\Dev\TERO.Email.config"></add>
+		<add key="Tero.Email.EMailServices.ConnectionString" value="Server=email;DataBase=EMail;User=abc;Password=abc"></add>
+		<add key="Tero.Email.EMailServices.Provider" value="0"></add>
+	</appSettings>
+</configuration>
+
+        Dim ms As Tero.Email.EMailServices
+        ms = New Tero.Email.EMailServices("SYSTEM")
+        ms.SendEmailFromSystem(Subject, Note, emailRecipients)
+        ms = Nothing

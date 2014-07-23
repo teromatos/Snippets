@@ -1,0 +1,411 @@
+UPDATE QUERY
+============
+
+UPDATE table SET update_expression WHERE search_expression
+Ex: UPDATE Categories SET CategoryName='Beverages' WHERE CategoryID=1
+
+
+DELETE QUERY
+============
+
+DELETE FROM table WHERE search_condition
+Ex: DELETE FROM Categories WHERE CategoryID=1
+
+
+INSERT QUERY
+============
+INSERT INTO table (column_list) VALUES (value_list)
+INSERT INTO Categories (CategoryID, CategoryName) VALUES (10, "Non-Dairy")
+
+
+Stored Procedure (output parameter)
+===================================
+CREATE PROCEDURE UpdateCategory
+(
+   @CategoryID int,
+   @CategoryName nvarchar(15),
+   @ReturnValue int OUTPUT
+
+)
+
+AS
+
+
+INSERT INTO Customers
+(
+   CategoryID,
+   CategoryName
+)
+
+VALUES
+(
+   @CategoryID
+   @CategoryName
+) 
+
+SELECT
+   @ReturnValue = @@Identity
+
+GO
+
+
+
+Stored Procedure (return value)
+===============================
+CREATE PROCEDURE UpdateCategory
+(
+   @CategoryID int,
+   @CategoryName nvarchar(15)
+
+)
+
+AS
+
+
+INSERT INTO Customers
+(
+   CategoryID,
+   CategoryName
+)
+
+VALUES
+(
+   @CategoryID
+   @CategoryName
+) 
+
+RETURN @@Identity
+
+GO
+
+
+
+--===============================================
+
+Shortcut                 Activity
+
+CTRL-SHIFT-F2            Bookmarks: Clear all bookmarks.
+CTRL+F2                  Bookmarks: Insert or remove a bookmark (toggle).
+F2                       Bookmarks: Move to next bookmark.
+SHIFT+F2                 Bookmarks: Move to previous bookmark.
+ALT+BREAK                Cancel a query.
+CTRL+O                   Connections: Connect.
+CTRL+F4                  Connections: Disconnect.
+CTRL+F4                  Connections: Disconnect and close child window.
+ALT+F1                   Database object information.
+CTRL+SHIFT+DEL           Editing: Clear the active Editor pane.
+CTRL+SHIFT+C             Editing: Comment out code.
+CTRL+C                   Editing: Copy. You can also use CTRL+INSERT.
+CTRL+X                   Editing: Cut. You can also use SHIFT+DEL.
+SHIFT+TAB                Editing: Decrease indent.
+CTRL+DEL                 Editing: Delete through the end of a line in the Editor pane.
+CTRL+F                   Editing: Find.
+CTRL+G                   Editing: Go to a line number.
+TAB                      Editing: Increase indent.
+CTRL+SHIFT+L             Editing: Make selection lowercase.
+CTRL+SHIFT+U             Editing: Make selection uppercase.
+CTRL+V                   Editing: Paste. You can also use SHIFT+INSERT.
+CTRL+SHIFT+R             Editing: Remove comments.
+F3                       Editing: Repeat last search or find next.
+CTRL+H                   Editing: Replace.
+CTRL+A                   Editing: Select all.
+CTRL+Z                   Editing: Undo.
+F5                       Execute a query. You can also use CTRL+E (for backward compatibility).
+F1                       Help for SQL Query Analyzer.
+SHIFT+F1                 Help for the selected Transact-SQL statement.
+F6                       Navigation: Switch between query and result panes.
+Shift+F6                 Navigation: Switch panes.
+CTRL+W                   Navigation: Window Selector.
+CTRL+N                   New Query window.
+F8                       Object Browser (show/hide).
+F4                       Object Search.
+CTRL+F5                  Parse the query and check syntax.
+CTRL+P                   Print.
+CTRL+D                   Results: Display results in grid format.
+CTRL+T                   Results: Display results in text format.
+CTRL+B                   Results: Move the splitter.
+CTRL+SHIFT+F             Results: Save results to file.
+CTRL+R                   Results: Show Results pane (toggle).
+CTRL+S                   Save.
+CTRL+SHIFT+INSERT        Templates: Insert a template.
+CTRL+SHIFT+M             Templates: Replace template parameters.
+CTRL+L                   Tuning: Display estimated execution plan.
+CTRL+K                   Tuning: Display execution plan (toggle ON/OFF).
+CTRL+I                   Tuning: Index Tuning Wizard.
+CTRL+SHIFT+S             Tuning: Show client statistics
+CTRL+SHIFT+T             Tuning: Show server trace.
+CTRL+U                   Use database.
+
+--===============================================
+
+SQL             Access           VB               VB.NET
+(bit)
+
+0 = False       0 = False        0 = False        0 = False
+1 = True        -1= True         -1= True         -1= True
+--===============================================
+
+exec sp_rename 'Messages.StatusKey', 'MessagesStatusKey', 'COLUMN'
+
+--===============================================
+
+CONVERT DATE
+
+
+--select getdate(), CONVERT(VARCHAR(8),GETDATE(),1)
+
+declare @Today_cd varchar(100)
+SET @Today_cd=CONVERT(VARCHAR(100),GETDATE(), 121)
+print @Today_cd
+
+declare @Today_dt datetime
+SET @Today_dt=CONVERT(VARCHAR(100),GETDATE())
+print @Today_dt
+
+declare @Today_sdt smalldatetime
+SET @Today_sdt=CONVERT(VARCHAR(100),GETDATE())
+print @Today_sdt
+
+--===============================================
+
+SET @Today=CONVERT(VARCHAR(8),GETDATE(),1)
+
+SELECT @ProcDateID=pd.ProcDateID
+FROM ProcDates as pd
+WHERE CONVERT(VARCHAR(8),Pd.ProcDate,1) = @Today
+
+--===============================================
+
+Simple way to Remove Duplicate Rows from an Existing Table in SQL
+
+SELECT DISTINCT *
+INTO duplicate_table
+FROM original_table
+GROUP BY key_value
+HAVING COUNT(key_value) > 1
+
+DELETE original_table
+WHERE key_value
+IN (SELECT key_value
+FROM duplicate_table)
+
+INSERT original_table
+SELECT *
+FROM duplicate_table
+
+DROP TABLE duplicate_table
+
+--===============================================
+
+Listing A
+
+
+SELECT ProductName,
+  'Category' =
+  CASE CategoryID
+    WHEN 1 THEN 'Beverages'
+    WHEN 2 THEN 'Condiments'
+    WHEN 3 THEN 'Confections'
+    WHEN 4 THEN 'Dairy Products'
+    WHEN 5 THEN 'Grains/Cereals'
+    WHEN 6 THEN 'Meat/Poultry'
+    WHEN 7 THEN 'Produce'
+    WHEN 8 THEN 'Seafood'
+  END
+  FROM Products
+
+
+
+Listing B
+
+
+SELECT ProductName,
+  'Product Type' =
+  CASE
+   WHEN UnitPrice > 30 THEN 'Expensive product'
+ ELSE 'Inexpensive product'
+ END
+ FROM Products
+
+--===============================================
+
+INSERT QUERY
+
+ACCESS
+        INSERT INTO Settings ( RunningDate, Font, Dialup, DailyHoroscopesID, ProcessedDateID )
+        SELECT #10/21/01# AS Expr1, "XXX" AS Expr2, "RCN" AS Expr3, 2094 AS Expr4, 218 AS Expr5
+        FROM Settings;
+
+
+SQL 2000
+        INSERT INTO Settings (RunningDate, Font, Dialup, DailyHoroscopesID, ProcessedDateID)
+        VALUES     ('10/12/2001', N'Wingdings', N'RCN', 2094, 218)
+
+--===============================================
+
+UPDATE QUERY
+
+ACCESS
+
+        UPDATE Graphics INNER JOIN DailyHoroscopes ON Graphics.Graphic = DailyHoroscopes.DailyImage SET DailyHoroscopes.GraphicsID = [Graphics]![GraphicsID];
+
+
+SQL 2000
+        USE YahooHoroscopes
+        UPDATE DailyHoroscopes
+           SET DailyHoroscopes.GraphicsID = Graphics.GraphicsID
+           FROM DailyHoroscopes INNER JOIN GRAPHICS ON (DailyHoroscopes.DailyImage = Graphics.Graphic)
+
+--===============================================
+
+CREATE table tablename
+(
+        col1    type    nullqualifier
+)
+
+--===============================================
+
+CREATE PROCEDURE procedurename
+        @inputparam     type,
+        @outputparam    type    OUTPUT
+AS
+        Declare @var1   type
+        set @var1 = ??
+
+print  @var1
+return @var1
+
+--===============================================
+
+DELETE table_or_view FROM table_sources WHERE search_condition
+
+--===============================================
+
+ALTER TABLE tablename ADD  column info (col1 int not null
+                      DROP
+
+--===============================================
+
+ALTER COLUMN columname type nullqualifier
+
+--===============================================
+
+
+'-----------------------------------------------------
+' Better SQL Error message
+'-----------------------------------------------------
+
+sqlexception.Errors(0).number
+sqlexception.Errors(0).message
+sqlexception.Errors(0).Procedure
+
+If Ex.Errors.Count > 0 Then
+	With Ex.Errors(0)
+		'-- Check out the docs for System.Data.SqlClient.SqlError
+		Return "SQL Error #" & .Number.ToString & vbCrLf & .Message
+	End With
+End If
+
+'-----------------------------------------------------
+' Use like keyword in select statement 
+' use only in tables with low number of rows
+'-----------------------------------------------------
+
+use abcmail
+select * 
+from messages 
+where subject like '%.net setup%'
+order by subject desc
+
+
+'-----------------------------------------------------
+' Function to select datetime column = to a date
+'-----------------------------------------------------
+
+
+create function dbo.IsDateBetween(@Date datetime, @MinDate as char(10), @MaxDate as char(10))
+returns bit
+as
+begin
+declare @ret as bit
+
+if @Date >= cast(@MinDate as datetime) and  @Date <= cast(@MaxDate as datetime)
+  begin
+    set @ret = 1
+  end
+else
+  begin
+    set @ret = 0
+  end
+
+  return @ret
+end
+
+
+
+' EXAMPLE HOW TO USE THE FUNCTION
+' ===============================
+
+select *
+from messages as m
+where msgdeleted = 1 and dbo.IsDateBetween(m.msgDate, '08/03/2004', '08/04/2004') = 1
+go
+
+
+
+' EXAMPLE USING ALL SQL STATEMENTS
+' ================================
+
+select *
+from messages 
+where msgdeleted = 1 and msgdate >= cast('08/03/2004' as datetime) and  msgdate <= cast('08/04/2004' as datetime)
+--order by msgdate asc
+
+
+
+' EXAMPLE USING SQL LIKE OPERATOR IN .NET
+' ================================
+
+    Private Function GetDrugsFromDrugName(ByVal drugname As String) As DataTable
+
+        Dim sqltext As String
+        sqltext = "SELECT DrugKey, NDC, LN, IsBrand FROM drugs WHERE LN LIKE ?"
+
+        Dim da As New OleDbDataAdapter
+        Dim dt As New Data.DataTable
+        Dim cb As New OleDbCommandBuilder(da)
+        Dim cmd As New OleDbCommand
+        cmd = New OleDbCommand(sqltext, drugsConnection)
+
+        Dim param As New OleDbParameter
+        param.OleDbType = OleDbType.VarChar
+        param.Size = 30
+        param.Value = "%" & drugname & "%"
+
+        cmd.Parameters.Add(param)
+
+        da.SelectCommand = cmd
+        da.Fill(dt)
+        If Not da Is Nothing Then da.Dispose()
+
+        Return dt
+    End Function
+
+
+' Interesting stored procedures
+' ================================
+xp_getfiledetails - This procedure returns the following information about an existing file.
+                    Alternate Name, Size, Creation Date, Creation Time, Last Written Date, Last Written Time, Last Accessed Date, Last Accessed Time, Attributes
+
+xp_dirtree - This extended stored procedure brings out the directory tree of the drive you pass to it as parameter with depth and Folder name.
+
+xp_fixeddrives - Returns free space in the fixed drives on the server in MB.  
+
+xp_fileexist [, OUTPUT] - Gives the following resultset
+                          File Exists [bit], File Is A Directory [bit], Parent Directory Exists [bit]
+
+xp_enumgroups - Returns the User Groups on the Server
+
+xp_availiblemedia - Free Space on the drives in bytes.
+
+xp_enumdsn - List of DSN configued on the server.

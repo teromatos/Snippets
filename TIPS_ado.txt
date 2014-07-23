@@ -1,0 +1,248 @@
+--===============================================
+
+For I = 0 To 10
+  workTable.Rows.Add(New Object() {I, I*100})
+Next
+
+--===============================================
+
+Sean
+Q: CarlProthman: In ADO 6.0, we were able to use TimeStamp fields to check for update conflicts. How do we do this using ADO.NET's Update method? 
+
+A: ADO.NET gives you full control over update logic allowing you to specify the TSQL for Insert, Update, and Delete operations - just add the timestamp check to your WHERE clauses. We are looking at more "built-in" support for this in vnext. 
+
+
+
+Katabuk: How can I locate specific record in DataTable (without using DataView) ? 
+
+A: DataTable.Select returns an array of DataRows matching an expression and rowstate you specify. DataTable.Rows.Find will search by primary key. And if those don't work you can always iterate through the rows collection manually. 
+
+Q: Barry: DataViews only work with 1 DataTable. How would you show a grid with columns from 2 tables - given that they have a 1 to 1 relationship? 
+
+A: Today you a have a couple of options: a) Join the tables when you query the database, b) create expression columns on the table referring to columns from the other table, or c) Merge the tables if they share a key. This is a common request so we're looking at multi-table DataViews in vnext. 
+
+
+Q: Suprio : How is the disconnected Dataset model different from the Client cursor engine/service? 
+
+A: While conceptually similar, the DataSet actually offers quite a bit more flexibility and control to the developer than the Client Cursor Engine. The dataset is a multi-table cache of data that supports the ability to define relations that let you navigate between related rows in different tables in a much more flexible, ad-hoc fashion than even shaped recordsets in ado. The updating logic for the DataSet is specific; you specify the insert, update, and delete commands in the Data Adapter, including the ability to specify things like stored procedures, rather than have the Client Cursor Engine attempt to generate commands that you have no control over, that may violate business logic by bypassing stored procedure or other update logic. The dataset is very tightly integrated with XML, while the recordset only loads and saves it's proprietary xml representation. There are a number of other differences, but these are some of the main ones. Don't get me wrong; Client Cursor Engine is very cool technology, but Dataset provides a much more explicit model that gives you, the developer, more control over how you access and work with data. 
+
+
+
+Q: CarlProthman: In ADO 6.0 Recordset, we used the EOF to find out if any records were found for a read-only, forward-only recordset. And ADO.NET, we use the DataReader's Read method. However, this doesn't work for logic that checks if any records were found, then do work, else do something else. (You end up missing the first record in the else case). How do you get around this? 
+
+A: We are looking at adding a flag to the DataReader to tell the user if there are any results for exactly this case. In the meantime, one way to get around this is may be to recognize (in code) that the check places the DataReader on the first record (just as a RecordSet starts out placed on the first record). Thus, a routine that you passed a DataReader to that you had "checked" for results, would have to know that it was already placed on the first record and not call Read before processing the first record. For instance: 
+
+public void ProcessData(DataReader dr, Boolean positionedOnFirstRecord)
+{
+    Boolean continue = true;
+    if(!positionedOnFirstRecord)
+         dr.Read();
+    while(continue)
+     {
+         doSomethingWithDataRow(dr);
+         continue = dr.Read();
+     }
+  }
+
+
+
+Q: Don : There are times when connected recordsets are the right thing to do. Will more support be added to ADO.NET for them in the future? 
+
+A: In addition to supporting a disconnected model through the DataSet, ADO.NET supports a connected model using the Connection, Command, and DataReader objects. The DataReader in particular gives you a non-cached, forward-only, read-only server cursor. This is the fastest way to stream data out of the database. But be aware that as long as you are holding the DataReader open, you are tieing up resources in the database, including database connections and possibly blocking others from reading or writing data. That is why you only want to use a DataReader in small, tight loops that process the data programmatically. For example, you wouldn't want to hold open a DataReader while waiting for a user to scroll. Before deciding to use a scrollable cursor on the server, it's important to understand the resources that that server cursor holds, and the negative effect that has on building scalable applications. We said before that you don't want to hold server resources while the waiting for user response, and 99% of all requirements for scrollable cursors revolve around tieing the scrollable cursor to User Interface. If the user is interacting with the data, then you'll scale and perform far better in a multi-user environment if you read the data into a separate, disconnected cache, allow the user to navigate through and make updates to that cache without tieing up expensive database resoruces, and later synchronize any changes with the Database. That's what the DataSet is all about. That said, it is possible to use scrollable server cursors in SQL Server from ADO.NET. You do this by explicitly opening a cursor and navigating it through SQL Server commands. For example, the following code sample declares and opens a cursor, scrolls through the results, and then positions on and updates the fifth row. When it's done it closes the cursor. 
+
+	// Declare and open cursor
+	SqlCommand cmd = new SqlCommand(null, conn,);
+	cmd.CommandText = 
+“DECLARE mycursor SCROLLABLE CURSOR FOR select * from Customers”;
+	cmd.ExecuteNonQuery(); 
+	cmd.CommandText = “OPEN mycursor”;
+	cmd.ExecuteNonQuery();
+	// Read from cursor
+	cmd.CommandText = “FETCH NEXT FROM mycursor”;
+	while(true) {
+		SqlDataReader  dr =cmd.ExecuteReader();
+		if (dr.Read() == false)
+		break;
+		Console.WriteLine(“CompanyName is ” 
++ dr[“CompanyName”] + “, ContactName is ” + dr[“ContactName”]);
+	dr.Close();         
+	}
+	// Update fifth row
+	cmd.CommandText = “FETCH ABSOLUTE 5 FROM mycursor”;
+	cmd.ExecuteNonQuery();
+	cmd.CommandText = 
+“UPDATE Customers set ContactName = ‘Fred Flintstone’ "+
+WHERE CURRENT OF mycursor”;
+	cmd.ExecuteNonQuery();
+	// Close the cursor
+	cmd.CommandText = “CLOSE mycursor; DEALLOCATE mycursor”;
+	cmd.ExecuteNonQuery();
+	
+Seem like a lot of commands to and from, and state managed at, the Database? (there is a command execution for each row retrieved, after all...) Well, that's exactly what happens when you use Server Cursors in ADO, RDO, ODBC, OLE DB, or any other data access language. The only thing that those APIs do is wrap the calls to execute the same cursor commands on the server. We decided not to wrap these calls in ADO.NET 1.0 because ADO.NET 1.0 is all about giving the developer complete control over how and where interactions with the database occur, and wrapping these calls gave the illusion that something was cheap that really was not. It would be easy for you to wrap the various different cursor calls, however, if you want to simplify the programming model when working with SQL Server server cursors; just don't forget what's really going on under the covers. 
+
+--===============================================
+
+Imports System.Data.Odbc
+
+Module Module1
+
+    Sub Main()
+
+        Dim conn As OdbcConnection
+        Dim cmd As OdbcCommand
+        Dim r As OdbcDataReader
+        Dim strsql As String
+
+        strsql = "Select * from customers"
+        conn = New OdbcConnection("Driver={Microsoft dBase Driver (*.dbf)};DBQ=C:\")
+
+        strsql = "select * from group where group_no = '93060930'"
+        conn = New OdbcConnection("Driver={Microsoft dBase Driver (*.dbf)};DBQ=X:\ROOT\DATABASE\")
+
+        'strsql = "select * from xxx"
+        'conn = New OdbcConnection("Driver={Microsoft dBase Driver (*.dbf)};DBQ=N:\TERO\")
+
+        conn.Open()
+        cmd = New OdbcCommand(strsql, conn)
+        r = cmd.ExecuteReader
+        Do While r.Read
+            Console.WriteLine(r.GetString(1))
+        Loop
+        r.Close()
+        conn.Close()
+
+        Console.ReadLine()
+    End Sub
+
+End Module
+
+--===============================================
+
+
+
+
+
+Connected classes
+=================
+
+Connection
+Command
+DataReader
+Transaction
+ParameterCollection
+Parameter
+
+
+Disconnected Classes
+====================
+
+DataSet
+DataTable
+DataColumn
+DataRow
+COnstrain
+DataRelationship
+DataView
+
+
+Providers
+=========
+
+SQL Server.NET - System.Data.SQLClient                   native, using TDS protocol
+OLE DB.NET     - System.Data.OleDb                       using OLD DB provider through COM
+ODBC.NET       - System.Data.Odbc  (Microsft.Data.Odbc)  using ODBC drivers through COM
+Oracle.NET     - System.Data.OracleClient                native use Oracle Call Interface (OCI)
+
+
+Connection String
+=================
+
+Authentication, DB Path, DB Name, [OLE DB Provider] , [ODBC driver]
+"Data Source = localhost;Initial Catalog = NorthWind;Integrated Security=SSPI"
+"Data Source=n:\dev\client list\ReportNames.mdb;Provider=Microsoft.Jet.OLEDB.4.0;"
+
+
+Connection
+==========
+System.Data.SQLClient.SQLConnection
+System.Data.OleDb.OleDbConnection
+System.Data.Odbc.OdbcConnection
+System.Data.OracleClient.OracleConnection
+
+
+Ensure user parameters for the connection string is verifed.
+No semi-colons allowed.
+
+
+Close the connection asap and make sure it's closed
+
+   try
+      con.open
+   catch
+       <handle error>
+   finally
+       con.close
+
+       'if not concerned with connection 
+       'pooling then alse use the following
+       '
+       'con.dispose()
+   end try
+
+
+Command
+=======
+System.Data.SQlClient.SQLCommand
+System.Data.OleDb.OleDbCommand
+
+
+
+Parameter
+=========
+System.Data.SQlClient.SQLParameter
+System.Data.OleDb.OleDbParameter
+
+
+
+Parameters must specify a parameter data type during it's declarartion.
+=======================================================================
+System.Data.SQlDbType
+System.Data.OleDb.OleDbType
+
+
+
+if using parameterized SQL queries instead of stored procedures
+===============================================================
+'SQL Server
+UPDATE Categories SET CategoryName=@CategoryName WHERE CategoryID=@CategoryId
+'Parameters added by Name
+
+'OleDb
+UPDATE Categories SET CategoryName=? WHERE CategoryID=?
+'Parameters must be added in order which are shown as ?
+
+
+
+
+'Create new parameter example
+=============================
+dim cmd as sqlCommand = new sqlcommand(strSQL, conn)
+dim param as sqlParameter = cmd.add(ParameterName, sqldbtype.varchar, 10, ColumnSource)
+param.value = "test"
+
+
+
+Stored procedures & Parameters
+==============================
+For storead procedures, parameters maybe be :
+
+input          -> param.direction = parameterdirection.Input
+output         -> param.direction = parameterdirection.Output
+result         -> param.direction = parameterdirection.Returnvalue
+bidirectional  -> param.direction = parameterdirection.InputOutput
+
+
+
+Also for OleDb.OleDbParameter, if the stored procudure returns a value
+(ex: RETURN @@Identity) the return value will be the first parameter
+within the command's parameter collection.

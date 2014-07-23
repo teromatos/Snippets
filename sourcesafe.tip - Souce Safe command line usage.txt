@@ -1,0 +1,21 @@
+================
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" CP $/AInfo.root/AInfo -Ytero
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" CheckOut -R $/AInfo.root/AInfo -Ytero
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" Checkin  -R $/AInfo.root/AInfo -Ytero -C"testing ss.exe command line"
+
+================
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" CP $/AInfo.root/AInfo -Ytero
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" CheckOut $/AInfo.root/AInfo/AInfo/abc.snk -Ytero
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" Checkin  $/AInfo.root/AInfo/AInfo/abc.snk -Ytero -C"testing ss.exe command line"
+
+================
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" CP $/AInfo.root/AInfo -Ytero
+
+"C:\Program Files\Microsoft Visual SourceSafe\ss.exe" Delete $/AInfo.root/AInfo/build.bat -Ytero

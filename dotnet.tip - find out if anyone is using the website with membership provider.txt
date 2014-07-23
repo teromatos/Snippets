@@ -1,0 +1,41 @@
+--============================================================
+--Find out if anyone is using the website within last n minutes
+--============================================================
+-- execute the following in the aspnetdb database on the server
+-- It will display users that had activity within the last 30 minutes
+
+
+DECLARE @Interval int
+SET @Interval = -30
+
+--statement1
+SELECT [UserName]
+      ,[LastActivityDate]
+      ,[PasswordFormat]
+      ,[MobilePIN]
+      ,[Email]
+      ,[LoweredEmail]
+      ,[PasswordQuestion]
+      ,[PasswordAnswer]
+      ,[IsApproved]
+      ,[IsLockedOut]
+      ,[CreateDate]
+      ,[LastLoginDate]
+      ,[LastPasswordChangedDate]
+      ,[LastLockoutDate]
+      ,[FailedPasswordAttemptCount]
+      ,[FailedPasswordAttemptWindowStart]
+      ,[FailedPasswordAnswerAttemptCount]
+      ,[FailedPasswordAnswerAttemptWindowStart]
+      ,[Comment]
+      ,[ApplicationId]      
+      ,[MobileAlias]
+      ,[IsAnonymous]      
+      ,[UserId]
+FROM [aspnetdbxxx].[dbo].[vw_aspnet_MembershipUsers]
+WHERE [LastActivityDate] > dateadd(n, @Interval, getutcdate())
+ORDER BY lastactivitydate DESC
+go
+
+SELECT GetUtcDate()
+go

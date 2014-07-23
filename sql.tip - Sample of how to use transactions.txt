@@ -1,0 +1,212 @@
+ALTER   PROCEDURE dbo.usp_PatientGroupChange2
+(
+  @ProfileClient varchar (8)  ,
+  @TerminationDate datetime,
+  @CopyDependents bit,
+  @ExistingPatientKey int   ,
+  @ExistingLastUpdate timestamp   ,
+  @NewClient varchar (8)  ,  
+  @NewGroupNo char (8)  ,
+  @NewMemberId char (9)  ,
+  @NewGroupKey int   ,
+  @NotificationDate datetime  ,
+  @DoneBy varchar (8)
+)
+AS
+
+DECLARE @NewPatientKey int
+DECLARE @CurrentDependentCount int
+DECLARE @error_no int, @rowcount_no int
+DECLARE @ErrorMessage nvarchar(255)
+
+--SET TRANSACTION ISOLATION LEVEL READ COMMITTED
+BEGIN TRANSACTION
+
+-- Determine if the member already exists in the new group
+-- If so, error will be thrown
+SET @ErrorMessage = ''
+SET @NewPatientKey = 0
+
+SELECT @NewPatientKey = Patients.PatientKey
+FROM   Patients
+WHERE  ((Patients.Client = @NewClient) OR (@NewClient = 'ABC')) AND
+       Patients.GroupNo  = @NewGroupNo AND
+       Patients.MemberId = @NewMemberId AND
+       Patients.PersonNo = '01'
+
+IF (@NewPatientKey > 0)
+BEGIN
+  SET @ErrorMessage = 'Unable to insert new member patient, it already exists in new group. '
+  SET @ErrorMessage = @ErrorMessage  + 'Client: ' + @NewClient
+  SET @ErrorMessage = @ErrorMessage  + ',GroupNo: ' + @NewGroupNo
+  SET @ErrorMessage = @ErrorMessage  + ',MemberId: ' + @NewMemberid
+  SET @ErrorMessage = @ErrorMessage  + ',PersonNo: 01'
+
+  SET @error_no = 0
+
+  PRINT '@NewPatientKey > 0. @NewPatientKey value: ' + cast(@NewPatientKey as varchar(10))
+  GOTO PROBLEM
+END
+
+
+-- Add new member
+SET @ErrorMessage = ''
+INSERT INTO dbo.Patients
+SELECT @NewGroupKey
+  , 0
+  , [Client]
+  , @NewGroupNo
+  , [MemberId]
+  , [PersonNo]
+  , [FirstName]
+  , [Lastname]
+  , [MiddleInitial]
+  , [BegDate]
+  , [EndDate]
+  , [Relation]
+  , [Student]
+  , [Gender]
+  , [DOB]
+  , @DoneBy
+  , [SSN]
+  , [MedicareBegDate]
+  , [MedicareEndDate]
+  , [Department]
+  , [Coverage]
+  , [OtherNo]
+  , 0
+  , @NotificationDate
+  , 0
+  , NULL
+FROM  dbo.Patients
+WHERE Patients.PatientKey = @ExistingPatientKey AND
+      Patients.LastUpdate = @ExistingLastUpdate
+
+    
+SELECT @error_no = @@ERROR, @rowcount_no = @@ROWCOUNT
+IF (@error_no <> 0)
+BEGIN
+  PRINT '@error_no <> 0. Value: ' + cast(@error_no as varchar(10))
+  GOTO PROBLEM
+END
+IF (@rowcount_no <> 1)
+BEGIN
+  SET @ErrorMessage = 'Unable to insert new member patient into patients table.'
+  PRINT '@rowcount_no <> 1. @rowcount_no value: ' + cast(@rowcount_no as varchar(10))
+  GOTO PROBLEM
+END
+
+-- Get the identity value
+SET @NewPatientKey = SCOPE_IDENTITY()
+
+-- Update dependents if requested
+SET @ErrorMessage = ''
+SET @CurrentDependentCount = 0
+IF (@CopyDependents = 1)
+  BEGIN
+
+    SELECT @CurrentDependentCount = COUNT(*)
+    FROM dbo.Patients
+    WHERE Patients.MemberPatientKey = @ExistingPatientKey
+
+    SELECT @error_no = @@ERROR, @rowcount_no = @@ROWCOUNT
+    IF (@error_no <> 0)
+    BEGIN
+      PRINT '@error_no <> 0. Value: ' + cast(@error_no as varchar(10))
+      GOTO PROBLEM
+    END
+    IF (@rowcount_no <> 1)
+    BEGIN
+      SET @ErrorMessage = 'Unable to determine existing dependent for patient key.'
+      PRINT '@rowcount_no <> 1. @rowcount_no value: ' + cast(@rowcount_no as varchar(10))
+      GOTO PROBLEM
+    END
+
+    INSERT INTO dbo.Patients
+    SELECT @NewGroupKey
+      , @NewPatientKey
+      , [Client]
+      , @NewGroupNo
+      , [MemberId]
+      , [PersonNo]
+      , [FirstName]
+      , [Lastname]
+      , [MiddleInitial]
+      , [BegDate]
+      , [EndDate]
+      , [Relation]
+      , [Student]
+      , [Gender]
+      , [DOB]
+      , @DoneBy
+      , [SSN]
+      , [MedicareBegDate]
+      , [MedicareEndDate]
+      , [Department]
+      , [Coverage]
+      , [OtherNo]
+      , 0
+      , @NotificationDate
+      , 0
+      , NULL
+    FROM  dbo.Patients
+    WHERE Patients.MemberPatientKey = @ExistingPatientKey
+
+    SELECT @error_no = @@ERROR, @rowcount_no = @@ROWCOUNT
+    IF (@error_no <> 0)
+    BEGIN
+      PRINT '@error_no <> 0. Value: ' + cast(@error_no as varchar(10))
+      GOTO PROBLEM
+    END
+    IF (@rowcount_no <> @CurrentDependentCount)
+    BEGIN
+      SET @ErrorMessage = 'Invalid dependent count in new group after member patient group change.'
+      PRINT '@rowcount_no <> @CurrentDependentCount. @rowcount_no value: ' + cast(@rowcount_no as varchar(10)) + ', @CurrentDependentCount value: ' + cast(@CurrentDependentCount as varchar(10))
+      GOTO PROBLEM
+    END
+  END
+
+
+
+-- Terminate the member in the existing group
+SET @ErrorMessage = ''
+UPDATE Patients
+SET    Patients.EndDate = @TerminationDate,
+       Patients.NotificationDate = @NotificationDate,
+       Patients.SentToABC = 0,
+       Patients.DoneBy = @DoneBy
+WHERE  ((Patients.Client = @ProfileClient) OR (@ProfileClient = 'ABC')) AND
+       Patients.PatientKey = @ExistingPatientKey AND
+       Patients.LastUpdate = @ExistingLastUpdate
+
+SELECT @error_no = @@ERROR, @rowcount_no = @@ROWCOUNT
+IF (@error_no <> 0)
+BEGIN
+  PRINT '@error_no <> 0. Value: ' + cast(@error_no as varchar(10))
+  GOTO PROBLEM
+END
+IF (@rowcount_no <> 1)
+BEGIN
+  SET @ErrorMessage = 'Unable to terminate member patient. Make sure where clauses match.'
+  PRINT '@rowcount_no <> 1. @rowcount_no value: ' + cast(@rowcount_no as varchar(10))
+  GOTO PROBLEM
+END
+
+COMMIT TRANSACTION
+RETURN
+
+PROBLEM:
+IF (@error_no <> 0)
+BEGIN
+  ROLLBACK TRANSACTION
+  RETURN
+END
+
+IF (LEN(@ErrorMessage) > 0)
+BEGIN
+  SET @ErrorMessage = 'T-SQL error. Unable to change member patient group.' + @ErrorMessage
+  RAISERROR(@ErrorMessage, 16, 1)
+
+  ROLLBACK TRANSACTION
+  RETURN
+END

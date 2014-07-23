@@ -1,0 +1,8 @@
+restore filelistonly
+FROM DISK='J:\Temp\abcrx_website_db\abc_db_200803300200.BAK' 
+
+restore database ABC
+FROM DISK='J:\Temp\abcrx_website_db\abc_db_200803300200.BAK' 
+  with recovery,
+  move 'abc_data' to 'c:\Program Files\Microsoft SQL Server\MSSQL\Data\abc_data.mdf',
+  move 'abc_log' to 'c:\Program Files\Microsoft SQL Server\MSSQL\Data\abc_log.ldf'

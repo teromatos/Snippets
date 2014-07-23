@@ -1,0 +1,24 @@
+Use System.Configuration.ConfigurationManager.AppSettings["RunFileLog"]
+
+for
+
+	<appSettings>
+		<add key="RunFileLog" value="false"/>
+		<add key="RunEmailException" value="false"/>
+	</appSettings>
+
+
+==========================================================
+
+Use Properties.Settings.Default.RunClaims
+
+for 
+
+ <applicationSettings>
+  <ABC.DataTransfer.Properties.Settings>
+   <setting name="RunClaims" serializeAs="String">
+    <value>True</value>
+   </setting>
+  <ABC.DataTransfer.Properties.Settings>   
+ <applicationSettings>
+  

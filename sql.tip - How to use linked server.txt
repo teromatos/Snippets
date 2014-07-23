@@ -1,0 +1,14 @@
+USE master
+GO
+
+EXEC sp_addlinkedserver 'WCW', 
+     '', 
+     'SQLOLEDB', 
+     'ABCADV'
+GO
+
+select * from wcw.ABC.dbo.Clients
+GO
+
+exec sp_linkedservers
+GO

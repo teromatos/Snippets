@@ -1,0 +1,1 @@
+TfsDeleteProject /collection:https://abc.visualstudio.com/DefaultCollection test

@@ -1,0 +1,7 @@
+Order to compile abc .NET assemblies
+
+AdvantageAPI
+abc.Y2K
+Shlomo.Common
+abc.COmmon
+abc.Advantage

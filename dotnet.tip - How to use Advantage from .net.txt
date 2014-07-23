@@ -1,0 +1,52 @@
+Imports ABC.Utils
+
+*** CDX Version ****
+
+	Dim dbfName As String
+	Dim cdxName As String
+	Dim dbfIndex As Integer
+	Dim cdxIndex As Integer()
+
+	'-- Connect to database in Advantage server
+	dbfName = Path.Combine(DBF_DIRECTORY, String.Concat(username, ".dbf"))
+	cdxName = Path.Combine(CDX_DIRECTORY, String.Concat(username, ".cdx"))
+	If File.Exists(dbfName) = False OrElse File.Exists(cdxName) = False Then
+		Throw New Exception("Unable to locate database files.")
+	End If
+	
+	//ntx = 1, cdx = 2
+	dbfIndex = AdvAPI.Adv_Use(dbfName, "mail", 2, False)
+	If dbfIndex < 1 Then
+		Throw New Exception("Unable to use email database.")
+	End If
+	
+	//2 = array length
+	cdxIndex = AdvAPI.Adv_SetIndexAr(dbfIndex, cdxName, 2)
+	If cdxIndex(0) < 1 OrElse cdxIndex(1) < 1 Then
+		Throw New Exception("Unable to use email database's index.")
+	End If
+
+*** NTX Version ***
+
+	Dim dbfName As String
+	Dim ntxName As String
+	Dim dbfIndex As Integer
+	Dim ntxIndex As Integer()
+
+	'-- Connect to database in Advantage server
+	dbfName = Path.Combine(DBF_DIRECTORY, String.Concat(username, ".dbf"))
+	ntxName = Path.Combine(NTX_DIRECTORY, String.Concat(username, ".ntx"))
+	If File.Exists(dbfName) = False OrElse File.Exists(ntxName) = False Then
+		Throw New Exception("Unable to locate database files.")
+	End If
+	
+	//ntx = 1, cdx = 2
+	dbfIndex = AdvAPI.Adv_Use(dbfName, "mail", 1, False)
+	If dbfIndex < 1 Then
+		Throw New Exception("Unable to use email database.")
+	End If
+	
+	ntxIndex = AdvAPI.Adv_SetIndex(dbfIndex, ntxName, 1, 1)
+	If ntxIndex < 1 Then
+		Throw New Exception("Unable to use email database's index.")
+	End If

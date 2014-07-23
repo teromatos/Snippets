@@ -1,0 +1,12 @@
+EXEC sp_detach_db 'uspsformularydraft', 'true'
+EXEC sp_detach_db 'uspsformularyfinal', 'true'
+EXEC sp_detach_db 'contractdrugs', 'true'
+EXEC sp_detach_db 'medicareformulary', 'true'
+EXEC sp_detach_db 'formulary', 'true'
+
+
+EXEC sp_attach_db @dbname = N'ContractDrugs',      	@filename1 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\ContractDrugs_Data.mdf',      	@filename2 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\ContractDrugs_Log.ldf'
+EXEC sp_attach_db @dbname = N'USPSFormularyDraft', 	@filename1 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\USPSFormularyDraft_Data.mdf', 	@filename2 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\USPSFormularyDraft_log.ldf'
+EXEC sp_attach_db @dbname = N'USPSFormularyFinal',	@filename1 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\USPSFormularyFinal_Data.mdf', 	@filename2 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\USPSFormularyFinal_log.ldf'
+EXEC sp_attach_db @dbname = N'MedicareFormulary',     	@filename1 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\MedicareFormulary_Data.mdf',	@filename2 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\MedicareFormulary_Log.ldf'
+EXEC sp_attach_db @dbname = N'Formulary',          	@filename1 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\Formulary_Data.mdf',          	@filename2 = N'c:\Program Files\Microsoft SQL Server\MSSQL\Data\Formulary_Log.ldf'

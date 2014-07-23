@@ -1,0 +1,11 @@
+To get a list of taks run the follwoing command:
+
+   schtasks /query /FO csv /NH
+
+This will include extra data but you can just delete anything after the task name
+or import it into ms excel.
+
+
+Sample command line to update task with username and password:
+
+schtasks /Change /TN "App Daily - Backup" /RU "ABC\TERO" /RP mypassword

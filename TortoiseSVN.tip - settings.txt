@@ -1,0 +1,60 @@
+global ignore pattern:
+bin obj _db _obsolete _DB _Obsolete _SQL _sql  _ReSharper* *.resharper *.resharper.user *.suo *.user *.load
+
+exclude paths:
+c:\Config.Msi\*
+c:\Dload\*
+c:\Documents and Settings\*
+c:\FolderShareTemp\*
+c:\Inetpub\*
+c:\JUNK\*
+c:\Kpcms\*
+c:\MSOCache\*
+c:\NVIDIA\*
+c:\OFFICE2K\*
+c:\OFFICE2K3\*
+c:\Program Files\*
+c:\RDS\*
+c:\RECYCLER\*
+c:\ruby\*
+c:\System Volume Information\*
+c:\TEMP\*
+c:\TMP\*
+c:\Tools\*
+c:\WINDOWS\*
+c:\WORK\*
+c:\workserver\Docs\*
+c:\workserver\Icons\*
+c:\workserver\MDB\*
+c:\workserver\Office\*
+c:\workserver\Prog\*
+c:\workserver\Release\*
+c:\workserver\Subversion\*
+c:\workserver\Tasks\*
+c:\workserver\VB\*
+d:\*
+e:\*
+f:\*
+g:\*
+h:\*
+i:\*
+j:\*
+k:\*
+l:\*
+m:\*
+n:\*
+o:\*
+p:\*
+q:\*
+r:\*
+s:\*
+t:\*
+v:\*
+w:\*
+x:\*
+y:\*
+z:\*
+
+
+include paths:
+c:\workserver\dotnet\*

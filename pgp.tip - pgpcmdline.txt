@@ -1,0 +1,5 @@
+Encrypt
+pgp --armor --encrypt c:\temp\test.txt -r "Luz Lopez" -r "abc" --output "c:\temp\encrypt\test.asc"
+
+Decrypt
+pgp --decrypt c:\temp\encrypt\test.asc --passphrase abc --output "c:\temp\decrypt\test.txt"
