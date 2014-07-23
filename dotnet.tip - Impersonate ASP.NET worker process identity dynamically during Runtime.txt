@@ -1,0 +1,42 @@
+URL= http://blogs.msdn.com/peterty/archive/2005/08/19/453097.aspx
+
+
+using System;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using Microsoft.Win32;
+
+namespace Impersonate
+{
+ public class ChangeExeAcctUtil
+ {
+  public ChangeExeAcctUtil()
+  {   
+  }
+
+  [DllImport("advapi32.dll")]
+  private static extern bool LogonUser(String
+   lpszUsername, String lpszDomain, String lpszPassword,
+   int dwLogonType, int dwLogonProvider, out int
+   phToken);
+
+  [DllImport("Kernel32.dll")]
+  private static extern int GetLastError();
+
+  public WindowsImpersonationContext Impersonate(string user, string password, string domain)
+  {
+   int iToken;
+   WindowsImpersonationContext mWIC = null;
+
+   bool loggedOn = LogonUser(user,domain,password,8,0, out iToken);
+   if (loggedOn)
+   {
+    IntPtr wToken = new IntPtr(iToken);
+    WindowsIdentity mWI = new WindowsIdentity(wToken);
+    mWIC = mWI.Impersonate();
+   }
+   return mWIC;
+  }
+
+ }
+}

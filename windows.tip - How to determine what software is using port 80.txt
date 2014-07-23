@@ -1,0 +1,30 @@
+Source: http://msgboard.alphasoftware.com/alphaforum/showthread.php?t=57516
+
+How to determine what software is using port 80 (or any other port) 
+
+--------------------------------------------------------------------------------
+
+For troubleshooting why the Web App Server says the port is in use...
+
+Windows XP and 2003 have the tools built-in to determine what process is using a specific TCP/IP port. If you are using some other version of windows, you will not be able to continue as below. But there are still a number of third-party tools available which can be downloaded instead. One such tool that has been used successfully by several people is fport.
+
+
+From a command prompt, run netstat -o. This will output a list of ports, along with the PID (process ID) that has that port open. The output looks something like:
+
+
+Code:
+C:\Documents and Settings\Administrator>netstat -o
+
+Active Connections
+
+  Proto  Local Address          Foreign Address        State           PID
+  TCP    WEBAPPSERVER2:80       199.90.113.2:57434     TIME_WAIT       2636
+  TCP    WEBAPPSERVER2:80       199.90.113.2:57589     TIME_WAIT       2636
+  TCP    WEBAPPSERVER2:80       199.90.113.2:57600     TIME_WAIT       2636
+  TCP    WEBAPPSERVER2:80       199.90.113.2:57608     TIME_WAIT       2636
+  TCP    WEBAPPSERVER2:3389     12.110.143.84:6473     ESTABLISHED     964
+  TCP    WEBAPPSERVER2:2325     192.168.0.13:netbios-ssn  TIME_WAIT       0
+
+C:\Documents and Settings\Administrator>The sample output above indicates that the local port 80 is being used by process id 2636.
+
+To determine what executable is running as a process ID, open Windows Task Manager and switch to the Processes tab. Now click on View->Select Columns... On the screen that opens, make sure "PID (Process Identifier)" is checked and then click OK. Now click on the PID heading to sort the entries by PID.

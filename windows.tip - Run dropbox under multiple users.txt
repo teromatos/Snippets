@@ -1,0 +1,34 @@
+I found some post in another place which describes a solution.
+
+First, run the Dropbox installer using the command line switch /D=C:\Program Files\Dropbox (with no quotes) to install Dropbox into the Program Files directory for all users.
+
+Then here an updated version of the procedure given on this link:
+
+Since Dropbox will normally only work when a user is logged in, we will have to install and use it first via remote desktop, before it can be turned it into a Service.
+
+Remote desktop to your WHS as administrator
+Get DropBox from their website.
+Install and configure Dropbox as you like. e.g. I made a special share on my WHS named Dropbox before the installation and linked Dropbox to this share. Then exit dropbox from the system tray.
+Similar to Foldershare, you will need instsrv.exe and srvany.exe from the Windows Server 2003 Resource Kit Tools.
+Copy instsrv.exe to C:\Program Files\Dropbox
+Copy srvany.exe to C:\Program Files\Dropbox
+execute "C:\Program Files\Dropbox\instsrv.exe" Dropbox "C:\Program Files\Dropbox\srvany.exe"
+execute reg ADD HKLM\SYSTEM\CurrentControlSet\Services\Dropbox\Parameters /v Application /d "C:\Program Files\Dropbox\Dropbox.exe"
+execute reg ADD HKLM\SYSTEM\CurrentControlSet\Services\Dropbox\Parameters /v AppDirectory /d "C:\Program Files\Dropbox"
+Delete or move the shorcut to Dropbox away from the startfolder (Start -> All Programs -> Startup) on the startmenu.
+Move (cut/paste) ALL the files from C:\Documents and Settings\Administrator\Application Data\DropBox to C:\Documents and Settings\Default User\Application Data\Dropbox
+execute net start Dropbox
+link|improve this answer
+edited Aug 18 at 22:23
+
+giveme5minutes
+32
+answered Sep 16 '09 at 9:25
+
+Gnoupi
+5,74121630
+4	  
+One step to add: As Dropbox installs into Application data, you need to create the folder c:\program files\dropbox and copy all files from the Dropbox\bin directory to it – Michael Stum Dec 30 '09 at 3:29
+Is there a similar version for Windows Server 2008? – Jaco Pretorius Jun 8 at 10:03
+I managed to get this working (Windows Server 2008 R2 64-bit) using this article social.technet.microsoft.com/Forums/en-US/winserverMigration/… - I didn't need to use instsrv.exe - just srvany.exe pointing to Dropbox – Jaco Pretorius Jun 14 at 14:12
+I use TaskScheduler and start Dropbox when system start. Work like a charm. :) – dario-g Aug 18 at 12:12

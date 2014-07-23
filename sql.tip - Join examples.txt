@@ -1,0 +1,7 @@
+select r1.responsekey, r1.applicationid, r1.ssn, r1.relation, r1.reasoncode, r1.filedate, r1.filepath
+from responses r1
+join responses as r2
+on (r1.ssn = r2.ssn)
+where r2.reasoncode <> '00'
+order by r1.applicationid, r1.ssn, r1.filedate desc
+go

@@ -1,0 +1,7 @@
+Encrypt or hash sensitive information before persisting it; decrypt or compare when reading it back
+Make cryptography code simple
+Best practices:
+Never store passwords directly, only hash values
+Only decrypt data if absolutely necessary (use a hash where possible)
+Use symmetric keys to encrypt and decrypt data across multiple machines
+Use Windows DPAPI for cryptography on a single machine without using keys

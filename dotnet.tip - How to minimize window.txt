@@ -1,0 +1,32 @@
+Use the FindWindow API function to find the window's handle. Then use the SetWindowPlacement API function to minimize, maximize, or restore it.  
+ 
+ 
+' Find the target window and minimize, maximize,
+' or restore it.
+Private Sub cmdGo_Click()
+Dim app_hwnd As Long
+Dim wp As WINDOWPLACEMENT
+
+    ' Find the target.
+    app_hwnd = FindWindow(vbNullString, txtTargetName.Text)
+
+    ' Get the window's current placement information.
+    wp.length = Len(wp)
+    GetWindowPlacement app_hwnd, wp
+
+    ' Set the appropriate action.
+    If optPlacement(0).Value Then
+        ' Minimize.
+        wp.showCmd = SW_SHOWMINIMIZED
+    ElseIf optPlacement(1).Value Then
+        ' Maximize.
+        wp.showCmd = SW_SHOWMAXIMIZED
+    Else
+        ' Restore.
+        wp.showCmd = SW_SHOWNORMAL
+    End If
+
+    ' Perform the action.
+    SetWindowPlacement app_hwnd, wp
+End Sub
+ 

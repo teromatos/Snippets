@@ -1,0 +1,29 @@
+HTTP Pipeline in ASP.NET 2.0
+
+Here is a quick reference for the steps in HTTP pipeline in ASP.NET 2.0.  Some of the steps are internal (cannot be subscribed by HTTP modules or GLOBAL.ASAX):
+
+   1. Internal step to validate request.  Protects against malicious attacks exploiting path canonicalization
+   2. Internal step to perform URL mapping (if the URL mapping feature is enabled)
+   3. Fire BeginRequest event
+   4. Fire AuthenticateRequest event
+   5. Fire DefaultAuthentication internal event
+   6. Fire PostAuthenticateRequest event
+   7. Fire AuthorizeRequest event
+   8. Fire PostAuthorizeRequest event
+   9. Fire ResolveRequestCache event
+  10. Fire PostResolveRequestCache event
+  11. Internal step to determine the IHttpHandler to process the current request (this is when the page compilation takes place)
+  12. Fire PostMapRequestHandler event
+  13. Fire AcquireRequestState event
+  14. Fire PostAcquireRequestState event
+  15. Fire PreRequestHandlerExecute event
+  16. Internal step to execute the IHttpHandler (call its ProcessRequest method) for the current request. The handler is determined at step #11
+  17. Fire PostRequestHandlerExecute event
+  18. Fire ReleaseRequestState event
+  19. Fire PostReleaseRequestState event
+  20. Internal step to perform response filtering (only if HttpResponse.Filter is installed)
+  21. Fire UpdateRequestCache event
+  22. Fire PostUpdateRequestCache event
+  23. Fire EndRequest event.  This is the only event that is guaranteed to be fired for each request
+
+I got this list from http://blogs.msdn.com/dmitryr/ - it was part of another topic, but I thought it had value by itself.

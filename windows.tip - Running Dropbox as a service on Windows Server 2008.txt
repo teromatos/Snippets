@@ -1,0 +1,19 @@
+Running Dropbox as a service on Windows Server 2008
+
+Right click the Dropbox icon in your system tray and select Preferences
+Deselect Show desktop notifications
+Deselect Start Dropbox on system startup
+Download and install Windows Server 2003 Resource Kit Tools. It will warn you about incompatibility, but you can safely ignore this (or at least I did).
+Open the Command Console (Run –> cmd).
+Enter sc create DropboxService binPath= C:\Windows\System32\srvany.exe DisplayName= "Dropbox Service"
+Open RegEdit and navigate to HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Services\DropboxService\
+Create a new key named Parameters
+Create a string value called Application and enter the full path to your Dropbox executable. Typically C:\Users\****\AppData\Roaming\Dropbox\bin\Dropbox.exe
+Open Services (Start Menu –> Administrative Tools –> Services)
+Locate your Dropbox Service, right click and select properties.
+Set the service to Autostart
+Under the Log on tab, check Allow service to interact with desktop.
+Press Apply
+Start the service
+You will get a popup asking for permissions to display the Dropbox configuration - Accept.
+Add your user info

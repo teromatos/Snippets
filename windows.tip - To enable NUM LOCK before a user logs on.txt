@@ -1,0 +1,5 @@
+To enable NUM LOCK before a user logs on, follow these steps:
+
+   1. Run Registry Editor.
+   2. Move to HKEY_USERS\.Default\Control Panel\Keyboard.
+   3. Change the value for InitialKeyboardIndicators from 0 to 2.

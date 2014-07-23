@@ -1,0 +1,13 @@
+Shut down svnserve, Apache, and anything else that might be accessing the repository. 
+svnadmin dump /path/to/repository > dumpfile.txt , using version X of svnadmin. 
+mv /path/to/repository /path/to/saved-old-repository 
+Now upgrade to Subversion Y (i.e., build and install Y, replacing X). 
+svnadmin create /path/to/repository, using version Y of svnadmin. 
+svnadmin load /path/to/repository < dumpfile.txt , again using version Y of svnadmin. 
+Copy over hook scripts, etc, from the old repository to the new one. 
+Restart svnserve, Apache, etc. 
+
+
+
+svnadmin dump c:\workserver\subversion > dumpfile.txt
+svnadmin load c:\workserver\subversion < dumpfile.txt

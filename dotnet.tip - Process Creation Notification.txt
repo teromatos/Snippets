@@ -1,0 +1,27 @@
+Process Creation Notification
+
+I am trying to create an application (C#) that can be notified of processes being created through WMI.
+I tried to do it using the following code:
+
+WqlEventQuery weq=new WqlEventQuery("SELECT * FROM __InstanceCreationEvent WHERE TargetInstance ISA 'Win32_Process'");mew=new ManagementEventWatcher(new ManagementScope(),weq);
+mew.EventArrived+=new EventArrivedEventHandler(ProcessUpdateDetected);mew.Start();
+
+When I do so, I get a COMException.
+
+Unhandled Exception: System.Runtime.InteropServices.COMException (0x80042002): Exception from HRESULT: 0x80042002.
+   at System.Runtime.InteropServices.Marshal.ThrowExceptionForHR(Int32 errorCode, IntPtr errorInfo)
+   at System.Management.ManagementEventWatcher.Start()
+   at UberTask.Form1.SetupEvents()
+   at UberTask.Form1..ctor()
+   at UberTask.Form1.Main()
+Since there is such little documentation in this area in .NET, any tips would be helpful.
+ 
+
+Charles
+Welcome aboard
+     Re: Process Creation Notification #  
+ 
+Sunday, Feb 13, 2005 10:30 PM    
+WBEMESS_E_REGISTRATION_TOO_PRECISE 
+
+A WITHIN clause was not used in this query 

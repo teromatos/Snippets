@@ -1,0 +1,63 @@
+Use the System.Drawing and System.Drawing.Imaging namespaces for this.
+
+Following snippet should do:
+
+Font objFont = new Font("Arial", 28);
+// need a graphics object to call the MeasurString method...
+objBitmap = new Bitmap(1,1,PixelFormat.Format32bppArgb);
+g = Graphics.FromImage(objBitmap);
+SizeF textSize = g.MeasureString("Hello, world!", objFont);
+// get width of the string in pixels...
+int intWidth = (int)textSize.Width;
+g.Dispose();
+
+Hope that helps,
+Wim
+
+"Thomas Lin" <tlin@nospam.quilogy.com> wrote in message
+news:b75a01c1a032$1ab89d40$b1e62ecf@tkmsftngxa04...
+[Original message clipped]
+
+
+  Wim Hollebrandse [@vi.net] 
+And it'd be neat to add the:
+
+objBitmap.Dispose();
+
+"Wim Hollebrandse" <wim.hollebrandse@vi.net> wrote in message
+news:#XNoZPDoBHA.1156@tkmsftngp07...
+[Original message clipped]
+
+
+ 
+  Matthew Curland [@microsoft.com] 
+Don't use MeasureString if you want an accurate result. MeasureString
+doesn't take any text rendering hints into account (the font rendering
+algorithms that actually make fonts look nice, like ClearType), so the
+number you get back is often significantly wider than the printed text. This
+is considered a gdiplus feature, which doesn't make it any easier to deal
+with. You should use the (unfortunately, much more complicated)
+MeasureCharacterRanges if you want an accurate answer.
+
+Here's a snippet pulled from one of my projects. Note that
+MeasureCharacterRanges doesn't recognize RectangleF.Empty, you have to give
+it a real rectangle.
+using (StringFormat rangeFormat = new StringFormat(...))
+{
+rangeFormat.SetMeasurableCharacterRanges(new CharacterRange[] {new
+CharacterRange(0, itemText.Length)});
+stringWidth = (int)Math.Ceiling(
+graphics.MeasureCharacterRanges(
+itemText,
+font,
+new RectangleF(0, 0, float.MaxValue, float.MaxValue),
+rangeFormat)
+[0].GetBounds(graphics).Right);//Right = Left + Width to account for
+leading
+}
+
+-Matt
+
+"Wim Hollebrandse" <wim.hollebrandse@vi.net> wrote in message
+news:#XNoZPDoBHA.1156@tkmsftngp07...
+[Original message clipped] 

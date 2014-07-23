@@ -1,0 +1,111 @@
+url= http://blogs.geekdojo.net/jmanners/archive/2006/01/03/9582.aspx
+
+How to disable the [X] button in a Windows form 
+Haga click aquí si desea leer este mensaje en español 
+Recently I had a need to create a Form with a disabled close button.  Believe or not, this simple task cannot done be achieved by simply configuring a property at design time, because no such design-time property exists.  One alternative is to set the ControlBox property to "false", but in reality this removes the three buttons (minimize, maximize, and close) altogether.
+
+After a little "googling" I found some examples but they were all using P/Invoke and/or were written in VB.  But then I remembered that during my good old days of Win32/C++/MFC programming I used to change the visual style of a window class by setting up values from the constants in the include file winuser.h.  In that file there was a constant named CS_NOCLOSE which was used to disable the close button in the window.  That's cool, but... how can I use that stuff now?
+
+Well, reading the beloved MSDN documentation (I really mean that) it turns out that the Form class has a property named CreateParams which allows you to set parameters that define the appearance of the form before it gets created.  So the only thing that needs to be done is to override this property in my Form and add the value for CS_NOCLOSE that we want.  Something similar to this:
+
+        protected override CreateParams CreateParams 
+
+        {
+
+            get 
+
+            {
+
+                const int CS_NOCLOSE = 0x200;
+
+                CreateParams cp = new CreateParams();
+
+                cp = base.CreateParams;
+
+                cp.ClassStyle = cp.ClassStyle | CS_NOCLOSE;
+
+                return cp;
+
+            }
+
+        }
+
+voilá, it works!!  BTW, if you like to know where the include file is, it should be under “C:\Program Files\Microsoft Visual Studio .NET 2003\Vc7\PlatformSDK\Include”, or something close to that depending on your installation of the Framework.  Here's a snapshot of how it looks like if your curious:
+
+ 2425 /*
+
+ 2426  * Class styles
+
+ 2427  */
+
+ 2428 #define CS_VREDRAW          0x0001
+
+ 2429 #define CS_HREDRAW          0x0002
+
+ 2430 #define CS_DBLCLKS          0x0008
+
+ 2431 #define CS_OWNDC            0x0020
+
+ 2432 #define CS_CLASSDC          0x0040
+
+ 2433 #define CS_PARENTDC        0x0080
+
+ 2434 #define CS_NOCLOSE          0x0200
+
+ 2435 #define CS_SAVEBITS        0x0800
+
+ 2436 #define CS_BYTEALIGNCLIENT  0x1000
+
+ 2437 #define CS_BYTEALIGNWINDOW  0x2000
+
+ 2438 #define CS_GLOBALCLASS      0x4000
+
+ 2439 
+
+ 2440 #define CS_IME              0x00010000
+
+ 2441 #if(_WIN32_WINNT >= 0x0501)
+
+ 2442 #define CS_DROPSHADOW       0x00020000
+
+ 2443 #endif /* _WIN32_WINNT >= 0x0501 */
+
+posted on Tuesday, January 03, 2006 3:54 PM by jmanners 
+
+# re: How to disable the [X] button in a Windows form @ Wednesday, January 04, 2006 10:43 AM 
+Now that you've figured that out, can you explain how to have a Windows Form load hidden? 
+Matt 
+
+# re: How to disable the [X] button in a Windows form @ Monday, January 23, 2006 5:19 PM 
+I tried this and it works as you say, although the form can still be closed with CTRL-F4. (The form I'm trying to prevent the user closing is a MDI child.) 
+Ian 
+
+# re: How to disable the [X] button in a Windows form @ Thursday, February 02, 2006 3:47 PM 
+Hi Matt, 
+
+Try these: 
+
+this.ShowInTaskbar = false; 
+this.WindowState = FormWindowState.Minimized; 
+
+They're both pretty much self explanatory but make sure you add a NotifyIcon component to your form otherwise you won't see an icon for your app in the System Tray. 
+
+I hope this helps. 
+
+Regards, 
+
+Jose Luis Manners 
+
+jmanners 
+
+# re: How to disable the [X] button in a Windows form @ Friday, February 03, 2006 2:09 PM 
+Ian, 
+
+Try overriding the Closing event of your window and set the Cancel property of the CancelEventArgs to true. Something similar to this: 
+
+private void Form2_Closing(object sender, System.ComponentModel.CancelEventArgs e) 
+{ 
+e.Cancel = true; 
+} 
+
+Hope it helps. 

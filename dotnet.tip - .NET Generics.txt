@@ -1,0 +1,111 @@
+URL=http://developer.com/net/vb/print.php/3521486
+
+Listing 1: How to Invoke the Generic Method
+Sub Main()
+      Dim I As Integer = 5
+      Dim J As Integer = 7
+      Swap(Of Integer)(I, J)
+      Console.WriteLine("I = " & I)
+      Console.WriteLine("J = " & J)
+
+      Dim S As String = "Paul"
+      Dim R As String = "Lori"
+      Swap(Of String)(S, R)
+      Console.WriteLine("S = " & S)
+      Console.WriteLine("R = " & R)
+
+      Console.ReadLine()
+
+  End Sub
+
+  Public Sub Swap(Of T)(ByRef a As T, ByRef b As T)
+
+      Dim temp As T
+      temp = a
+      a = b
+      b = temp
+  End Sub
+
+
+
+Listing 3: A Generic Strongly Typed Collection
+Module Module1
+    Sub Main()
+      Dim BrokenBones As TypedCollection(Of OrthoInjury) = _
+        New TypedCollection(Of OrthoInjury)
+
+      BrokenBones.Add(New OrthoInjury(True, _
+        "Broken Right Clavicle", "Vicodin; Heals n 8 to 12 weeks"))
+      BrokenBones.Add(New OrthoInjury(True, _
+        "Fractured Posterior Rib #5", "Heals in 6 to 8 weeks"))
+
+      BrokenBones.Add(New OrthoInjury(True, _
+        "Fractured Posterior Rib #1", "Heals in 6 to 8 weeks"))
+
+      Dim injury As OrthoInjury
+      For Each injury In BrokenBones
+        Console.WriteLine("Description: " & injury.Description)
+      Next
+      Console.ReadLine()
+    End Sub
+
+End Module
+
+Public Class TypedCollection(Of T)
+  Inherits System.Collections.CollectionBase
+
+  Default Public Property Item(ByVal Index As Integer) As T
+    Get
+      Return CType(List(Index), T)
+    End Get
+    Set(ByVal value As T)
+      List(Index) = value
+    End Set
+  End Property
+
+  Public Function Add(ByVal value As T) As Integer
+    Return List.Add(value)
+  End Function
+
+End Class
+
+Public Class OrthoInjury
+  Private FHasXray As Boolean
+  Private FDescription As String
+  Private FPrognosis As String
+
+  Public Sub New(ByVal HasXray As Boolean, _
+    ByVal Description As String, ByVal Prognosis As String)
+
+    FHasXray = HasXray
+    FDescription = Description
+    FPrognosis = Prognosis
+  End Sub
+
+  Public Property HasXray() As Boolean
+    Get
+      Return FHasXray
+    End Get
+    Set(ByVal value As Boolean)
+      FHasXray = value
+    End Set
+  End Property
+
+  Public Property Description() As String
+    Get
+      Return FDescription
+    End Get
+    Set(ByVal value As String)
+      FDescription = value
+    End Set
+  End Property
+
+  Public Property Prognosis() As String
+    Get
+      Return FPrognosis
+    End Get
+    Set(ByVal value As String)
+      FPrognosis = value
+    End Set
+  End Property
+End Class

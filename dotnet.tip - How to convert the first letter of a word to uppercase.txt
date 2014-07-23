@@ -1,0 +1,23 @@
+Generally, title casing converts the first character of a word to uppercase and converts the rest of the letters to lowercase.
+
+The returned string might differ in length from the input string. For more information on casing, refer to the Unicode Technical Report #21 "Case Mappings," published by the Unicode Consortium (http://www.unicode.org). The current implementation preserves the length of the string; however, this behavior is not guaranteed and could change in future implementations.
+
+Casing semantics depend on the culture in use. If using the invariant culture, the casing semantics are not culture-sensitive. If using a specific culture, the casing semantics are sensitive to that culture. Words that are selected for title casing depend on the language.
+
+If a security decision depends on a string comparison or a case-change operation, use the InvariantCulture to ensure that the behavior will be consistent regardless of the culture settings of the system. However, the invariant culture must be used only by processes that require culture-independent results, such as system services; otherwise, it produces results that might be linguistically incorrect or culturally inappropriate.
+
+For more information on cultures, see CultureInfo.
+
+===========================================================
+
+ToTitleCase
+
+===========================================================
+
+
+You could also add a refrence to Microsoft Visual Basic .Net Runtime and then use something like this: 
+
+Microsoft.VisualBasic.Strings.StrConv("some string", Microsoft.VisualBasic.VbStrConv.ProperCase); 
+
+
+

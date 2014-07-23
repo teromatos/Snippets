@@ -1,0 +1,14 @@
+url=http://waelchatila.com/2007/03/06/1173223980000.html
+
+On the old server machine do.
+svnadmin dump repositoryPath > repository.dumpfile
+
+File transfer the repository.dumpfile file to the new server machine and over there do
+cd /path/to/new-repository-parent-directory
+
+svnadmin create repository-name
+
+svnadmin load repository-name < repository.dumpfile
+
+Then on your client type
+svn switch --relocate oldurl newurl 

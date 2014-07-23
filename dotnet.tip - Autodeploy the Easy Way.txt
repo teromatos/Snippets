@@ -1,0 +1,71 @@
+http://www.ftponline.com/reports/vslive/021202/vsnet/default.asp
+
+Autodeploy the Easy Way
+You can autodeploy assemblies to the client with a couple lines of code.
+VSLive! SF, Day 1, February 12, 2002 - Like most people, you have probably run into deployment issues with COM and ActiveX components in the past. This is one of the biggest problems Microsoft developers face. 
+
+Microsoft .NET tackles this issue head-on by avoiding the Windows registry and providing a strong versioning scheme for assemblies (components). Better still, with just a couple lines of code, you can autodeploy assemblies to the client. This means that all the DLLs containing your application's UI and business logic will download automatically to the client machine, with no effort on your part.
+
+To use autodeployment, you need to create a tiny .NET program installed on the client machine. This program pulls down only the first DLL of your application-the rest follow automatically, with this code: 
+
+Dim appAsm As [Assembly]
+Dim formType As Type
+Dim obj As Object
+Dim af As Form
+
+appAsm = [Assembly].LoadFrom( _
+  "http://localhost/myapp/myapp.dll")
+formType = appAsm.GetType("myapp.MainForm")
+obj = Activator.CreateInstance(formType)
+af = CType(obj, Form)
+Application.Run(af)
+The code assumes that myapp.dll will contain a form named MainForm. That form is the application's starting point. This works great, unless you also want to use serialization, another important .NET feature.
+
+You use serialization to make an exact copy, or clone, of an object. You can make this copy within your application, but more importantly you can make it across the network. By copying an object across the network, you can create and populate an object on your server, then return it to the client and have it actually move to the client machine. This means you can create truly distributed objects.
+
+Unfortunately, serialization won't work in code autodownloaded using the previous code snippet. The deserialization process will fail because it can't find the assembly that contains your object's code. This is because assemblies loaded by using the Assembly object's LoadFrom method are treated slightly differently than assemblies loaded normally.
+
+You can overcome that problem with this code:
+
+Dim appAsm As [Assembly]
+Dim formType As Type
+Dim obj As Object
+Dim af As Form
+Dim currentDomain As AppDomain 
+
+currentDomain = AppDomain.CurrentDomain
+AddHandler currentDomain.AssemblyResolve, _
+  AddressOf MyResolveEventHandler
+
+appAsm = [Assembly].LoadFrom( _
+  "http://localhost/myapp/myapp.dll")
+formType = appAsm.GetType("myapp.MainForm")
+obj = Activator.CreateInstance(formType)
+af = CType(obj, Form)
+Application.Run(af)
+
+Autodeploy the Easy Way (Continued)
+
+This code adds an event handler that is activated any time that an assembly can't be found. When the deserialization process fails to find the assembly containing your object's code, this event will be raised, and you can handle it to return a reference to the right assembly.
+
+This code shows the method to handle the event and return a reference to the "missing" assembly:
+
+Function MyResolveEventHandler( _
+  ByVal sender As Object, _
+  ByVal args As ResolveEventArgs) As [Assembly]
+
+  Dim a() As [Assembly] = _
+    AppDomain.CurrentDomain.GetAssemblies()
+
+  Dim asm As [Assembly]
+  For Each asm In a
+    If asm.FullName = args.Name Then
+      Return asm
+    End If
+  Next
+End Function
+The AppDomain object contains a list of all the assemblies available to your code, so you can simply loop through that list to find the one that is needed. With this change, you'll find the deserialization process works just fine in autodeployed code. Now you can create applications that use truly distributed objects and are deployed automatically and updated to your client machines.
+
+About the Author
+Rockford Lhotka is the author of several books, including Professional Visual Basic Interoperability: COM and VB6 to .NET (Wrox Press), and is a contributing author for Visual Studio Magazine and a columnist for MSDN Online. He speaks at major conferences around the world. Rockford is the principal technology evangelist for Magenic Technologies, a Microsoft Gold Certified Partner. Reach Rocky at rocky@lhotka.net.
+

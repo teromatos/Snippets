@@ -1,0 +1,23 @@
+Where are Adium's preferences stored? 
+Adium's preferences are located at: 
+
+Your home folder
+    Library
+        Application Support
+	    Adium 2.0
+The Preferences are stored in the "Default" folder in the "Users" folder in the "Adium 2.0" folder. Other folders in the "Adium 2.0" folder contain your installed AdiumXtras. 
+
+There is also a preference file at: 
+
+Your home folder
+    Library
+        Preferences
+	    com.adiumX.adiumX.plist
+Troubleshooting Preferences 
+If you believe that corrupt or oddly configured preferences may be causing problems in Adium, the quickest way to rule out these issues is by temporarily creating a new set of preferences and checking if the problem still persists. 
+
+Quit Adium 
+Rename the "Adium 2.0" folder to "Adium 2.0-old". 
+Rename the com.adiumX.adiumX.plist to com.adiumX.adiumX-old.plist 
+Relaunch Adium, and see if your problem persists. 
+If that doesn't work, then you may as well revert to your previous preferences. To do this, quit Adium, delete the new "Adium 2.0" folder that Adium created, and rename your "Adium 2.0-old" folder back to "Adium 2.0". 

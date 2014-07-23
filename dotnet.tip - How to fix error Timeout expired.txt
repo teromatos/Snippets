@@ -1,0 +1,23 @@
+URL=http://techielion.blogspot.com/2007/01/error-timeout-expired-timeout-period.html
+
+When you are trying to connect or access from a Database table which is having large volume of data (more than a lakh), query execution time will be more.
+
+The error ( Timeout expired. The timeout period elapsed prior to completion of the operation or the server is not responding.) occurs when the execution time crosses Timeout Property.
+
+There are two main Timeout property in ADO.NET.
+
+1. Connection Timeout for Connection
+2. Timeout for Data Access( Command Object or DataAdapter)
+
+The Former, could be solved by setting ConnectionTimeout Property of Connection object either in on Connection String.
+
+This string will make a connection object to wait 400 seconds to get connected to the database.
+
+Even after this, you may still get the same.
+Because this property will set timeout only to Connection object.
+So it will wait for xxx seconds for the connection to the database.
+
+
+2.If this error Timeout Expired still persists, then it is not with the Timeout property of Connection object instead it is with Data Provider objects say in DataAdapter or Command Object
+
+To overcome this , set cmd.CommandTimeout='0'(Zero) which makes adapter or command to wait for indefinite time before terminating the attempt to execute a command and generating an error.

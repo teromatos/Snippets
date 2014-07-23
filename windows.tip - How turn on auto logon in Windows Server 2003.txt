@@ -1,0 +1,24 @@
+Click Start, and then click Run.  
+2. In the Open box, type Regedt32.exe, and then press ENTER. 
+3. Locate the following subkey in the registry: 
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Winlogon 
+4. Double-click the DefaultUserName entry, type your user name, and then click OK. 
+5. Double-click the DefaultPassword entry, type your password, and then click OK.NOTE: If the DefaultPassword value does not exist, it must be added. To add the value, follow these steps:
+
+a.  On the Edit menu, click New, and then point to String Value. 
+b.  Type DefaultPassword, and then press ENTER. 
+c.  Double-click DefaultPassword. 
+d.  In the Edit String dialog, type your password and then click OK. 
+NOTE: If no DefaultPassword string is specified, Windows automatically changes the value of the AutoAdminLogon key from 1 (true) to 0 (false), disabling the AutoAdminLogon feature.
+
+ 
+6. On the Edit menu, click New, and then point to String Value. 
+7. Type AutoAdminLogon, and then press ENTER. 
+8. Double-click AutoAdminLogon. 
+9. In the Edit String dialog box, type 1 and then click OK. 
+10. Quit Registry Editor. 
+11. Click Start, click Shutdown, and then type a reason in the Comment text box.  
+12. Click OK to turn off your computer. 
+13. Restart your computer. You can now log on automatically. 
+
+NOTE: To bypass the AutoAdminLogon process, and to log on as a different user, hold down the SHIFT key after you log off or after Windows restarts.

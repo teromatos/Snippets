@@ -1,0 +1,1 @@
+sb.Append(String.Format("x{0,2:x}", b(i)).Replace(" ", "0"))

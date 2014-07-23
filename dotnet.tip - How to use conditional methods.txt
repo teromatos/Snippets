@@ -1,0 +1,9 @@
+Avoid explicit code exclusion of method calls (#if...#end if). Use conditional methods instead.
+
+Public Class MyClass
+	
+	<Conditional("MySpecialCondition")>
+	Public SUb MyMethod()
+	End SUb
+	
+End Class

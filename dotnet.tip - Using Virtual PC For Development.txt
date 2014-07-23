@@ -1,0 +1,28 @@
+URL= http://blogs.geekdojo.net/joel/archive/2005/05/18/8363.aspx
+
+Using Virtual PC For Development
+I finally made the move to start developing in Virtual PC rather than on my main machine. It was a rather smooth transition, actually. But there are a few quirks that I found.
+
+First, I had a Windows 2003 Server already set up with a bunch of tools on it, so going the next step was fairly simple. I had planned to do this before, but I ran out of hard drive space and time a few months ago. Since then, I got a bigger hard drive and some time. 
+
+Now for the downside. There are a few oddities that I've run across. Before I installed VPC SP1, I got some odd issues with using Alt-Tab and it being sent to both the guest and host operating system. This mainly occurred when the guest operating system was busy - like building in Visual Studio. 
+
+SP1 fixed that problem, but introduced another one that in my opinion is more annoying. My laptop runs at a resolution of 1400 x 1050. It appears that VPC doesn't support that resolution anymore, so I can't go into full screen mode. So now, I'm running it in an almost full-screen mode. I'd rather be able to run in full screen, but at least for now, that's not possible for me.
+
+I had considered using differencing disks, but the more I thought about it, the more I didn't like the idea. Here's a scenario explaining why.
+
+1. Create a base image.
+2. Create a differencing disk off of that image
+3. Service pack for something on the base image is released, and has to be installed. Now I have to install the sp on the differencing disk (actually, each one that I create - which I plan to be one per client). 
+
+Now after the above occurs, imagine that I get a new client. I have to create a differencing disk off of the base, and now to be ready to go, I have to install any updates to the base image before I can even start on a new client, which somewhat defeats the purpose of using VPC for me.
+
+Now, if I were to copy the image, here's the steps I take.
+
+1. Create a base image
+2. Create a copy of that image
+3. Service pack for something on the base image is released, and has to be installed. Now I install the sp on the copied disk (every one - same as before). I also install it on the base.
+
+Now every new client image I need is copied from a base image that is up to date. Much better. And this applies to more than just service packs - it also applies to tools I have installed on the base image. I can update those as they release new versions or I find new tools to use. Plus, I've also heard that using differencing disks doesn't really save that much disk space. 
+
+I guess next would be to post a list of the tools I install. That, and reload my base machine with XP and a light load.

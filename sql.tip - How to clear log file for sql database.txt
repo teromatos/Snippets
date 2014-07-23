@@ -1,0 +1,5 @@
+Use Master
+backup log <dbname> with no_log
+
+Use <dbname>
+dbcc shrinkfile(<dbname>_Log, 0, truncateonly)

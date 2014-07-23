@@ -1,0 +1,124 @@
+Permuted order of array.
+
+Permutes the order of an array so that each call to .GetNext() will sort the array into the next order.  No order is repeated until all orders have been "seen", then it starts over.  The cool thing is no state is kept, as the state is the state of the array.  The array will be sorted as needed.  Need to improve this by not using hash codes as hash codes could change.  Maybe a dictionary pair is needed where the first element is a count, then we could sort on that.  May find use for this at some point.
+
+Usage:
+ArrayList al = new ArrayList();
+al.add(x);  // Add some elements to array.
+al.add(y);
+PermutedOrder.GetNext(al);
+Console.WriteLine("Order is now Permuted.");
+
+// Class
+using System;
+using System.Text;
+using System.Collections;
+
+/// <summary>
+/// This Permuted Order class will take any ArrayList and "Permute" its
+/// order (based on hash codes of elements) after each call to
+/// GetNext(ArrayList values).  The algorithm takes care of sorting the ArrayList
+/// on first GetNext and after any addition to the ArrayList.
+/// </summary>
+public sealed class PermutedOrder
+{
+ private static bool reset;
+
+ private PermutedOrder()
+ {
+ }
+
+ internal class HashComparer : IComparer
+ {
+  #region IComparer Members
+
+  public int Compare(object x, object y)
+  {
+   int xHash = x.GetHashCode();
+   int yHash = y.GetHashCode();
+   if ( xHash == yHash )
+    return 0;
+   if ( xHash < yHash )
+    return -1;
+   return 1;
+  }
+  #endregion
+ }
+
+ public static void SortArray(ArrayList values)
+ {
+  if ( values == null )
+   throw new ArgumentNullException("values");
+  if ( values.Count < 2 )
+   return;
+  values.Sort(new HashComparer());
+ }
+
+ /// <summary>
+ /// Find the next permutation using Lexicographic order of hash codes returned by array objects.
+ /// Normally, the array would start sorted in hash code order, but is not required.
+ /// Adding or deleting elements is ok too as the function will re-sort when needed.
+ /// Call GetNext to have array arranged to next permutation.  Call GetNext N number of times
+ /// to see all permutations of unique objects in array (i.e. unique hashcodes.)
+ /// </summary>
+ /// <param name="values">ArrayList of objects to permutate.</param>
+ public static void GetNext(ArrayList values)
+ {
+  if ( values == null || values.Count < 2 )
+   return;
+  int i = values.Count - 1;
+  while ( values[i-1].GetHashCode() >= values[i].GetHashCode() )
+  {
+   i = i - 1;
+   if ( i == 0 )
+   {
+    reset = true;
+    values.Sort(new HashComparer());
+    return;
+   }
+  }
+  int j = values.Count;
+  while ( values[j-1].GetHashCode() <= values[i-1].GetHashCode() )
+   j = j - 1;
+  Swap(values, i-1, j-1); // swap values at positions (i-1) and (j-1)
+  i++;
+  j = values.Count;
+  while (i < j)
+  {
+   Swap(values, i-1, j-1);
+   i++;
+   j--;
+  }
+ }
+
+ /// <summary>
+ /// Returns the number of permutations the ArrayList could be ordered by.
+ /// A simple Factorial function does not work as {0,0,1} would yield 3 perms, not 6.
+ /// </summary>
+ /// <param name="values"></param>
+ /// <returns></returns>
+ public static int PermutationsCount(ArrayList values)
+ {
+  if ( values == null || values.Count == 0 )
+   return 0;
+  if ( values.Count == 1 )
+   return 1;
+  int permCount = 0;
+  ArrayList tmp = (ArrayList)values.Clone();
+  SortArray(tmp);
+  reset = false;
+  while( reset == false )
+  {
+   GetNext(tmp);
+   permCount++;
+  }
+  return permCount;
+ }
+
+ private static void Swap(ArrayList values, int i, int j)
+ {
+  object tmp = values[i];
+  values[i] = values[j];
+  values[j] = tmp;
+ }
+} // End Class

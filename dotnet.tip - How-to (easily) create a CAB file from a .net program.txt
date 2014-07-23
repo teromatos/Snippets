@@ -1,0 +1,19 @@
+How-to (easily) create a CAB file from a .net program 
+
+
+Add a (COM Library) reference to COM MakeCab 1.0 Type Library
+
+Sample c# code:
+
+            string cabFile = @"X:\sample.cab";
+            COMMKCABLib.MakeCab cabMaker = new COMMKCABLib.MakeCab();
+            cabMaker.CreateCab(cabFile, false, 0, false);
+            // for Windows 2000 remove last parameter
+            // cabMaker.CreateCab(cabFile, false, 0);
+            cabMaker.AddFile(@"X:\cab\Main.frm", @"Main.frm");
+            cabMaker.AddFile(@"X:\cab\Main.frx", @"Main.frx");
+            cabMaker.AddFile(@"X:\cab\Readme.txt", @"Readme.txt");
+            cabMaker.CloseCab();
+
+
+Now...  continue with the search to find something as simple as this to decompress a CAB file from a .net program.

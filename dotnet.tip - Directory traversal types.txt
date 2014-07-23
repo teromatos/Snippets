@@ -1,0 +1,57 @@
+depth first traversal
+---------------------
+
+var FSO = new ActiveXObject("Scripting.FileSystemObject");
+var stack = new Array();
+stack.push(FSO.GetFolder("."));
+while(stack.length > 0)
+{
+  var folder = stack.pop();
+  for (var enumtor = new Enumerator(folder.Subfolders) ; !enumtor.atEnd(); enumtor.moveNext())
+  {
+    try
+    {
+      stack.push(enumtor.item());
+    }
+    catch(e){}
+  }
+  for (enumtor = new Enumerator(folder.Files) ; !enumtor.atEnd(); enumtor.moveNext())
+  {
+    try
+    {
+      WScript.Echo(enumtor.item().Path);
+    }
+    catch(e){}
+  }
+}
+
+
+breadth-first traversal
+-----------------------
+
+var FSO = new ActiveXObject("Scripting.FileSystemObject");
+var queue = new Array();
+queue[queue.length] = FSO.GetFolder(".");
+var counter = 0;
+while(counter < queue.length)
+{
+  var folder = queue[counter];
+  for (var enumtor = new Enumerator(folder.Subfolders) ; !enumtor.atEnd(); enumtor.moveNext())
+  {
+    try
+    {
+      queue[queue.length] = enumtor.item();
+    }
+    catch(e) {}
+  }
+  for (enumtor = new Enumerator(folder.Files) ; !enumtor.atEnd(); enumtor.moveNext())
+  {
+    try
+    {
+      WScript.Echo(enumtor.item().Path);
+    }
+    catch(e){}
+  }
+  queue[counter] = null;
+  counter++;
+}

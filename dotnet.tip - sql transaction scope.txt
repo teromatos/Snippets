@@ -1,0 +1,64 @@
+ public sealed class TransactionBound : IDisposable
+    {
+        private ObjectContext repository;
+        private TransactionScope scope;
+        private bool save = false;
+        private bool close = false;
+
+        public TransactionBound(ObjectContext repository)
+            : this(repository, IsolationLevel.Snapshot)
+        {
+        }
+
+        public TransactionBound(ObjectContext repository, IsolationLevel isolationLevel)
+        {
+            this.repository = repository;
+            if (this.repository.Connection.State != System.Data.ConnectionState.Open)
+            {
+                this.close = true;
+                this.repository.Connection.Open();
+            }
+
+            this.scope = new TransactionScope(
+                TransactionScopeOption.RequiresNew,
+                new TransactionOptions
+                {
+                    IsolationLevel = isolationLevel,
+                });
+        }
+
+        public void Commit()
+        {
+            this.save = true;
+        }
+
+        public void Dispose()
+        {
+            if (this.save)
+            {
+                this.repository.SaveChanges();
+                this.scope.Complete();
+                this.scope.Dispose();
+
+                if (this.close)
+                {
+                    this.repository.Connection.Close();
+                }
+            }
+        }
+    }
+
+and using:
+
+            using (var repository = new Repository())
+            {
+                using (var t = new TransactionBound(repository))
+                {
+                    Request request =
+                        repository.Requests
+                        .Where(r => r.RequestId == 1)
+                        .FirstOrDefault();
+                    request.Status = 1;
+                    t.Commit();
+                }
+            }

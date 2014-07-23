@@ -1,0 +1,117 @@
+Knowning if application runs in Console or GUI subsystem
+is very handy when writing .NET libraries.
+
+And up to date, NO function for this was found in .NET?
+
+According Microsoft, the '.subsystem' directive of a
+.NET assembly manifest is NOT in the metadata!
+So we can't access this with Reflection...
+
+If you don't care about a small helper function
+with 3 lines of Win32-Interop, see my workaround below.
+[Tested on Win2000SP2 only!]
+
+I propose Microsoft should add a similar function to
+ 'System.Environment' class.
+
+
+------------------------------------------------------------------
+using System.Runtime.InteropServices;
+.....
+public static bool IsConsole()
+ {
+ // get in-memory-pointer of EXE
+ IntPtr ptrexe = GetModuleHandle( IntPtr.Zero );
+
+ // msdos header e_lfanew
+ int peoff = Marshal.ReadInt32( ptrexe, 0x03c );
+
+ // 4='PE00' + 20=COFF + 68=offsetof:subsystem
+ // 3=IMAGE_SUBSYSTEM_WINDOWS_CUI
+ return Marshal.ReadInt32( ptrexe, peoff + 4 + 20 + 68 ) == 3;
+ }
+
+[DllImport("kernel32.dll", CharSet=CharSet.Auto)]
+private static extern IntPtr GetModuleHandle( IntPtr modname );
+
+------------------------------------------------------------------
+KB Q90493:
+  http://support.microsoft.com/support/kb/articles/Q90/4/93.ASP
+EXE file headers:
+  http://www.microsoft.com/hwdev/download/hardware/PECOFF.pdf
+.NET Tool Developers Guide:
+  Partition II Metadata.doc
+------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
+
+   IMAGE_SUBSYSTEM_NATIVE               1
+   IMAGE_SUBSYSTEM_WINDOWS_GUI          2
+   IMAGE_SUBSYSTEM_WINDOWS_CUI          3
+   IMAGE_SUBSYSTEM_OS2_CUI              5
+   IMAGE_SUBSYSTEM_POSIX_CUI            7
+   IMAGE_SUBSYSTEM_NATIVE_WINDOWS       8
+   IMAGE_SUBSYSTEM_WINDOWS_CE_GUI       9
+
+
+
+    case IMAGE_SUBSYSTEM_UNKNOWN:
+        printf("Type is unknown.\n");
+        break;
+
+    case IMAGE_SUBSYSTEM_NATIVE:
+        printf("Type is native.\n");
+        break;
+
+    case IMAGE_SUBSYSTEM_WINDOWS_GUI:
+        printf("Type is Windows GUI.\n");
+        break;
+
+    case IMAGE_SUBSYSTEM_WINDOWS_CUI:
+        printf("Type is Windows CUI.\n");
+        break;
+
+    case IMAGE_SUBSYSTEM_OS2_CUI:
+        printf("Type is OS/2 CUI.\n");
+        break;
+
+    case IMAGE_SUBSYSTEM_POSIX_CUI:
+        printf("Type is POSIX CUI.\n");
+        break;
+
+    case IMAGE_SUBSYSTEM_NATIVE_WINDOWS:
+           printf("Type is native Win9x driver.\n");
+           break;
+
+       case IMAGE_SUBSYSTEM_WINDOWS_CE_GUI:
+           printf("Type is Windows CE.\n");
+           break;
+
+    default:
+        printf("Unknown type %u.\n", image_optional_header.Subsystem);
+        break;
+
+
+
+
+
+
+Public Shared Function IsConsole() As Boolean
+   ' get in-memory-pointer of EXE
+   Dim ptrexe As IntPtr = GetModuleHandle(IntPtr.Zero)
+   
+   ' msdos header e_lfanew
+   Dim peoff As Integer = Marshal.ReadInt32(ptrexe, &H3C)
+   
+   ' 4='PE00' + 20=COFF + 68=offsetof:subsystem
+   ' 3=IMAGE_SUBSYSTEM_WINDOWS_CUI
+   Return Marshal.ReadInt32(ptrexe, peoff + 4 + 20 + 68) = 3
+End Function 'IsConsole

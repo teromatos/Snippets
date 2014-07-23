@@ -1,0 +1,3 @@
+tlbimp c:\windows\system32\msi.dll /out:Interop.WindowsInstaller.dll /keyfile:"c:\documents and settings\mykey.snk"
+
+tlbimp msword9.olb /out:Interop.Word.dll /keyfile:"C:\WORKSERVER\VB.NET\snk\tero.snk"

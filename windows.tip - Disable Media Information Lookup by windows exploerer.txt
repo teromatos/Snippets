@@ -1,0 +1,10 @@
+Disabling Duration/Dimension/Bitrate/Artist etc. in Windows Explorer 
+  Y'know frequently you enter a folder with a lot of images, mp3s or videos, and Windows Explorer freezes up because it reads every single file and tries to display it's metadata. That's all cool and it works but if you enter a folder with large video files especially, it's quite annoying to wait for Windows Explorer to read through the files and finish displaying mostly useless information such as "dimensions of my video file".
+
+Here's how you'd disable that. On command prompt, run - 
+
+regsvr32 /u shmedia.dll 
+
+That's it :). To renable, run - 
+
+regsvr32 shmedia.dll

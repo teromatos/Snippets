@@ -1,0 +1,11 @@
+Flicker-free painting – is it possible?
+
+You’ve assigned a huge image to the background of your form, and as it resizes it just looks like a flicker fest. If you change the BackColor to HotPink, chances are you’re briefly seeing pink, then the background image paint.
+
+Double-buffering to the rescue! When a control is double buffered, it’s first painted offscreen, then it’s copied back to the screen once all the painting has completed. DoubleBuffer is perfect when you have layers of painting going on (the BackColor, then the BackgroundImage for example) and you just want it to appear all at once.
+
+If it’s so great, why not turn it on everywhere by default? It’s all a matter of resources - if you have to paint somewhere else first, you need to allocate a bitmap in order to paint into it. Common dialogs and forms mostly use a solid back color, so this is not typically needed.
+
+To enable double buffering in a control, you need to call the protected SetStyle() method specifying ControlStyles.DoubleBuffer (in WindowsForms 2.0 use OptimizedDoubleBuffer – same thing better algorithm). There are a couple of other flags you’ll want to set: this stems back to the original discussion about WM_ERASEBKGND and WM_PAINT.
+
+If you only call SetStyle(ControlStyles.DoubleBuffer, true), you still may notice flicker. This is because you’re still painting the background in a separate windows message than the foreground. The OnPaintBackground is double buffered, and the OnPaint is double buffered, but it would be more helpful if the background and the foreground were rendered together and then copied out to the screen. Enter ControlStyle.AllPaintingInWmPaint – by specifiying this, all the painting happens together in WM_PAINT, eliminating flicker.

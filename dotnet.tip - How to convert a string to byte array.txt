@@ -1,0 +1,2 @@
+            Dim oEncoder As New System.Text.ASCIIEncoding
+            ioStream.Write(oEncoder.GetBytes(Me.txtDocument.Text), 0, Me.txtDocument.Text.Length)

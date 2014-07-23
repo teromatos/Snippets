@@ -1,0 +1,165 @@
+Backup all databases on a server.
+Author Nigel Rivett
+
+This stored procedure will backup all databases on a server.
+It will also delete old backups depending on the retention period.
+A table DatabaseBackup is maintained to allow the changing of the retention period or exclusion of a database.
+
+This Sp is useful for development systems where databases may be created in an ad-hoc manner but still need to be included in the backups.
+
+Create a database Admin and include this SP and table and schedule it t run.
+ 
+
+if exists (select * from sysobjects where id = object_id(N'[dbo].[s_BackupAllDatabases]') and OBJECTPROPERTY(id, N'IsProcedure') = 1)
+drop procedure [dbo].[s_BackupAllDatabases]
+go
+
+Create Procedure s_BackupAllDatabases
+@Path varchar(128) ,
+@Type varchar(4) -- Full / Log
+as
+/*
+Backup file format
+	_Full_yyyymmdd_hhmmss.bak
+	_Log_yyyymmdd_hhmmss.bak
+
+exec s_BackupAllDatabases 'e:\BackupNigel\', 'Full'
+*/
+/*
+drop table DatabaseBackup
+
+Create table DatabaseBackup
+	(
+	Name varchar(128) primary key nonclustered ,
+	BackupFlagFull varchar(1) not null check (BackupFlagFull in ('Y','N')) ,
+	BackupFlagLog varchar(1) not null check (BackupFlagLog in ('Y','N')) ,
+	RetentionPeriodFull datetime not null ,
+	RetentionPeriodLog datetime not null
+	)
+*/
+set nocount on
+declare @sql varchar(1000)
+
+	-- Get all database names
+	create table #DBName
+		(
+		ID int identity (1,1) ,
+		Name varchar(128) not null ,
+		RetentionPeriod datetime null
+		)
+	
+	insert #DBName
+		(Name)
+	select name
+	from master..sysdatabases
+	
+	-- Include any new databases in the backup
+	insert DatabaseBackup
+		(
+		Name ,
+		BackupFlagFull ,
+		BackupFlagLog ,
+		RetentionPeriodFull ,
+		RetentionPeriodLog
+		)
+	select #DBName.Name ,
+		'Y' ,
+		'N' ,
+		'2 jan 1900' , -- default 2 days
+		'1 jan 1900'
+	from #DBName
+		left outer join DatabaseBackup
+			on DatabaseBackup.Name = #DBName.Name
+	where DatabaseBackup.Name is null
+	and lower(#DBName.Name) <> 'tempdb'
+	
+	-- Remove any non-existant databases
+	delete DatabaseBackup
+	where not exists
+		(
+		select *
+		from #DBName
+		where #DBName.Name = DatabaseBackup.Name
+		)
+	
+	delete #DBName
+	
+	create table #ExistingBackups
+		(
+		Name varchar(128) ,
+		ID int identity (1,1)
+		)
+	
+	-- loop through databases
+declare @Name varchar(128) ,
+	@RetentionPeriod datetime ,
+	@LastBackupToKeep varchar(8) ,
+	@ID int ,
+	@MaxID int
+	
+	insert #DBName
+		(Name, RetentionPeriod)
+	select Name, case when @Type = 'Full' then RetentionPeriodFull else RetentionPeriodLog end
+	from DatabaseBackup
+	where (@Type = 'Full' and BackupFlagFull = 'Y')
+	or (@Type = 'Log' and BackupFlagLog = 'Y')
+	
+	select @MaxID = max(ID) ,
+		@ID = 0
+	from #DBName
+	
+	while @ID < @MaxID
+	begin
+		-- get next database to backup
+		select @ID = min(ID) from #DBName where ID > @ID
+		
+		select @Name = Name ,
+			@RetentionPeriod = RetentionPeriod
+		from #DBName
+		where ID = @ID
+		
+		-- Delete old backups
+		delete #ExistingBackups
+		select @sql = 'dir /B ' + @Path
+		select @sql = @sql + '"' + @Name + '_' + @Type + '*.*"'
+		
+		insert #ExistingBackups exec master..xp_cmdshell @sql
+		
+		if exists (select * from #ExistingBackups where Name like '%File Not Found%')
+			delete #ExistingBackups
+		
+		select @LastBackupToKeep = convert(varchar(8),getdate() - @RetentionPeriod,112)
+		delete #ExistingBackups where Name > @Name + '_' + @Type + '_' + @LastBackupToKeep
+		
+declare @eID int ,
+	@eMaxID int ,
+	@eName varchar(128)
+		
+		-- loop round all the out of date backups
+		select 	@eID = 0 ,
+			@eMaxID = coalesce(max(ID), 0)
+		from 	#ExistingBackups
+		
+		while @eID < @eMaxID
+		begin
+			select @eID = min(ID) from #ExistingBackups where ID > @eID
+			select @eName = Name from #ExistingBackups where ID = @eID
+			
+			select @sql = 'del ' + @Path + '"' + @eName + '"'
+			exec master..xp_cmdshell @sql, no_output
+		end
+		delete #ExistingBackups
+		
+		-- now do the backup
+		select @sql = @Path + @Name + '_' + @Type + '_'
+				+ convert(varchar(8),getdate(),112) + '_'
+				+ replace(convert(varchar(8),getdate(),108),':','') + '.bak'
+		if @Type = 'Full'
+			backup database @Name
+				to disk = @sql
+		else
+			backup log @Name
+				to disk = @sql
+	end
+
+go

@@ -1,0 +1,21 @@
+url=http://www.hanselman.com/blog/GoodExceptionManagementRulesOfThumb.aspx
+
+Good Exception Management Rules of Thumb 
+
+I was coming up with Good Exception Management Rules of Thumb for .NET. Here's what my brainstorming came up with. What do you have as good Rules o' Thumb?
+
+Exceptions are exceptional and should be treated as such. If something exceptional, unusual, or generally "not supposed to ordinarily happen" then an exception is a reasonable thing to do. 
+You shouldn't throw exceptions for things that happen all the time. Then they'd be "ordinaries".
+If your functions are named well, using verbs (actions) and nouns (stuff to take action on) then throw an exception if your method can't do what it says it can. 
+For example, SaveBook(). If it can't save the book - it can't do what it promised - then throw an exception. That might be for a number of reasons. 
+If you can, throw an exception that means something, and if there's an exception that already exists that matches what happened semantically, throw that. 
+Don't create a HanselmanException just because you're writing the Hanselman module unless you're adding data or valuable semantics to the type.
+If you are building a framework (or even if you're not) throw ArgumentExceptions and ArgumentNullExceptions liberally. Just as your method should throw if it can't do what it promised, it should throw if you supplied it with crap input.
+If something horrible happens (something exceptional) then you need to decide if you can keep going. 
+Don't catch exceptions you can't do anything about. It's likely if you could do something about it, it wouldn't be exceptional, and you might consider calling TryParse, or File.Exists, or whatever it takes to prevent that exception.
+There are reasons to swallow exceptions (catch (Exception ex)) but they are few and far between and they should be logged if appropriate and documented liberally. 
+Remember always if you do catch an exception and intend to rethrow it, then use throw; not throw ex; lest you lose your call stack and good bits of context.
+Create a global error handler that logs everything. 
+A user shouldn't ever see an exception dialog or ASP.NET Yellow Screen of Death, but if they do, let them know that you've been notified. 
+{smartassembly} is an easy way to make this happen. So is ELMAH for ASP.NET. (I freakin' love ELMAH)
+Yes Response.Redirect in ASP.NET causes an internal exception. Yes, it's a bummer, but there's a reason. It was an easy way to stop execution. If you don't like it, call its overload and stop page execution yourself. Personally, I don't sweat that one, but then I avoid Redirects, too.

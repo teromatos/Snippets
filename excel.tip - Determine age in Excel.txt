@@ -1,0 +1,3 @@
+Determine age in Excel
+
+=DATEDIF(A1,TODAY(),"Y") & " Years, " & DATEDIF(A1,TODAY(),"YM") & " Months, " & DATEDIF(A1,TODAY(),"MD") & " Days"

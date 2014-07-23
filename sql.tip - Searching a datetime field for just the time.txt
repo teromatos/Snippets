@@ -1,0 +1,9 @@
+select * from MyTable Where DatePart(HH, StartDate) BETWEEN 13 and 16 
+
+or
+
+SELECT * FROM MyTable
+
+WHERE StartDate - CAST(FLOOR(CAST(StartDate AS float)) AS datetime) > '13:00'
+
+AND StartDate - CAST(FLOOR(CAST(StartDate AS float)) AS datetime) < '16:00'

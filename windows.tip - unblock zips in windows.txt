@@ -1,0 +1,3 @@
+In Windows Vista, Click Start.
+In the Search box, Run box or console window type: GPEDIT.MSC to bring up the Group Policy Object editor.
+Navigate to User Configuration > Administrative Templates > Windows Components > Attachment Manager. Here you will find a couple of policies related to this feature, but to disable it you'll want to ENABLE the policy called "Do not preserve zone information in file attachments".

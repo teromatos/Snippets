@@ -1,0 +1,420 @@
+HTTP Headers in depth.
+
+Synopsis:
+Sending headers to a remote system, and knowing fully what they mean. Also covers sessions, hosting, and various interesting bits and bobs.
+
+
+
+  -=CONNECTING=-
+
+IMHO, the best way to send and receive headers, is to use a free program called Putty. It's like telnet, but better. trust me.
+
+Go here or here, and download the latest version of putty.exe, for your operating system
+
+now, run putty.
+
+Use the following configuration:
+
+"Host name": 67.19.149.66
+"Protocol": RAW
+"Port": 80
+"Close window on exit": never
+
+(leave all other settings as they are)
+
+now click "open".
+
+You should see a black window, like a DOS prompt, appear.
+This is known as the console, or session, and is where we send and receive commands to the server.
+
+You are now connected.
+
+
+
+
+
+
+
+
+
+  -=SENDING HEADERS=-
+
+The server is waiting for us to ask it to do something.
+
+Type the following lines into your Putty window line by line, and press return
+
+
+GET / HTTP/1.0
+Accept-Encoding:
+Host: puremango.co.uk
+Referer: http://www.puremango.co.uk
+Cookie: this=that
+User-Agent: Mozilla/4.0 (MSIE 5.01; Windows NT 5.0)
+Connection: close
+
+
+
+If nothing happens, press return again.
+If you get a message saying "Connection closed by remote host", before you've finished typing the lines, this is because the server has given up waiting for you. Right click the little icon at the top of the window, and click "Duplicate Session", and send the lines again... perhaps a little quicker this time ;)
+
+You should see html code scroll past the window, and a message pop up saying "Connection closed by remote host"
+
+The server has just replied to your request, and closed the connection.
+
+Now let's look at what we just did:
+
+
+
+
+
+
+
+
+
+  -=GET=-
+
+
+GET / HTTP/1.0
+
+
+Tells the server 3 things:
+
+1) We are using the 'request method': GET
+2) We want to GET the file '/'
+3) We are using HTTP version 1.0
+
+A request method describes the type of action we are doing, in this case, getting a webpage.
+
+If we wanted to get http://www.puremango.co.uk/free_downloads/notitle.zip, we would have said:
+
+
+GET /free_downloads/notitle.zip HTTP/1.0
+
+
+The HTTP version is always either 1.0, or 1.1. Most servers support 1.1, but you can never be sure, so it's best to use 1.0.
+All the headers detailed in this article are supported in both versions, with the exception of Accept-Encoding (see that section for a HTTP/1.1 equivalent)
+
+You can send data to a page by using GET, in fact you've probably seen a lot of GET'ed information, for example,
+
+
+GET /search?q=cool+websites&num=50 HTTP/1.0
+
+
+Asks for the file named "search", and tells that file that we have sent a field called q, with a value of "cool+websites", and another field called num, which equals 50.
+
+This example may be familiar to some of you, and is actually a query you could send to google to ask for the top 50 results for "cool websites".
+
+As you can see, you can change the way a page works by changing the variables sent to it, in this case we changed the number of results google returned (it normally returns the first 10). To mimic this behaiviour from a web browser, simply type the arguments after the URL, eg google.com/search?q=blah&num=50 (note that the maximum value for 'num' that google will allow is 100)
+
+By looking at which fields get sent in the request, and which part of the request they are sent in (cookie, get or post), we can gather a fair amount of information as to how a particular piece of code works; we now know that at some point in the page on google called 'search', it takes the variable 'q', replaces plus signs with spaces, and sends that to it's database for searching, asking it to send back 'num' results. If google had insufficient error checking, I'm sure it would be possible to crash it by sending num as some huge number, or a negative number (don't bother trying, it will not work in this case). Though interestingly, you can fool google into thinking there are no results for a query check it out.
+
+Note that the separators for GET and POST information are not always ? and &, though these are the standard.
+You can configure Apache, and some other web servers to use any character as a separator. For instance, online shops such as kelkoo use a / character to fool search engines into thinking the site has lots of different pages, so instead of
+
+kelkoo.com/products?country=uk&category=hardware&item=drill
+
+the URL might be
+
+kelkoo.com/products/uk/hardware/drill
+
+this can be confusing, but thankfully most sites use ? and &.
+
+POST is another header, similar to GET, so we will cover that field next, even though we didn't send it in the example.
+
+
+
+
+
+
+
+
+  -=POST=-
+
+
+POST / HTTP/1.0
+
+
+The POST request works much like the GET request, except that instead of saying
+
+
+GET /index.php?id=4&page=index HTTP/1.0
+
+
+If we were posting the data, we would say
+
+
+POST /index.php HTTP/1.0
+(all other headers go here)
+
+id=4&page=index
+
+
+Two additional fields are required when POSTing information, detailed below:
+
+
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 15
+
+
+Content-Type is nearly always the same, the notable exception being when POSTing entire files, this is discussed in the 'NOTES' section below.
+
+Content-Length simply tells the server how long, in bytes, the information being sent is. In this case, it is 15 because "id=4&page=index" is 15 characters long. Simple.
+
+So, in summary, a full POST request might look like this:
+
+
+POST / HTTP/1.0
+Accept-Encoding:
+Host: puremango.co.uk
+Referer: http://www.puremango.co.uk
+Cookie: this=that
+User-Agent: Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)
+Connection: close
+Content-Type: application/x-www-form-urlencoded
+Content-Length: 15
+
+id=4&page=index
+
+
+The POST method's main advantage over GET, is that you can only send around 2000 bytes when using GET. (if someone has accurate verifiable data on this, please let me know) With POST, there is theoretically no limit (most webservers impose a limit of around 3-5Mb to preserve bandwidth).
+
+A minor advantage of POSTed forms is that POSTed data will not be logged - for example, if a form was submitted using the GET method, an entry like this:
+
+
+login.php?username=bob&password=bibble
+
+
+might appear in the server logs, or worse the webstats package.
+If the form had used the POST method, only "login.php" would appear in the logs. I've even seen login data come up in referer logs.
+
+It is a very common misconception that POSTed data is harder to forge and intercept, while the later is true, the former has no foundation whatsoever. It's just as easy to forge POST data. It is of course still possible and easy to intercept POST data, it's just a tiny amount harder than GET.
+
+
+
+
+
+
+
+  -=ACCEPT-ENCODING=-
+
+
+Accept-Encoding:
+
+
+Tells the server that we will not accept any type of encoding.
+'encoding' is the format of the returned data, for instance, if we said
+
+
+Accept-Encoding: gzip
+
+
+We would get compressed data returned to us (like a zip file). Obviously we cannot read compressed data, so it is usually best to tell the server we don't accept any encoding, otherwise the server may as well return gibberish.
+
+If you're using HTTP version 1.1, you can use
+
+Accept: text/plain
+
+To ask that plain text is returned.
+
+
+
+
+
+
+
+
+  -=HOST=-
+
+
+Host: puremango.co.uk
+
+
+Tells the server which website we want.
+
+"But why do we need to? Surely the server knows which site it is?"
+
+Not necessarily.
+
+There are two types of web hosting; dedicated, and shared (sometimes referred to as virtual hosting).
+
+Dedicated hosting means that one computer hosts one website, shared hosting means one computer could be hosting any number of websites.
+
+If you're connected to a website with dedicated hosting, you don't need the HOST header, but otherwise, you definitely need it. It's best to include it anyway. See the notes section for more info on dedicated/shared hosting.
+
+Now, puremango has shared hosting, supplied by geekhosting.com, so what we need to do is tell the geekhosting computer (67.19.149.66) that the site we want is puremango.co.uk.
+
+Hence, although we connected to 67.19.149.66, we do not receive 67.19.149.66's index page, but instead puremango.co.uk's
+
+
+
+
+
+
+
+
+
+  -=REFERER=-
+
+
+Referer: http://www.puremango.co.uk
+
+
+Tells the server that the last page we visited was http://www.puremango.co.uk
+
+The referer header is often used for authentication, for instance, if I have a login form called form.html, and a script that logs you in, called login.php, login.php might check that the last place you were was form.html, if so, it tries to log you in, if not, it takes you back to form.html.
+
+By telling login.php that our referer was form.html, we can bypass that layer of security.
+
+
+
+
+
+
+
+
+
+  -=COOKIE=-
+
+
+Cookie: this=that&something=somethingelse
+
+
+Tells the server that we have been given two cookies, one named 'this', containing the data 'that', and another named 'something', containing data: 'somethingelse'. This is of course a lie, and is yet another useful way to fool servers into doing naughty things for us :).
+
+A very common cookie is the session ID cookie. When using PHP, it's called "PHPSESSID", in ASP, it's "ASPSESSID", and so on.
+
+Sessions are a way for servers to keep track of sensetive data, here's how they work:
+
+A script will ask the server for a session to be established.
+The server generates a file in the tmp directory (not accessible across the web), and gives it a unique name, eg "fa1e58c9a2e7f0e44963c226db0a62b5f"
+The script stores sensetive information in this file
+The script sends the user a cookie, containing the session file name (aka session id)
+The user asks for the next script, sending the session id in the cookie.
+The script opens the session file, based on the session id, and reads the sensitive data
+
+This way, the user never knows what's stored in the session, only the ID of the session, and hence, any session data is considered secure - it never leaves the host.
+
+However, the ID -is- sent between the client and the server, so if you were able to get my session id while I was logged in to a site, then send that ID in a cookie to the same site, the server would read the session file associated with the ID you sent (i.e. my session file), see that the user was logged in, and let you do anything I can while logged in. In effect, you'd be me.
+
+So-called 'session hi-jacking' is a very effective way of leveraging your access on a site.
+
+Cookies can also hold any other bits of information. Shopping carts often hold product IDs (sometimes even prices) in the cookie, usernames, passwords - all sorts of data can be held in a cookie. All cookies are interceptable and forgable.
+
+Anyway, back to HTTP headers:
+
+
+
+
+
+
+
+
+
+
+  -=USER-AGENT=-
+
+
+User-Agent: Mozilla/4.0 (compatible; MSIE 5.01; Windows NT 5.0)
+
+
+Tells the server which type of browser we are using, and in this case, even which operating system we are running.
+
+User Agent is very often used in javascript, to try to detect if the script will work with your browser or not. To find out which user agent a surfer is using, use the following code:
+
+
+alert(navigator.userAgent);
+
+
+User Agent is usually of little concern to hackers, however, some 'odd' scripts may only allow you in if you're using a certain user agent, so it's useful to be aware of. Also, by adding a common user agent, such as MSIE, if anyone's looking at the logs, your requests will stand out less than a request with no user agent. It's always best to blend in.
+
+
+
+
+
+
+
+
+
+  -=CONNECTION=-
+
+
+Connection: close
+
+
+Tells the server that we don't need to stay connected after it has sent us it's data.
+
+If we had said
+
+
+Connection: Keep-Alive
+
+
+The server -might- not have closed the connection after it had sent us it's page.
+
+
+
+
+
+
+
+
+
+  -=NOTES=-
+
+To discover if a website is on shared or dedicated hosting
+
+Open a command prompt
+
+type "ping puremango.co.uk"
+
+note the IP address (in this case 67.19.149.66)
+
+type "tracert 67.19.149.66"
+
+If traceroute resolves the IP address to the same domain as the ping, it's -probably- dedicated, else, it's -definitely- shared
+
+As you can see from the output of tracert, puremango.co.uk is shared on a server owned by theplanet.com
+
+Another way to discover if a website is on shared or dedicated hosting, is to connect on port 80, and simply say "GET / HTTP/1.0" with no host specified, the server will -probably- give the default page. If you do this with puremango.co.uk, you'll see romukauppa.com's index page come up. (the parent company of geekhosting.com, I think)
+
+Yet another way could be to check /admin/ and other probable admin URLs (webmail, mail, stats, webstat, etc) - sometimes welcome banners give away the ISP, hosting company, etc.
+
+Additional HTTP headers
+The following header is a response to a "401 unauthorised" header:
+Authorization: Basic username:password
+
+where username:password are obviously the credentials you wish to send, but less obviously, are base64 encoded - see the hash calculator in the online tools section.
+
+POSTing entire files
+
+Below are the headers that are sent when a form is submitted containing two fields; 'othervar', a simple text field, and 'myfile', a 'file' field:
+
+
+POST / HTTP/1.0
+(other headers)
+Content-Type: multipart/form-data; boundary=---------------------------7d428f31401f4
+Content-Length: 348
+
+-----------------------------7d428f31401f4
+Content-Disposition: form-data; name="othervar"
+
+some text here
+-----------------------------7d428f31401f4
+Content-Disposition: form-data; name="myfile"; filename="C:\stuff\New Text Document.txt"
+Content-Type: text/plain
+
+here are the file contents
+-----------------------------7d428f31401f4--
+
+
+The same basic principle applies as applied for standard POST requests.
+The "-----------------------------7d428f31401f4" is simply a unique string to identify when fields end and begin.
+Note the different main content-type, and that 'myfile' also has a content-type header, to inform the server what type of file we are uploading.
+
+In terms of security, file uploads can be a nightmare;
+Consider an application that allows the user to upload an image. Say it checks that the content-type is "Image/Jpeg" before allowing the upload, and that foolishly, it doesn't bother checking the extension. You can see where I'm going with this, right?
+Note that such an application is very rare - most file uploaders check the file's extension (I hope), however, there is no standard way to check the extension, so maybe blah.jpg.php will work? If not, remember that .php is not the only extension that PHP will process - what about .inc, .phtml, .php3 - other examples exist for other languages, I'm sure.
+In some cases, the webserver might even be set up to process .html via PHP, but this is very rare.
+
+
+Follow this link for an automated header spoofing tool.

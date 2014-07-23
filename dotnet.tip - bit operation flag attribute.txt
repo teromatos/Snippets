@@ -1,0 +1,40 @@
+[Serializable]
+[Flags]
+public enum SiteRoles
+{
+    User = 1 << 0,
+    Admin = 1 << 1,
+    Helpdesk = 1 << 2
+}
+
+[CustomAuthorize(Roles=SiteRoles.Admin|SiteRoles.HelpDesk)]
+
+Console.WriteLine("User     0x{0:x}", 1 << 0);
+Console.WriteLine("Admin    0x{0:x}", 1 << 1);
+Console.WriteLine("HelpDesk 0x{0:x}", 1 << 2);
+Console.WriteLine("Other    0x{0:x}", 1 << 3);
+Console.WriteLine();
+Console.WriteLine("User     0x{0:x}", 1 >> 0);
+Console.WriteLine("Admin    0x{0:x}", 1 >> 1);
+Console.WriteLine("HelpDesk 0x{0:x}", 1 >> 2);
+Console.WriteLine("Other    0x{0:x}", 1 >> 3);
+Console.WriteLine();
+Console.WriteLine("User     0x{0:x}", 8 >> 0);
+Console.WriteLine("Admin    0x{0:x}", 8 >> 1);
+Console.WriteLine("HelpDesk 0x{0:x}", 8 >> 2);
+Console.WriteLine("Other    0x{0:x}", 8 >> 3);
+
+User     0x1
+Admin    0x2
+HelpDesk 0x4
+Other    0x8
+
+User     0x1
+Admin    0x0
+HelpDesk 0x0
+Other    0x0
+
+User     0x8
+Admin    0x4
+HelpDesk 0x2
+Other    0x1

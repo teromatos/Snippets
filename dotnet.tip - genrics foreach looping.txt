@@ -1,0 +1,4 @@
+				groupRecords.ForEach(delegate(String groupRecord)
+				{
+					groupLines.Add(new GroupLine(groupRecord));
+				});

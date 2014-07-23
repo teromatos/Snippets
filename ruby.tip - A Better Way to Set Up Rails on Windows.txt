@@ -1,0 +1,28 @@
+URL:http://blog.bloc.io/a-better-way-to-set-up-rails-on-windows
+
+A Better Way to Set Up Rails on Windows
+
+In this post we'll go over how we have our Windows students set up a modern Rails environment for our courses.
+
+Setting up a modern Ruby on Rails environment on a Windows computer is a tormenting experience. Even after you set it up, you'll continue to be plagued by incompatibilities. While it's possible to write Ruby code that works on any operating system, many programmers ignore the Windows platforms so that some portion of the libraries available to most programmers will not be available to Windows users. Check out this StackOverflow post for a list of all the incompatibilities and potential problems you might run into with Rails on Windows.
+
+At one point, I would have told anyone who wanted to seriously learn how to program that they couldn't do it unless they installed Linux or bought a Mac. Thanks to virtualization technologies, we have much better options today that can give you a pretty great approximation of a Linux computer with a minimal amount of effort.
+
+VirtualBox and Vagrant
+
+VirtualBox is a tool from Oracle that allows you to create virtual machines on your computer. A virtual machine is essentially a whole new virtual computer inside of your own computer. Unfortunately, configuring and bootstrapping a new virtual machine can be complicated, and that's where Vagrant comes in.
+
+Vagrant allows you to specify a "recipe" for a virtual machine inside of a single Vagrantfile and then create and bootstrap your virtual machine with a simple $ vagrant up command. I would highly recommend watching Ryan Bate's Railscast on Vagrant to get a more clear picture of how you use Vagrant. The official documentation for Vagrant is very well written and easy to understand as well, check it out at http://vagrantup.com
+
+Setting Up Your Rails Environment
+
+Install VirtualBox: https://www.virtualbox.org/wiki/Downloads
+Install Vagrant: http://downloads.vagrantup.com/tags/v1.0.3
+Download this Vagrantfile into the directory you're going to code in: http://bloc.s3.amazonaws.com/Vagrantfile
+From the command line prompt, run: $ vagrant box add base http://files.vagrantup.com/lucid32.box
+From the command line prompt and in the directory of your Vagrantfile, run $ vagrant up Note: this could take up to an hour, and you'll get many Gem.specification deprecation warnings that you can ignore.
+Set up PuTTY to allow you to SSH into Vagrant (see directions on the Vagrant site in the "Using Microsoft Windows?" section here: http://vagrantup.com/docs/getting-started/ssh.html)
+You're now on a virtual box within your computer, except this one is running Linux. If you do $ cd /vagrant you'll be able to see the Vagrantfile you copied into a directory earlier. This is a special directory on your virtual box that links back to the directory you created from Windows. If you create a file in there from Windows, you'll be able to see it in this directory and vice versa.
+Done. You now have all of the essentials of a modern Rails environment set up on an Ubuntu VirtualBox on your Windows computer. Try creating a new app within your VirtualBox with $ rails new <app name>.
+
+If you'd like to see what you can do with your new virtual machine instance, be sure to check out the official documentation at http://vagrantup.com and the Railscast here

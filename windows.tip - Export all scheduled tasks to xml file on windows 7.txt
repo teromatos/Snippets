@@ -1,0 +1,2 @@
+At a "Command Prompt."
+Type "schtasks /Query /XML > AllTasks.xml" without quotes.

@@ -1,0 +1,7 @@
+HOWTO: Perform OCR on PDFs
+Here's a quick and dirty approach (based on this) that works well enough for me to perform OCR on scanned bills and bank drafts.
+Requires ImageMagick with GhostScript support, matching language files (I'm using Portuguese training data), and source material at 300dpi (150dpi didn't cut it for me with smaller type).
+convert -density 300 ~/foo.pdf /tmp/p%03d.tif
+montage /tmp/*.tif -tile 1x -mode concatenate /tmp/foo.tif
+tesseract /tmp/foo.tif output -l por
+You can then grab output.txt, tokenize it and use it to set PDF keywords or other metadata (details forthcoming once I find a way that works for all my use cases).

@@ -1,0 +1,610 @@
+'http://www.mvps.org/emorcillo/en/code/shell/shortcut.shtml
+'Eduardo A. Morcillo
+
+
+' Create a new shortcut object using the specified file. 
+' If the link already exists it will be opened. Otherwise
+' a new one will be created.
+'Dim shortcut As New Edanmo.IO.Shortcut("c:\MyShortcut.lnk")
+'
+' Set the application path
+'shortcut.ApplicationPath = "c:\windows\notepad.exe"
+'
+' Set the command line arguments
+'shortcut.Arguments = "c:\windows\example.txt"
+'
+' Save changes 
+'shortcut.Save()
+'
+' Release the object
+'shortcut.Dispose()
+
+
+Option Explicit On 
+Option Strict On
+
+Imports System
+Imports System.Text
+Imports System.Runtime.InteropServices
+Imports System.Runtime.InteropServices.Marshal
+
+Namespace Edanmo.IO
+
+    ''' -----------------------------------------------------------------------------
+    ''' Class	 : Edanmo.IO.Shortcut
+    ''' -----------------------------------------------------------------------------
+    ''' <summary>
+    ''' Shell shortcut wrapper class.
+    ''' </summary>
+    ''' <remarks></remarks>
+    ''' <history>
+    ''' 	[Eduardo Morcillo]	11/03/2004	Created
+    ''' </history>
+    ''' -----------------------------------------------------------------------------
+    Public Class Shortcut
+        Implements IDisposable
+
+#Region " COM Interfaces "
+
+        <ComImport(), Guid("000214EE-0000-0000-C000-000000000046"), _
+        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)> _
+        Private Interface IShellLinkA
+
+            Sub GetPath( _
+            	<Out(), MarshalAs(UnmanagedType.LPStr)> ByVal pszFile As StringBuilder, _
+            	<[In]()> ByVal cch As Integer, _
+            	<[In]()> ByVal pfd As IntPtr, _
+            	<[In]()> ByVal fFlags As SLGP_FLAGS)
+
+            Function GetIDList() As IntPtr
+
+            Sub SetIDList(<[In]()> ByVal pidl As IntPtr)
+
+            Sub GetDescription( _
+            	<Out(), MarshalAs(UnmanagedType.LPStr)> ByVal pszName As StringBuilder, _
+            	<[In]()> ByVal cch As Integer)
+
+            Sub SetDescription( _
+            	<[In](), MarshalAs(UnmanagedType.LPStr)> ByVal pszName As String)
+
+            Sub GetWorkingDirectory( _
+            	<Out(), MarshalAs(UnmanagedType.LPStr)> ByVal pszDir As StringBuilder, _
+            	<[In]()> ByVal cch As Integer)
+
+            Sub SetWorkingDirectory( _
+            	<[In](), MarshalAs(UnmanagedType.LPStr)> _
+	            ByVal pszDir As String)
+
+            Sub GetArguments( _
+            	<Out(), MarshalAs(UnmanagedType.LPStr)> ByVal pszArgs As StringBuilder, _
+            	<[In]()> ByVal cch As Integer)
+
+            Sub SetArguments( _
+            	<[In](), MarshalAs(UnmanagedType.LPStr)> ByVal pszArgs As String)
+
+            Function GetHotkey() As Short
+
+            Sub SetHotkey( _
+            	<[In]()> ByVal wHotkey As Short)
+
+            Function GetShowCmd() As Integer
+
+            Sub SetShowCmd( _
+            	<[In]()> ByVal iShowCmd As Integer)
+
+            Sub GetIconLocation( _
+            	<Out(), MarshalAs(UnmanagedType.LPStr)> ByVal pszIconPath As StringBuilder, _
+            	<[In]()> ByVal cch As Integer, _
+            	<Out()> ByRef piIcon As Integer)
+
+            Sub SetIconLocation( _
+            	<[In](), MarshalAs(UnmanagedType.LPStr)> ByVal pszIconPath As String, _
+            	<[In]()> ByVal iIcon As Integer)
+
+            Sub SetRelativePath( _
+            	<[In](), MarshalAs(UnmanagedType.LPStr)> ByVal pszPathRel As String, _
+            	<[In]()> ByVal dwReserved As Integer)
+
+            Sub Resolve( _
+            	<[In]()> ByVal hwnd As IntPtr, _
+            	<[In]()> ByVal fFlags As SLR_FLAGS)
+
+            Sub SetPath( _
+            	<[In](), MarshalAs(UnmanagedType.LPStr)> ByVal pszFile As String)
+
+        End Interface
+
+        <ComImport(), Guid("000214F9-0000-0000-C000-000000000046"), _
+        InterfaceType(ComInterfaceType.InterfaceIsIUnknown)> _
+        Private Interface IShellLinkW
+
+            Sub GetPath( _
+            	<Out(), MarshalAs(UnmanagedType.LPWStr)> ByVal pszFile As StringBuilder, _
+            	<[In]()> ByVal cch As Integer, _
+                <[In]()> ByVal pfd As IntPtr, _
+                <[In]()> ByVal fFlags As SLGP_FLAGS)
+
+            Function GetIDList() As IntPtr
+
+            Sub SetIDList(<[In]()> ByVal pidl As IntPtr)
+
+            Sub GetDescription( _
+            	<Out(), MarshalAs(UnmanagedType.LPWStr)> ByVal pszName As StringBuilder, _
+            	<[In]()> ByVal cch As Integer)
+
+            Sub SetDescription( _
+            	<[In](), MarshalAs(UnmanagedType.LPWStr)> ByVal pszName As String)
+
+            Sub GetWorkingDirectory( _
+            	<Out(), MarshalAs(UnmanagedType.LPWStr)> ByVal pszDir As StringBuilder, _
+            	<[In]()> ByVal cch As Integer)
+
+            Sub SetWorkingDirectory( _
+            	<[In](), MarshalAs(UnmanagedType.LPWStr)> ByVal pszDir As String)
+
+            Sub GetArguments( _
+            	<Out(), MarshalAs(UnmanagedType.LPWStr)> ByVal pszArgs As StringBuilder, _
+            	<[In]()> ByVal cch As Integer)
+
+            Sub SetArguments( _
+            	<[In](), MarshalAs(UnmanagedType.LPWStr)> ByVal pszArgs As String)
+
+            Function GetHotkey() As Short
+
+            Sub SetHotkey( _
+            	<[In]()> ByVal wHotkey As Short)
+
+            Function GetShowCmd() As Integer
+
+            Sub SetShowCmd( _
+            	<[In]()> ByVal iShowCmd As Integer)
+
+            Sub GetIconLocation( _
+            	<Out(), MarshalAs(UnmanagedType.LPWStr)> ByVal pszIconPath As StringBuilder, _
+            	<[In]()> ByVal cch As Integer, _
+            	<Out()> ByRef piIcon As Integer)
+
+            Sub SetIconLocation( _
+            	<[In](), MarshalAs(UnmanagedType.LPWStr)> ByVal pszIconPath As String, _
+            	<[In]()> ByVal iIcon As Integer)
+
+            Sub SetRelativePath( _
+            	<[In](), MarshalAs(UnmanagedType.LPWStr)> ByVal pszPathRel As String, _
+            	<[In]()> ByVal dwReserved As Integer)
+
+            Sub Resolve( _
+            	<[In]()> ByVal hwnd As IntPtr, _
+            	<[In]()> ByVal fFlags As SLR_FLAGS)
+
+            Sub SetPath( _
+            	<[In](), MarshalAs(UnmanagedType.LPWStr)> ByVal pszFile As String)
+
+        End Interface
+
+        <Flags()> Private Enum SLGP_FLAGS
+            SLGP_SHORTPATH = &H1
+            SLGP_UNCPRIORITY = &H2
+            SLGP_RAWPATH = &H4
+        End Enum
+
+        <Flags()> Private Enum SLR_FLAGS
+            SLR_NO_UI = &H1                    ' don't post any UI durring the resolve
+                                               ' operation, not msgs are pumped
+            SLR_ANY_MATCH = &H2                ' no longer used
+            SLR_UPDATE = &H4                   ' save the link back to it's file if the 
+                                               ' track made it dirty
+            SLR_NOUPDATE = &H8
+            SLR_NOSEARCH = &H10                ' don't execute the search heuristics
+            SLR_NOTRACK = &H20                 ' don't use NT5 object ID to track the link
+            SLR_NOLINKINFO = &H40              ' don't use the net and volume relative info
+            SLR_INVOKE_MSI = &H80              ' if we have a darwin link, then call msi to 
+                                               ' fault in the applicaion
+            SLR_NO_UI_WITH_MSG_PUMP = &H101    ' SLR_NO_UI + requires an enable modeless site or HWND
+        End Enum
+
+#End Region
+
+        Public Enum WindowMode
+            Normal = 1
+            Minimized = 7
+            Maximized = 3
+        End Enum
+
+        Private _filename As String
+        Private _link As Object
+        Private _linkA As IShellLinkA
+        Private _linkW As IShellLinkW ' Implemented only on NT based OSes
+
+        Public Sub New(ByVal filename As String)
+
+            Me.New()
+
+            ' If the shortcut doesn't exists create one
+            If Not System.IO.File.Exists(filename) Then
+
+                Me.Save(filename)
+
+            Else
+
+                ' Load the shortcut
+                Load(filename)
+
+            End If
+
+        End Sub
+
+        Public Sub New()
+
+            ' Get the type for the shell shortcut object
+            Dim t As Type = Type.GetTypeFromCLSID( _
+                               New Guid("00021401-0000-0000-C000-000000000046"))
+
+            ' Create an instance of the shortcut object
+            _link = Activator.CreateInstance(t)
+
+            ' Try to get the Unicode interface and
+            ' if it fails get the Ansi one.
+            If TypeOf _link Is IShellLinkW Then
+                _linkW = DirectCast(_link, IShellLinkW)
+            Else
+                _linkA = DirectCast(_link, IShellLinkA)
+            End If
+
+        End Sub
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or sets the application executable path.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks>
+        ''' </remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property ApplicationPath() As String
+            Get
+
+                Dim data As New StringBuilder(260)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.GetPath(data, data.Capacity, IntPtr.Zero, SLGP_FLAGS.SLGP_RAWPATH)
+                Else
+                    _linkA.GetPath(data, data.Capacity, IntPtr.Zero, SLGP_FLAGS.SLGP_RAWPATH)
+                End If
+
+                Return data.ToString
+
+            End Get
+            Set(ByVal value As String)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetPath(value)
+                Else
+                    _linkA.SetPath(value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Get or sets the command line arguments.
+        ''' </summary>
+        ''' <returns>The command line arguments.</returns>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property Arguments() As String
+            Get
+
+                Dim data As New StringBuilder(260)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.GetArguments(data, data.Capacity)
+                Else
+                    _linkA.GetArguments(data, data.Capacity)
+                End If
+
+                Return data.ToString
+
+            End Get
+            Set(ByVal value As String)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetArguments(value)
+                Else
+                    _linkA.SetArguments(value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or set the shortcut description.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks>The description is shown as a tooltip by explorer.</remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property Description() As String
+            Get
+
+                Dim data As New StringBuilder(260)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.GetDescription(data, data.Capacity)
+                Else
+                    _linkA.GetDescription(data, data.Capacity)
+                End If
+
+                Return data.ToString
+
+            End Get
+            Set(ByVal value As String)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetDescription(value)
+                Else
+                    _linkA.SetDescription(value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or sets the shortcut hot key.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks>
+        ''' </remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	03/11/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property HotKey() As Short
+            Get
+
+                If Not _linkW Is Nothing Then
+                    Return _linkW.GetHotkey
+                Else
+                    Return _linkA.GetHotkey
+                End If
+
+            End Get
+            Set(ByVal value As Short)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetHotkey(value)
+                Else
+                    _linkA.SetHotkey(value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or sets the file that contains the shortcut icon.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property IconFile() As String
+            Get
+
+                Dim data As New StringBuilder(260)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.GetIconLocation(data, data.Capacity, 0)
+                Else
+                    _linkA.GetIconLocation(data, data.Capacity, 0)
+                End If
+
+                Return data.ToString
+
+            End Get
+            Set(ByVal value As String)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetIconLocation(value, Me.IconIndex)
+                Else
+                    _linkA.SetIconLocation(value, Me.IconIndex)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or sets the index of the shortcut icon in the IconFile file.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property IconIndex() As Integer
+            Get
+
+                Dim index As Integer
+
+                If Not _linkW Is Nothing Then
+                    _linkW.GetIconLocation(New StringBuilder(0), 0, index)
+                Else
+                    _linkA.GetIconLocation(New StringBuilder(0), 0, index)
+                End If
+
+                Return index
+
+            End Get
+            Set(ByVal value As Integer)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetIconLocation(Me.IconFile, value)
+                Else
+                    _linkA.SetIconLocation(Me.IconFile, value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or sets the initial state of the main window.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	03/11/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property ShowCommand() As WindowMode
+            Get
+
+                If Not _linkW Is Nothing Then
+                    Return CType(_linkW.GetShowCmd, WindowMode)
+                Else
+                    Return CType(_linkA.GetShowCmd, WindowMode)
+                End If
+
+            End Get
+            Set(ByVal value As WindowMode)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetShowCmd(value)
+                Else
+                    _linkA.SetShowCmd(value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Gets or sets the application working directory.
+        ''' </summary>
+        ''' <returns></returns>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Property WorkingDirectory() As String
+            Get
+
+                Dim data As New StringBuilder(260)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.GetWorkingDirectory(data, data.Capacity)
+                Else
+                    _linkA.GetWorkingDirectory(data, data.Capacity)
+                End If
+
+                Return data.ToString
+
+            End Get
+            Set(ByVal value As String)
+
+                If Not _linkW Is Nothing Then
+                    _linkW.SetWorkingDirectory(value)
+                Else
+                    _linkA.SetWorkingDirectory(value)
+                End If
+
+            End Set
+        End Property
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Releases the shortcut object.
+        ''' </summary>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Sub Dispose() Implements System.IDisposable.Dispose
+
+            Do While Marshal.ReleaseComObject(_link) > 0 : Loop
+
+            _linkA = Nothing
+            _linkW = Nothing
+            _link = Nothing
+
+            GC.SuppressFinalize(Me)
+
+        End Sub
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Loads the shortcut file.
+        ''' </summary>
+        ''' <param name="filename"></param>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Private Sub Load(ByVal filename As String)
+
+            Dim pf As UCOMIPersistFile
+
+            pf = DirectCast(_link, UCOMIPersistFile)
+            pf.Load(filename, 0)
+
+            _filename = filename
+
+        End Sub
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Saves the shortcut to a file.
+        ''' </summary>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------        
+        Public Sub Save(ByVal filename As String)
+
+            Dim pf As UCOMIPersistFile
+
+            pf = DirectCast(_link, UCOMIPersistFile)
+            pf.Save(filename, False)
+
+            _filename = filename
+
+        End Sub
+
+        ''' -----------------------------------------------------------------------------
+        ''' <summary>
+        ''' Saves the shortcut to the current file.
+        ''' </summary>
+        ''' <remarks></remarks>
+        ''' <history>
+        ''' 	[Eduardo Morcillo]	11/03/2004	Created
+        ''' </history>
+        ''' -----------------------------------------------------------------------------
+        Public Sub Save()
+
+            If _filename Is Nothing Then Throw New ArgumentNullException
+
+            Save(_filename)
+
+        End Sub
+
+    End Class
+
+End Namespace

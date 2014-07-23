@@ -1,0 +1,33 @@
+url=http://www.sharepointblogs.com/echef/archive/2007/12/05/how-to-clear-off-a-sql-server-quickly.aspx
+
+How to clear off a SQL server quickly...
+
+So I was asked in an online community how to quickly clean off a SQL Server to rebuild a MOSS Farm.  Although it won't clean up and "add-ins" to the system DB's or any security identities, this does a quick and dirty job...
+
+IF object_id('tempdb..#AllDatabases') IS NOT NULL DROP TABLE #AllDatabases
+
+CREATE TABLE #AllDatabases
+(
+            id          INT IDENTITY,
+            name     NVARCHAR(128)
+)
+
+DECLARE @dbname   nvarchar(128)
+DECLARE @counter  int
+DECLARE @maxcount int
+
+INSERT INTO #AllDatabases SELECT name FROM master..sysdatabases WHERE name NOT IN ('tempdb', 'master', 'model', 'msdb')
+
+SET @counter = 1
+SELECT @maxcount = MAX(id) FROM #AllDatabases
+
+WHILE @counter <= @maxcount
+BEGIN
+    SELECT @dbname = name FROM #AllDatabases WHERE id = @counter
+    Print 'Deleting DB ' + @dbname
+    --Uncomment the next line to enable deleting all User DBs
+    --DROP DATABASE @dbname
+    SET @counter = @counter + 1
+END
+
+IF object_id('tempdb..#AllDatabases') IS NOT NULL DROP TABLE #AllDatabases

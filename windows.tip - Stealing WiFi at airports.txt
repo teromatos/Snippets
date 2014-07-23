@@ -1,0 +1,6 @@
+Most airport networks will allow you to connect to their network, and then ask you for your credit card. Go ahead connect to the network. 
+Check the IP you got, chances are, there are a bunch of others with similar IP ranges. Start nbtstati'ing them and figure out their MAC Addresses. 
+One of these suckers, who actually paid, has a Mac address that is no longer in use. 
+Use macshift to spoof your mac address. 
+Reboot. 
+You're happily online.

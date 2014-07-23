@@ -1,0 +1,17 @@
+While debugging changes to the Extended Event Manager, I had a few nagging things like having to type in the server name to connect to for each and every test.  I set about configuring a most recent servers drop down in the application and wanted to model it off SQL Server Management Studio when I noticed that there is no way to clear the list from SQL Server Management Studio, which was something I wanted to incorporate in my own development.
+
+It turns out that you actually can clear the list, but it requires that you remove the SqlStudio.bin file from the users application data path which generally is like the following for SQL Server 2008:
+
+    C:\Documents and Settings\<%username%>\Application Data\Microsoft\Microsoft SQL Server\100\Tools\Shell
+
+or the following for SQL Server 2005:
+
+    C:\Documents and Settings\<%username%>\Application Data\Microsoft\Microsoft SQL Server\90\Tools\Shell
+
+By deleting this file and restarting SQL Server Management Studio, the MRU List for Servers is cleared from the Connection Box.
+
+Hi Jonathan,
+
+The file you delete in SQL 2005 is mru.dat. In SQL 2008 it was changed to SqlStudio.bin.
+
+Don

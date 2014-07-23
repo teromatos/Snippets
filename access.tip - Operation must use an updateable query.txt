@@ -1,0 +1,23 @@
+Source: http://support.microsoft.com/kb/207761
+
+Operation must use an updateable query.
+
+DELETE QUERIES
+
+To resolve this error, set the query's UniqueRecords property to Yes by following these steps:
+
+   1. Open the delete query in Design view.
+   2. If the property sheet is not already open, on the View menu, click Properties.
+   3. Click an empty area in the upper half of the query window so that the property sheet displays "Query Properties" in the title bar.
+   4. Set the UniqueRecords property to Yes.
+   5. Save the query, close it, and then run the query. 
+   
+SELECT & UPDATE QUERIES
+
+To resolve this error, set the query's UniqueRecords property to No by following these steps:
+
+   1. Open the update query in Design view.
+   2. If the property sheet is not already open, on the View menu, click Properties.
+   3. Click an empty area in the upper half of the query window so that the property sheet displays "Query Properties" in the title bar.
+   4. Set the UniqueRecords property to No.
+   5. Save the query, close it, and then run the query. 

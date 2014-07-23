@@ -1,0 +1,8 @@
+Note: It will overwrite the current application.exe.config file 
+
+AppConfig cfg = new AppConfig();
+
+cfg.SetValue("ftpUri",txtFtpUri.Text);
+cfg.SetValue("ftpUser",txtFtpUserName.Text);
+cfg.SetValue("ftpPass",txtFtpPassword.Text);
+cfg.SetValue("zipPass",txtZipPassword.Text);

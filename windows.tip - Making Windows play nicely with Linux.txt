@@ -1,0 +1,42 @@
+Making Windows play nicely with Linux…
+Posted by zbowling under Personal , Linux , Mono & .NET
+[2] Comments 
+This is a republishing of a previous blog entry I did 4 months ago with some updates. Enjoy.
+
+I’ve thrown a list of simple things you can install and do to help you understand the common products and systems in Linux better and use the tools that Linux users use everyday. It help any Windows user better understand Linux. It can also make it easy just to work with other Linux people at your office. Who knows. Here is what you need to do: 
+
+STEP 1: 
+
+Download and install the following apps (*optional):
+
+Paco’s (Fransico Martinez) WIN32 installer for Mono 
+http://www.mono-project.com/downloads/index.html - Free 
+Cygwin is a full package of tools, applications, and compliable libraries that all work under windows using a unix emulation layer. 
+http://www.cygwin.com/ - Free 
+Apache and PHP for your web server.
+http://httpd.apache.org/ - Free
+http://www.php.net/ - Free 
+ActivePerl, ActiveTcl, ( and maybe ActivePython)
+http://www.activestate.com/Products/Language_Distributions/ - Free 
+*MinGW (maybe MSYS) for compiling those linux based apps. (You can use -mno-cygwin but I prefer MinGW straight up. Seems to play more friendly that way)
+http://www.mingw.org/ - Free 
+*Windows Services for UNIX from Microsoft is nice for the command line utilities and setting up a Windows based NFS server (but is hard to find at a good price)
+http://www.microsoft.com/windows/sfu/ - $$$ 
+*Mozilla Firefox and the Mozilla suite are the best web browsers (not really needed but it can help with your window’s struggles)
+http://www.mozilla.org/ - Free 
+*Subversion and TortoiseSVN
+http://tortoisesvn.tigris.org/ - Free 
+*CVSNT for a great NT based CVS
+http://www.cvsnt.org/ - Free 
+*VNC for remote desktop.
+http://www.realvnc.com/ - Free 
+*Putty for SSH. (Cygwin SSH is nice but Putty has better graphics support but don’t try to tie putty to subverison.)
+http://www.chiark.greenend.org.uk/~sgtatham/putty/ - Free 
+*NMAP is great for scanning open ports (some virus scanners think this is a virus though) 
+http://www.insecure.org/nmap/ - Free 
+*UCD-SNMP (or if you want to play with NET-SNMP, but its not as stable on windows) for SNMP
+http://www.net-snmp.org - Free 
+*Ethereal for packet sniffing
+http://www.ethereal.org/ - Free 
+*Gaim for instant messaging (Works with AIM, MSN, Yahoo, IRC, ICQ, Jabber, Novell Groupwise, Napster and more)
+http://gaim.sf.net/ - Free 

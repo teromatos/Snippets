@@ -1,0 +1,107 @@
+URL= http://weblogs.asp.net/uber1024/archive/2005/07/19/419904.aspx
+
+Stored Proc that does paging and sorting for you 
+This was a solution I came up for paging and sorting with that I use pretty much all over now.  Let's face it, sorting and (especially) paging with a DataGrid is for chumps.
+
+A little intro to this proc ... you pass it a table/view name, the primary key (used for paging), and then the info that you would need to generate the SQL (page size, which page you want, how you want to sort it, and a WHERE clause), and it returns the exact data you want.  It figures out whether it needs to page and then builds the SQL that it will execute.  
+
+My next post will be the base class that I derive from that wraps this stored proc call.
+
+CREATE PROCEDURE GetSortedPage(
+  @TableName VARCHAR(500),
+  @PrimaryKey VARCHAR(25),
+  @SortField VARCHAR(100) = NULL,
+  @PageSize INT = 99999,
+  @PageIndex INT = 1,
+  @QueryFilter VARCHAR(3000) = NULL
+) AS
+SET NOCOUNT ON
+
+DECLARE @SizeString AS VARCHAR(5)
+DECLARE @PrevString AS VARCHAR(5)
+
+SET @SizeString = CONVERT(VARCHAR, @PageSize)
+SET @PrevString = CONVERT(VARCHAR, @PageSize * (@PageIndex - 1))
+
+
+IF @PageIndex = 1 AND @PageSize = 99999 AND @QueryFilter IS NOT NULL AND @QueryFilter <> ''
+ BEGIN
+  IF @SortField IS NULL
+  BEGIN
+   EXEC('SELECT * FROM ' + @TableName + ' WHERE  ' + @QueryFilter )
+  END
+  ELSE
+  BEGIN
+   EXEC('SELECT * FROM ' + @TableName + ' WHERE  ' + @QueryFilter + ' ORDER BY  ' + @SortField )
+  END
+  EXEC('SELECT 1 AS PageCount')
+ END
+ELSE
+ BEGIN
+  IF @QueryFilter IS NULL OR @QueryFilter = ''
+  BEGIN
+  
+     -- if the sort is null then don't sort - the view might have a sort on it
+     IF @SortField IS NULL
+       BEGIN
+   EXEC(
+      'SELECT * FROM ' + @TableName + ' WHERE ' + @PrimaryKey + ' IN
+        (SELECT TOP ' + @SizeString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' WHERE ' + @PrimaryKey + ' NOT IN
+          (SELECT TOP ' + @PrevString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ') 
+                  )' 
+                        )
+       END   
+  
+     ELSE
+  
+       BEGIN
+  
+              EXEC(
+     'SELECT * FROM ' + @TableName + ' WHERE ' + @PrimaryKey + ' IN
+       (SELECT TOP ' + @SizeString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' WHERE ' + @PrimaryKey + ' NOT IN
+         (SELECT TOP ' + @PrevString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' ORDER BY ' + @SortField + ')
+       ORDER BY ' + @SortField + ')
+     ORDER BY ' + @SortField
+     ) 
+       END    
+  
+       EXEC('SELECT (COUNT(*) - 1)/' + @SizeString + ' + 1 AS PageCount FROM ' + @TableName)
+   
+  END
+  ELSE
+   BEGIN 
+  
+     IF @SortField IS NULL
+  
+   BEGIN
+       EXEC(
+      'SELECT * FROM ' + @TableName + ' WHERE  ' + @QueryFilter + ' AND  ' + @PrimaryKey + ' IN
+        (SELECT TOP ' + @SizeString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' WHERE ' + @QueryFilter + ' AND ' + @PrimaryKey + ' NOT IN
+          (SELECT TOP ' + @PrevString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' WHERE ' + @QueryFilter +  ')
+        )'
+               )
+               END
+    
+     ELSE
+     
+       BEGIN 
+  
+     EXEC(
+     'SELECT * FROM ' + @TableName + ' WHERE  ' + @QueryFilter + ' AND  ' + @PrimaryKey + ' IN
+       (SELECT TOP ' + @SizeString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' WHERE ' + @QueryFilter + ' AND ' + @PrimaryKey + ' NOT IN
+         (SELECT TOP ' + @PrevString + ' ' + @PrimaryKey + ' FROM ' + @TableName + ' WHERE ' + @QueryFilter + ' ORDER BY ' + @SortField + ')
+       ORDER BY ' + @SortField + ')
+     ORDER BY ' + @SortField
+     )
+       END
+  
+   
+       EXEC('SELECT (COUNT(*) - 1)/' + @SizeString + ' + 1 AS PageCount FROM ' + @TableName + ' WHERE ' + @QueryFilter)
+  
+  END
+ END
+GO
+
+
+For what it's worth, I typically don't bother with the dozens of near unreadable emails attempting to explain my shortcomings that I get with every post.  This time, I'm going to do something a little different.  I'm going to take the worst email I get and post it.  
+

@@ -1,0 +1,32 @@
+MSDN Link to topic
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpguide/html/cpconmakingimageeasiertodebug.asp
+===============================================================================================================
+
+
+Mark Pearce posted in the comments about my Debug vs. Release post some valuable tips that deserved being shared in a formal post.   Mark reminds us of the little-known little-used [.NET Framework Debugging Control] section of a {gasp} .INI file.  These help guide and control the JIT.  From MSDN: 
+
+This JIT configuration has two aspects: 
+
+You can request the JIT-compiler to generate tracking information. This makes it possible for the debugger to match up a chain of MSIL with its machine code counterpart, and to track where local variables and function arguments are stored. 
+You can request the JIT-compiler to not optimize the resulting machine code. 
+So Mark suggested this (emphasis mine): 
+
+You can have the best of both worlds with a rather neat trick. The major differences between the default debug build and default release build are that when doing a default release build, optimization is turned on and debug symbols are not emitted. So: 
+
+Step 1: Change your release config to emit debug symbols. This has virtually no effect on the performance of your app, and is very useful if (when?) you need to debug a release build of your app. 
+
+Step 2: Compile using your new release build config, i.e. *with* debug symbols and *with* optimization. Note that 99% of code optimization is done by the JIT compiler, not the language compiler, so read on... 
+
+Step 3: Create a text file in your app's folder called xxxx.exe.ini (or dll or whatever), where xxxx is the name of your executable. This text file should initially look like: 
+
+[.NET Framework Debugging Control] 
+GenerateTrackingInfo=0 
+AllowOptimize=1 
+
+Step 4: With these settings, your app runs at full speed. When you want to debug your app by turning on debug tracking and possibly turning off (CIL) code optimization, just use the following settings: 
+
+[.NET Framework Debugging Control] 
+GenerateTrackingInfo=1 
+AllowOptimize=0 
+
+Great stuff Mark!  I'm going to go see how this would work with ASP.NET (do I use an ASPNET_WP.EXE.ini(?) and I'll probably have to recycle the ASP.NET worker process.)  

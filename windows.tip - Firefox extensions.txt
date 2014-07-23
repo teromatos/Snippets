@@ -1,0 +1,5 @@
+tabbrowser_preferences-1.1.1-fx.xpi
+chromedit-0.1.1.1-fx+mz+tb.xpi
+favorites_converter_(export)-1.0.1-fx.xpi
+linky-230.xpi
+syncmarks-0.3-fx.xpi

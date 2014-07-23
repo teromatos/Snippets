@@ -1,0 +1,3 @@
+select filename
+from sysaltfiles
+where dbid = (select dbid from sysaltfiles where name = 'northwind')

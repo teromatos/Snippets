@@ -1,0 +1,44 @@
+Public Sub DeleteDuplicateRecurringItems()
+    Dim folderIndex As Integer
+    Dim itemsIndex As Integer
+    Dim itemsFoundIndex As Integer
+    Dim olNS As Outlook.NameSpace
+    Dim olFolder As Outlook.MAPIFolder
+    Dim currentItem As String
+    Dim itemsFound As Collection
+    Dim foundIt As Boolean
+    Dim i As Integer
+    
+    Set olNS = Application.GetNamespace("MAPI")
+    
+    For folderIndex = 1 To olNS.Folders(1).Folders.Count
+        Set olFolder = olNS.Folders(1).Folders(folderIndex)
+        If olFolder.Name = "Calendar" Then
+            Set itemsFound = New Collection
+            
+            For itemsIndex = olFolder.items.Count To 1 Step -1
+                currentItem = LCase(olFolder.items(itemsIndex))
+                foundIt = False
+                
+                For itemsFoundIndex = 1 To itemsFound.Count
+                    If currentItem = itemsFound(itemsFoundIndex) Then
+                        foundIt = True
+                    End If
+                Next
+                
+                If foundIt Then
+                    olFolder.items.Remove itemsIndex
+                Else
+                    itemsFound.Add (currentItem)
+                End If
+            Next
+            
+            For i = 1 To itemsFound.Count
+                Debug.Print itemsFound(i)
+            Next
+        End If
+    Next
+    
+    Set olNS = Nothing
+
+End Sub

@@ -1,0 +1,21 @@
+AppSettings can Reference an External Config File 
+I recently discovered that the app/web.config file can reference an external config file to get some or all of its appsettings.  You don't have to name it with the extension config, but that's best since its protected from anyone browsing to it, and since it has the support of the VS.NET editor.  You can have keys that are only defined in the external file, or you can override keys that were already defined in the app/web.config file.  One great use of this would be to store your database connection string, or other settings that may vary from development to testing to production.  I did notice that changes made to the external config file are not automatically picked up until the app restarts, but thats easy to force by simply editing the real app/web.config.  By the way, this does fully work in the original version 1.0 .NET framework, although it was apparently undocumented until 1.1.  Sorry if someone else wrote about this -- I can't remember where I first saw this tidbit recently -- I think it may have been in the last MSDN Magazine but I'm not sure.
+
+Web.config:
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+  <appSettings file="YourSettings.config">
+    <add key="KeyToOverride" value="Original" />
+    <add key="KeyToNotOverride" value="Standard" />
+  </appSettings>
+  <system.web>
+    <!-- standard web settings go here -->
+  </system.web>
+</configuration>
+
+YourSettings.config:
+<appSettings>
+  <add key="KeyToOverride" value="Overridden" />
+  <add key="KeyToBeAdded" value="EntirelyNew" />
+</appSettings>
+

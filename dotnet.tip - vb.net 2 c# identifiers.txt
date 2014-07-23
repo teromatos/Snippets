@@ -1,0 +1,5 @@
+static		shared
+virtual 	overridable
+abstract 	mustoverride
+override 	overrides
+internal	friend

@@ -1,0 +1,17 @@
+In Visual SourceSafe Administrator, archive the project in the current database, 
+then restore it in the database you want.
+
+    Archive->Archive Projects
+    Archive->Restore Projects
+
+To do it from the command line take a look at the ssarc.exe and ssrestor.exe utilities
+
+URL:http://support.microsoft.com/kb/176909
+
+Moving a project or projects from one database to another, while preserving the project's history.
+
+NOTE: This process is for Visual SourceSafe 5.0 or greater only.
+
+Use the SSARC and SSRESTOR utilities included in Visual SourceSafe 5.0. With these utilities, you can archive projects, preserve their histories, and restore them to a new database.
+
+NOTE: You must have SourceSafe Admin privileges to use these utilities. For more information on the use of SSARC and SSRESTORE, see the Visual SourceSafe, version 5.0, "Visual SourceSafe User's Guide," Appendix B, pages 216-220 or under the SSAdmin Online Help topic "Basic Administrator Operations".

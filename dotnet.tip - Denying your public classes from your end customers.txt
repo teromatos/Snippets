@@ -1,0 +1,25 @@
+NOTE:This is not 100% safe see http://blogs.msdn.com/tims/archive/2003/12/03/57463.aspx
+
+
+
+Denying your public classes from your end customers
+
+
+Here's a cool way to make sure that no one else but your application can use any of the public classes that are exposed by your business assemblies: you put a permission requirement on the class that requires the strong name of your calling assembly:
+
+[StrongNameIdentityPermission(SecurityActoin.LinkDemand, PublicKey="XXXYY)]
+
+public class MyPublicLogicClass
+
+{
+
+//do something
+
+}
+
+[via Juval Lowy's .Net Master class]
+
+
+
+original link:
+http://weblogs.asp.net/rosherove/archive/2004/12/29/343653.aspx

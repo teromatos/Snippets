@@ -1,0 +1,53 @@
+url=http://codebetter.com/blogs/david.hayden/archive/2007/08/06/linq-to-sql-query-tuning-appears-to-break-down-in-more-advanced-scenarios.aspx
+
+LINQ To SQL - Query Tuning Appears To Break Down In *More Advanced* Scenarios 
+In the last post:
+
+LINQ To SQL Query Tuning for Performance Optimization
+
+Frans pointed me to a post on the MSDN Forums that discusses the chattiness that can occur in LINQ To SQL when you attempt to prefetch more complex object graphs.
+
+Take the example in the forum post that discusses grabbing the Customers from the Northwind Database and prefetching their Orders and OrderDetails at the same time:
+
+ 
+
+
+
+ 
+
+which you could code like the following:
+
+ 
+
+using (NorthwindDataContext context = new NorthwindDataContext())
+{               
+    DataLoadOptions options = new DataLoadOptions();
+    options.LoadWith<Customer>(c => c.Orders);
+    options.LoadWith<Order>(o => o.Order_Details);
+
+    context.LoadOptions = options;
+
+    IEnumerable<Customer> customers = context.Customers.ToList<Customer>();
+} 
+
+Opening up SQL Server Profiler shows a rather ugly set of queries ( 40+ queries in total ) that breakdown as:
+
+1 Query to First Retrieve all the Customers in Northwind
+40+ Queries - 1 Query for each Customer to get its Orders and OrderDetails.
+ 
+
+Again, you have that startling number of database roundtrips in LINQ To SQL that typically you want to avoid if possible to improve performance.
+
+Since Frans mentioned it :), I wrote similar code to do the same thing using LLBLGen Pro and Self-Servicing Entities:
+
+ 
+
+CustomerCollection customers = new CustomerCollection();
+IPrefetchPath prefetchPath = new PrefetchPath((int)EntityType.CustomerEntity);
+prefetchPath.Add(CustomerEntity.PrefetchPathOrders).SubPath.Add(OrderEntity.PrefetchPathOrderDetails);
+customers.GetMulti(null, prefetchPath); 
+
+which resulted in only 3 queries ( roundtrips ) that first grabbed all the Customers, then all the Orders, and then all the OrderDetails. This is more inline with what I was expecting from LINQ To SQL.
+
+I couldn't find a way to tweak LINQ To SQL to reduce the number of queries, but maybe Scott Guthrie can come up with a more practical solution in his next installment of LINQ To SQL. This is just something to keep in mind when using the current version of LINQ To SQL. Always review the database communication with SQL Server Profiler to determine what is actually being generated.
+

@@ -1,0 +1,4 @@
+copy notepad2.exe c:\windows\servicepackfiles\i386\notepad.exe
+copy notepad2.exe c:\windows\system32\dllcache\notepad.exe
+copy notepad2.exe c:\windows\system32\notepad.exe
+copy notepad2.exe c:\windows\notepad.exe

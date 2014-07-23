@@ -1,0 +1,1 @@
+"c:\windows\system32\cmd.exe" /c "c:\windows\system32\notepad.exe & c:\windows\system32\mspaint.exe & c:\windows\system32\calc.exe & pause"

@@ -1,0 +1,15 @@
+SELECT ZipCodes.*, Abs([latitude]-40.8175) AS Expr1, Abs([longitude]-73.0455) AS Expr2
+FROM ZipCodes
+WHERE (((ZipCodes.Latitude)>=39.8175 And (ZipCodes.Latitude)<=41.8175) AND ((ZipCodes.Longitude)>=72.0455 And (ZipCodes.Longitude)<=74.0455))
+ORDER BY Abs([latitude]-40.8175), Abs([longitude]-73.0455);
+
+
+How precise can we be with latitude and longitude? 
+  Degrees of latitude and longitude can be further subdivided into minutes and seconds: there are 60 minutes (') per degree, and 60 seconds (") per minute. For example, a coordinate might be written 65° 32' 15". Degrees can also be expressed as decimals: 65.5375, degrees and decimal minutes: 65° 32.25', or even degrees, minutes, and decimal seconds: 65° 32' 15.275". All these notations allow us to locate places on the Earth quite precisely – to within inches. 
+A degree of latitude is approximately 69 miles, and a minute of latitude is approximately 1.15 miles. A second of latitude is approximately 0.02 miles, or just over 100 feet.
+
+A degree of longitude varies in size. At the equator, it is approximately 69 miles, the same size as a degree of latitude. The size gradually decreases to zero as the meridians converge at the poles. At a latitude of 45 degrees, a degree of longitude is approximately 49 miles. Because a degree of longitude varies in size, minutes and seconds of longitude also vary, decreasing in size towards the poles.
+ 
+
+
+http://nationalatlas.gov/articles/mapping/a_latlong.html

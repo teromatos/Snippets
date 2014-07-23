@@ -1,0 +1,98 @@
+    Private Sub ReflectorFunctionNamesToSharedFunctions()
+
+
+        Dim sr As New StreamReader("c:\temp\funcs.txt")
+        Dim line As String
+        Dim isFunction As Boolean
+        Dim delimiterPos As Integer
+
+        Dim i As Integer
+        For i = 0 To 5
+            Debug.WriteLine("")
+        Next
+
+        Do While sr.Peek <> -1
+            line = sr.ReadLine
+            If Not line Is Nothing AndAlso line.Length > 0 Then
+                line = line.Trim
+                isFunction = GetIsFunction(line)
+
+                Debug.WriteLine(line)
+                Debug.Write(ControlChars.Tab)
+                If isFunction Then
+                    Debug.Write("Return Microsoft.ApplicationBlocks.Data.SqlHelper.")
+                Else
+                    Debug.Write("Microsoft.ApplicationBlocks.Data.SqlHelper.")
+                End If
+                Debug.Write(GetProcedureName(line, isFunction, delimiterPos))
+                Debug.Write("(")
+                Debug.Write(GetArguments(line, delimiterPos))
+                Debug.WriteLine(")")
+
+                Debug.WriteLine(GetEndStatement(isFunction))
+                Debug.WriteLine("")
+
+            End If
+        Loop
+
+    End Sub
+
+    Private Function GetIsFunction(ByVal line As String) As Boolean
+        If line.StartsWith("Public Shared Function") Then
+            Return True
+        End If
+
+        Return False
+    End Function
+
+    Private Function GetEndStatement(ByVal isFunction As Boolean) As String
+        If isFunction Then
+            Return "End Function"
+        Else
+            Return "End Sub"
+        End If
+
+    End Function
+
+    Private Function GetProcedureName(ByVal line As String, ByVal isFunction As Boolean, ByRef delimiterPos As Integer) As String
+        Dim startIndex As Integer
+
+        If isFunction Then
+            startIndex = 23
+        Else
+            startIndex = 18
+        End If
+
+        delimiterPos = line.IndexOf("("c, startIndex)
+        Return line.Substring(startIndex, delimiterPos - startIndex)
+
+    End Function
+
+    Private Function GetArguments(ByVal line As String, ByVal delimiterPos As Integer) As String
+        Dim pos As Integer
+
+        line = line.Substring(delimiterPos + 1)
+        pos = line.IndexOf(") ")
+        If pos = -1 Then
+            If line.EndsWith("))") Then
+                line = line.Substring(0, line.Length - 1)
+            End If
+        Else
+            line = line.Substring(0, pos)
+        End If
+
+
+        Dim arguments() As String
+        arguments = line.Split(",")
+        Dim argument As String
+        Dim ret As String = ""
+
+        For Each argument In arguments
+            argument = argument.Trim
+            pos = argument.IndexOf(" As")
+            ret &= argument.Substring(6, pos - 6) & ", "
+        Next
+
+        Return ret.Substring(0, ret.Length - 2)
+
+    End Function

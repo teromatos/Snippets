@@ -1,0 +1,12 @@
+Setup UltraVNC in Windows XP to allow Ctrl-Alt-Del
+
+On a Win 7 machine, you must have UAC on. Keep it on the default setting. Next, have the PC logged in and unlocked.
+Remote into it with Ultravnc. Hit the button to send ctl alt delete command. 
+You will see 2 popup messages, one I think is the UAC prompt, the other asks if you want to let ultravnc make changes to the registry. 
+Say yes to all the popups. Now hit the ctl alt delete button again and you'll see the Win 7 PC at the lock/switch user/logoff etc. screen. 
+You can now send ctl alt delete commands to it whether it is locked/logged off or unlocked.
+
+Setup UltraVNC on machine with 2 monitors
+Stop UltraVNC server. 
+Open MS DOS with admin right, edit ultravnc.ini and change secondary=0 to secondary=1.
+Restart UltraVNC server.

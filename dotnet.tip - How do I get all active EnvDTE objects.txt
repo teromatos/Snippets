@@ -1,0 +1,109 @@
+URL = http://www.dotnet247.com/247reference/msgs/46/231613.aspx
+
+How do I get all active EnvDTE objects?
+
+By Ed Dore [MSFT] (VIP) 
+
+From a COM standpoint, the DTE object is registered in the system's
+RunningObject. If I recall correctly, the IRunningObjectTable::GetObject
+will actually retrieve the last object registered, when you have duplicate
+objects in the ROT. You may have to enumerate the ROT instead, and then
+possibly grab the caption of each instance, so the user will know which
+instance to select.
+
+Below is some code from a previous post that illustrates how to do this
+with C# via PInvoke.
+
+Sincerely,
+Ed Dore [MSFT]
+
+This post is 'AS IS' with no warranties, and confers no rights.
+
+using System;
+using System.Runtime.InteropServices;
+using EnvDTE;
+
+namespace RunningObject
+{
+    /// <summary>
+    /// Summary description for Class1.
+    /// </summary>
+    class Class1
+    {
+
+        [DllImport("ole32.dll")]        
+        public static extern int GetRunningObjectTable(int reserved, out
+            UCOMIRunningObjectTable prot);    
+    
+        [DllImport("ole32.dll")]        
+        public static extern int CreateBindCtx(int reserved, out UCOMIBindCtx
+            ppbc);
+        
+        [STAThread]        
+        static object GetMSDEVFromGIT(string strProgID)        
+        {            
+            UCOMIRunningObjectTable prot;            
+            UCOMIEnumMoniker pMonkEnum;            
+            try            
+            {                
+                GetRunningObjectTable(0,out prot);                
+                prot.EnumRunning(out pMonkEnum);                
+                pMonkEnum.Reset(); // Churn through enumeration.                
+                int fetched;                
+                UCOMIMoniker []pmon = new UCOMIMoniker[1];                
+                while(pMonkEnum.Next(1, pmon, out fetched) == 0)                 
+                {                    
+                    UCOMIBindCtx pCtx;                    
+                    CreateBindCtx(0, out pCtx);                    
+                    string str;                    
+                    pmon[0].GetDisplayName(pCtx,null,out str);                
+                    if(str == strProgID)            
+                    {        
+                        object objReturnObject;        
+                        prot.GetObject(pmon[0],out objReturnObject);    
+                        object ide = (object)objReturnObject;        
+                        return ide;        
+                    }        
+                }    
+            }    
+            catch    
+            {    
+                return null;    
+            }    
+            return null;    
+        }// End CodeSample
+
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
+        static void Main(string[] args)
+        {
+
+            foreach(string s in args)
+                Console.WriteLine(s);
+            if (args.Length > 0 && args[0] == "noload")
+            {
+                Console.WriteLine("no load specified");
+                return;
+            }
+
+            //use the moniker of form "!VisualStudio.DTE.7:<PID> for 7.0
+            //use the moniker of form "!VisualStudio.DTE.7.1:<PID> for 7.1
+            string strMoniker = "!VisualStudio.DTE.7.1:2916";
+                
+            //From the WebControl we would call
+System.Diagnostics.Process.GetCurrentProcess().Id.ToString(); and append it
+            //after the semicolon i.e.
+            //strMoniker = "!VisualStudio.DTE.7.1:" +
+System.Diagnostics.Process.GetCurrentProcess().Id.ToString();
+            _DTE ide = (_DTE)GetMSDEVFromGIT(strMoniker);
+            Console.WriteLine(ide.ActiveDocument.FullName);
+
+            
+
+        }
+    }
+}
+ 
+ 

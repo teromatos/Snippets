@@ -1,0 +1,26 @@
+ 
+
+
+
+Last night Loren and I wrote some VB.NET code together. The objective was to read data from a table in one Access database, and save that data back to a different table in a second Access database. One approach would have been to use a DataReader, and then cycle through each record, saving each one to the new table. But that sounded slow and dumb.
+
+Loren suggested we should look at some of the other methods of the DataSet, and we stumbled into the Merge method. The Merge method let's you merge a DataSet's contents into an existing DataSet. This sounded promising. Here's the relevant code:
+
+'Retrieve source data
+
+daSource.Fill(dsSource, "Results")
+
+'Returns an empty result table, but "connects" this to the destination database
+
+daDest.Fill(dsDest, "Results")
+
+dsDest.Merge(dsSource)
+
+'Command builder creates appropriate commands, which are required for it to write the data back out to the new table
+Dim cb As OleDbCommandBuilder = New OleDbCommandBuilder(daDest)
+cb.QuotePrefix = "["
+cb.QuoteSuffix = "]"
+
+daDest.Update(dsDest.Tables("Results"))
+
+Two things to keep in mind. First, the Merge method will add the new records to the destination dataset, but the Update method will not result in updating the destination database unless the CommandBuilder is used. Using the CommandBuilder will generate the appropriate commands for the DataAdapter. Second, we found that we also needed to set the QuotePrefix and QuoteSuffix properties for the CommandBuilder. Otherwise, the automatically generated insert command generated a syntax error.

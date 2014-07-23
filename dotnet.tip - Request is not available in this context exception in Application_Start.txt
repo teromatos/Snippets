@@ -1,0 +1,91 @@
+IIS7 Integrated mode: Request is not available in this context exception in Application_Start
+
+The “Request is not available in this context” exception is one of the more common errors you may receive on when moving ASP.NET applications to Integrated mode on IIS 7.0.  This exception happens in your implementation of the Application_Start method in the global.asax file if you attempt to access the HttpContext of the request that started the application.  It looks something like this:
+
+Server Error in '/' Application.
+
+Request is not available in this context
+
+Description: An unhandled exception occurred during the execution of the current web request. Please review the stack trace for more information about the error and where it originated in the code. 
+
+Exception Details: System.Web.HttpException: Request is not available in this context
+
+Source Error:
+
+Line 3:  {
+Line 4:      HttpContext context = HttpContext.Current;
+Line 5:      String appPath = context.Request.ApplicationPath;
+Line 6:  }
+Line 7:  </script>
+
+Source File: c:\inetpub\wwwroot\global.asax    Line: 5 
+
+Stack Trace:
+
+[HttpException (0x80004005): Request is not available in this context]
+   System.Web.HttpContext.get_Request() +3467061
+   ASP.global_asax.Application_Start(Object source, EventArgs e) in c:\inetpub\wwwroot\global.asax:5
+[HttpException (0x80004005): Request is not available in this context]
+   System.Web.HttpApplicationFactory.EnsureAppStartCalledForIntegratedMode(HttpContext context, HttpApplication app) +3388766
+   …
+This error is due to a design change in the IIS7 Integrated pipeline that makes the request context unavailable in Application_Start event.  When using the Classic mode (the only mode when running on previous versions of IIS), the request context used to be available, even though the Application_Start event has always been intended as a global and request-agnostic event in the application lifetime.  Despite this, because ASP.NET applications were always started by the first request to the app, it used to be possible to get to the request context through the static HttpContext.Current field.
+
+
+Applications have taken a dependency on this behavior become broken in Integrated mode, which officially decouples Application_Start from the request that starts the application.  In the future, we may introduce changes that will further break the assumption that applications start because of requests – for example, by introducing a warmup mechanism that can start ASP.NET applications based on a specific schedule.
+
+So, what does this mean to you?
+
+
+Basically, if you happen to be accessing the request context in Application_Start, you have two choices:
+
+Change your application code to not use the request context (recommended).
+Move the application to Classic mode (NOT recommended).
+
+In fact, most of the customers I have spoken to realize that they do not need to access the request context in Application_Start.  Because this event is intended for global initialization activities, any logic that references a specific request is typically a design oversight.
+
+In these cases, it should be trivial to remove any reference to HttpContext.Current from the Application_Start method. 
+
+
+A common example of this is using the HttpContext.Current.Request.ApplicationPath to get to the application’s root virtual path.  This should become HttpRuntime.AppDomainAppVirtualPath.  Voila, no need to use the request!
+
+
+In the cases where you do need to access the request information for the first request to the application (I have seen VERY few applications where this is the case), you can use a workaround that moves your first-request initialization from Application_Start to BeginRequest and performs the request-specific initialization on the first request.
+
+
+Here is an example of how to do that in your global.asax (you can also do it in a module):
+
+void Application_BeginRequest(Object source, EventArgs e)
+{
+    HttpApplication app = (HttpApplication)source;
+    HttpContext context = app.Context;
+    // Attempt to peform first request initialization
+    FirstRequestInitialization.Initialize(context);
+}
+
+class FirstRequestInitialization
+{
+    private static bool s_InitializedAlready = false;
+    private static Object s_lock = new Object();
+    // Initialize only on the first request
+    public static void Initialize(HttpContext context)
+    {
+        if (s_InitializedAlready)
+        {
+            return;
+        }
+        lock (s_lock)
+        {
+            if (s_InitializedAlready)
+            {
+                return;
+            }
+            // Perform first-request initialization here ...
+            s_InitializedAlready = true;
+        }
+    }
+}
+This code attempts to initialize at the beginning of each request, with only the first request performing the initialization (hence, first request initialization J). Note that the lock is necessary to insure correct behavior in the case where multiple requests arrive to your application near simultaneously (don’t lock around type objects, since this may lock multiple appdomains – see Rico’s post).
+
+
+
+With this issue out of the way, you should be able to enjoy the benefits of Integrated mode on IIS7 without much other grief.  For more info on ASP.NET Integrated mode and how to take advantage of it, be sure to check out http://www.iis.net/articles/view.aspx/IIS7/Extending-IIS7/Getting-Started/How-to-Take-Advantage-of-the-IIS7-Integrated-Pipel

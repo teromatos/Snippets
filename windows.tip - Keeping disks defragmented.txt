@@ -1,0 +1,103 @@
+@if "%_Echo%" == "" echo off
+
+ 
+
+if "%1" == "" goto Usage
+
+ 
+
+     :next
+
+ 
+
+cd /d %1\
+
+ 
+
+echo defragmenting %1 > defrag.log 
+
+defrag -v -f %1 >> defrag.log 2>&1
+
+ 
+
+shift
+
+if NOT (%1) == () goto next
+
+ 
+
+goto :EOF
+
+ 
+
+ 
+
+     :Usage
+
+ 
+
+echo pass volumes on the command line:
+
+echo.
+
+echo     %~n0 c: d: c:\mount_point
+
+ 
+
+goto :EOF
+
+ 
+
+ 
+
+I’m known for writing confusing batch files, so let’s go through it:
+
+ 
+
+@if "%_Echo%" == "" echo off
+
+ 
+
+Turn off echo by default.  If you want to see echo output, ‘set _echo=1’.
+
+ 
+
+cd /d %1\
+
+ 
+
+The ‘/d’ option means change the current drive, too.  (Should be the default, but hard to change now.)
+
+ 
+
+defrag -v -f %1 >> defrag.log 2>&1
+
+ 
+
+Run the defragger.  ‘-v’ means generate verbose output about the number of fragmented files before & after, etc.  Redirect it all to defrag.log, which will be (normally) be written to the root of the drive.
+
+ 
+
+shift
+
+if NOT (%1) == () goto next
+
+ 
+
+Repeat for each parameter.
+
+ 
+
+goto :EOF
+
+ 
+
+exit the batch script.  (If you use ‘call :label’ then just exit this instance).
+
+ 
+
+echo     %~n0 c: d: c:\mount_point
+
+ 
+
+%~n0 means ‘just the base name of the current batch file’.

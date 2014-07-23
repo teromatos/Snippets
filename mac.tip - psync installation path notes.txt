@@ -1,0 +1,9 @@
+Psync was written by Dan Kogai. Information on original version is here: http://www.dan.co.jp/cases/macosx/psync.html
+
+Psync is part of and requires MacOSX:File package. Source code is here (you have to build it): http://search.cpan.org/search?dist=MacOSX-File
+
+If you prefer ready/prebuilt/binary package:
+
+for Panther just download and install this: http://www.jacek-dom.net/software/psync/psync.dmg 
+for Jaguar: download and install this: http://www.dan.co.jp/cases/macosx/MacOSX-File-0.66.dmg, then download http://www.jacek-dom.net/software/psync/psync and put in /usr/local/bin.
+If you use PsyncX (http://sourceforge.net/projects/psyncx), please note that it installs psync in /usr/bin (instead of /usr/local/bin). After installing copy or link psync from /usr/local/bin to /usr/bin.

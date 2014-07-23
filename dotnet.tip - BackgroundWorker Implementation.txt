@@ -1,0 +1,466 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Configuration;
+using System.Data;
+using System.Drawing;
+using System.IO;
+using System.Text;
+using System.Windows.Forms;
+
+using SubSonic;
+using CMS.Data;
+
+namespace CMSManager
+{
+	public partial class AddFilesFromCMS : Form
+	{
+
+		public readonly DateTime INVALIDTIME = new DateTime(1799, 1, 1); 
+		public readonly DateTime BEGTIME = new DateTime(1800, 1, 1); 
+		public readonly DateTime ENDTIME = new DateTime(3000, 1, 1);		
+
+		public AddFilesFromCMS()
+		{
+			InitializeComponent();
+		}
+
+		int FileIndex = -1;		
+
+		private string _PlanSponsorId;
+		public string PlanSponsorId
+		{
+			get { return _PlanSponsorId; }
+			set { _PlanSponsorId = value; }
+		}
+
+		private string _CMSApplicationId;
+		public string CMSApplicationId
+		{
+			get { return _CMSApplicationId; }
+			set { _CMSApplicationId = value; }
+		}
+
+		private string _PlanSponsorName;
+		public string PlanSponsorName
+		{
+			get { return _PlanSponsorName; }
+			set { _PlanSponsorName = value; }
+		}
+
+		private string[] _Files;
+		public string[] Files
+		{
+			get { return _Files; }
+		}
+
+		private bool  _Cancelled;
+		public bool Cancelled
+		{
+			get { return _Cancelled; }
+		}
+
+		private void btnCancel_Click(object sender, EventArgs e)
+		{
+			this._Files = null;
+			this._Cancelled = true;
+			this.Close();
+		}
+
+		private void btnBrowse_Click(object sender, EventArgs e)
+		{
+			openFileDialog1.InitialDirectory = string.Format(@"{0}\{1}\{2}\FromCMS", ConfigurationManager.AppSettings["ToCMSOuputDir"], _PlanSponsorName, _CMSApplicationId);
+			if (!Directory.Exists(openFileDialog1.InitialDirectory)) { Directory.CreateDirectory(openFileDialog1.InitialDirectory); }
+
+			openFileDialog1.FileName = string.Empty;
+			openFileDialog1.Filter = "Comma Delimited files (*.csv)|*.csv|All files (*.*)|*.*";
+			openFileDialog1.FilterIndex = 1;
+			openFileDialog1.RestoreDirectory = true;			
+			openFileDialog1.Multiselect = true;
+			if (this.openFileDialog1.ShowDialog() == DialogResult.Cancel)
+			{
+				return;
+			}
+
+			this._Files = this.openFileDialog1.FileNames;
+			Array.Sort(this._Files);
+			foreach (string filename in this._Files)
+			{
+				ListViewItem lvi = new ListViewItem(filename);
+				lvi.SubItems.Add(string.Empty);
+				this.lvwFiles.Items.Add(lvi);
+			}
+		}
+
+		private void btnProcess_Click(object sender, EventArgs e)
+		{
+			if (lvwFiles.Items.Count == 0)
+			{
+				return;
+			}
+
+			this.btnBrowse.Enabled = false;
+			this.btnProcess.Enabled = false;
+			this.btnCancel.Enabled = false;
+
+			this.FileIndex = -1;
+			this.bwProcessFile.RunWorkerAsync(this._Files);
+		}
+
+		private void ProcessFiles(string[] files, BackgroundWorker bw, DoWorkEventArgs e)
+		{  			
+			try
+			{
+				foreach (string filename in files)
+				{
+					FileIndex++;
+					if (ValidFilename(filename))
+					{
+						ProcessFile(filename, bw, e);
+					}
+				}
+				this._Cancelled = false;
+			}
+			catch (Exception ex)
+			{
+				MessageBox.Show(ex.Message, System.Windows.Forms.Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Error);
+				this._Cancelled = true;
+			}
+		}
+
+		private bool ValidFilename(string filename)
+		{
+			bool ret = false;
+			///if (FilesFromCMS.Schema == null) { FilesFromCMS.GetTableSchema(); }
+			Query fq = new Query(FilesFromCMS.Schema);
+			fq.AddWhere("PlanSponsorId", this.PlanSponsorId);
+			fq.AddWhere("CMSApplicationId", this.CMSApplicationId);
+			fq.AddWhere("Filename", Path.GetFileName(filename));
+			fq.SelectList = "FileFromCMSKey";
+			IDataReader rdr = fq.ExecuteReader();
+
+			try 
+			{
+				if (rdr.Read())
+				{
+					StringBuilder sb = new StringBuilder();
+					sb.AppendLine("A file with the following details was already added to the dabatabase.");
+					sb.AppendLine();
+					sb.AppendFormat("Plan Sponsor Id: {0}{1}", this.PlanSponsorId, Environment.NewLine);
+					sb.AppendFormat("CMS Application Id: {0}{1}", this.CMSApplicationId, Environment.NewLine);
+					sb.AppendFormat("Filename: {0}{1}", Path.GetFileName(filename), Environment.NewLine);
+					sb.AppendLine();
+					sb.AppendLine("To be able to add this file to the database, all records for the previous file will be deleted.");
+					sb.AppendLine("Sure you want to continue?");
+
+					if (MessageBox.Show(sb.ToString(), System.Windows.Forms.Application.ProductName, MessageBoxButtons.YesNo, MessageBoxIcon.Question) == DialogResult.Yes)
+					{
+						int filesFromCMSKey = (int)rdr["FileFromCMSKey"];
+						CMSManagerController.DeleteFilesFromCMS(filesFromCMSKey);
+						return true;
+					}
+				}
+				else
+				{
+					ret = true;
+				}
+			}
+			finally
+			{
+				if (rdr != null) { rdr.Close(); }				
+			}
+
+			return ret;
+		}
+
+		private void ProcessFile(string filename, BackgroundWorker bw, DoWorkEventArgs e)
+		{
+			string[] fileLines = File.ReadAllLines(filename);
+			//Check lines exist in file
+			if (fileLines.Length == 0)
+			{
+				throw new Exception(string.Format("Invalid file {0}. Does not contain any data.", filename));
+			}
+
+			//Check the application id within the file lines matches 
+			//the application id we're processing
+			string[] items = fileLines[0].Split(","[0]);
+			if (!CMSApplicationId.Equals(items[0], StringComparison.OrdinalIgnoreCase))
+			{
+				throw new Exception("Invalid application id found withing file contents.");
+			}
+
+			int lineCounter = 0;
+			int fileFromCMSKey = -1;
+
+			try
+			{
+				filename = filename.ToUpper();
+
+				//Add file record
+				FilesFromCMS ffcms = new FilesFromCMS();
+				ffcms.PlanSponsorId = this._PlanSponsorId; 
+				ffcms.CMSApplicationId = this._CMSApplicationId;
+				ffcms.IsRetireeResponse = filename.EndsWith("RR.CSV");
+				ffcms.FileDate = GetFileDate(filename);
+				ffcms.FilePath = filename;
+				ffcms.Filename = Path.GetFileName(filename);				
+				ffcms.NotificationDate = DateTime.Today;
+				ffcms.Save(string.Empty);
+				fileFromCMSKey = ffcms.FileFromCMSKey;
+
+				//Add detail records
+				foreach (string fileLine in fileLines)
+				{
+					items = fileLine.Split(","[0]);
+
+					FilesFromCMSDetails ffcmsd = new FilesFromCMSDetails();
+					ffcmsd.FileFromCMSKey = fileFromCMSKey;
+					ffcmsd.CMSApplicationId = items[0];
+					ffcmsd.SSN = items[1];
+					ffcmsd.HICN = items[2];
+					ffcmsd.FirstName = items[3];
+					ffcmsd.MiddleInitial = items[4];
+					ffcmsd.LastName = items[5];
+					ffcmsd.DOB = items[6];
+					ffcmsd.Gender = items[7];
+					ffcmsd.BegCoverage = items[8];
+					ffcmsd.EndCoverage = items[9];
+					ffcmsd.UBOI = items[10];
+					ffcmsd.Relation = items[11];
+					ffcmsd.TransactionType = items[12];
+					ffcmsd.Accepted = (items[13] == "Y");
+					ffcmsd.ReasonCodeKey = items[14];
+					ffcmsd.BegSubsidy = items[15];
+					ffcmsd.EndSubsidy = items[16];
+					ffcmsd.DOBDate = CYMDToDate(items[6]);
+					ffcmsd.BegCoverageDate = CYMDToDate(items[8]);
+					ffcmsd.EndCoverageDate = CYMDToDate(items[9]);
+					ffcmsd.BegSubsidyDate = CYMDToDate(items[15]);
+					ffcmsd.EndSubsidyDate = CYMDToDate(items[16]);
+					ffcmsd.Save(string.Empty);
+
+					///if (CMSPatients.Schema == null) { CMSPatients.GetTableSchema(); }
+					Query q = new Query(CMSPatients.Schema);
+					q.AddWhere("CMSApplicationId", this._CMSApplicationId);
+					q.AddWhere("SSN", ffcmsd.SSN);
+					CMSPatientsCollection pc = new CMSPatientsCollection();
+					pc.Load(q.ExecuteReader());
+
+					CMSPatients p;
+					if (pc.Count == 0)
+					{
+						p = new CMSPatients();
+					}
+					else
+					{
+						p = pc[0];
+					}
+					
+					if (!p.IsLoaded)
+					{
+						p.CMSApplicationId = this.CMSApplicationId;
+						p.SSN = ffcmsd.SSN;
+						p.Relation = ffcmsd.Relation;
+						p.LastFromCMSDetail = ffcmsd.FileFromCMSDetailsKey;
+						p.LastToCMSDetail = -1;
+
+						if (ffcmsd.Accepted)
+						{
+							p.LastAccepted = ffcmsd.FileFromCMSDetailsKey;
+						}
+						else
+						{
+							p.LastAccepted = -1;
+						}
+
+						if (ffcms.IsRetireeResponse)
+						{
+							p.LastRetireeResponse = ffcmsd.FileFromCMSDetailsKey;
+							p.LastWeeklyNotification = -1;
+						}
+						else
+						{
+							p.LastRetireeResponse = -1;
+							p.LastWeeklyNotification = ffcmsd.FileFromCMSDetailsKey;
+						}
+					}
+					else
+					{
+						p.LastFromCMSDetail = ffcmsd.FileFromCMSDetailsKey;						
+
+						if (ffcmsd.Accepted)
+						{
+							p.LastAccepted = ffcmsd.FileFromCMSDetailsKey;
+						}
+						else
+
+						if (ffcms.IsRetireeResponse)
+						{
+							p.LastRetireeResponse = ffcmsd.FileFromCMSDetailsKey;
+						}
+						else
+						{							
+							p.LastWeeklyNotification = ffcmsd.FileFromCMSDetailsKey;
+						}
+					}
+
+					p.Save(string.Empty);
+
+					lineCounter++;
+					if ((lineCounter == 1) || (lineCounter % 10) == 0) { bw.ReportProgress(0, new ProcessFileStatus(lineCounter)); }
+				}
+
+				bw.ReportProgress(0, new ProcessFileStatus(lineCounter));
+			}
+			catch (Exception)
+			{
+				if (fileFromCMSKey > 0)
+				{
+					CMSManagerController.DeleteFilesFromCMS(fileFromCMSKey);
+				}
+				throw;
+			}
+		}
+
+		private DateTime GetFileDate(string filename)
+		{
+			string temp = Path.GetFileNameWithoutExtension(filename);
+			return DateTime.Parse(string.Format("{0}/{1}/{2} {3}:{4}:{5}", temp.Substring(4, 2),
+																			  temp.Substring(6, 2),
+																			  temp.Substring(0, 4),
+																			  temp.Substring(8, 2),
+																			  temp.Substring(10, 2),
+																			  temp.Substring(12, 2)));
+		}
+
+		public DateTime CYMDToDate(string cymd)
+		{
+
+			switch (cymd)
+			{
+				case	"00000000":
+					return INVALIDTIME;
+
+				case "99999999":
+					return ENDTIME;
+
+				default:
+					return DateTime.Parse(string.Format("{0}/{1}/{2}", cymd.Substring(4, 2),
+						             									  cymd.Substring(6, 2),
+									  							          cymd.Substring(0, 4)));
+			}		
+		}
+
+		private void AddFile_Load(object sender, EventArgs e)
+		{
+			AppInit();
+		}
+
+		private void AppInit()
+		{
+			this.lvwFiles.Items.Clear();
+			this.lvwFiles.Columns.Clear();
+			this.lvwFiles.View = View.Details;
+			this.lvwFiles.FullRowSelect = true;
+			this.lvwFiles.GridLines = true;
+
+			int len = (this.lvwFiles.Width - (100));
+
+			this.lvwFiles.Columns.Add("FilePath", len, HorizontalAlignment.Left);
+			this.lvwFiles.Columns.Add("Progress", 100, HorizontalAlignment.Center);
+
+			this.lblPlanSponsorName.Text = this._PlanSponsorName;
+			this.lblPlanSponsorId.Text = this._PlanSponsorId;
+			this.lblApplicationId.Text = this._CMSApplicationId;
+		}
+
+		private void bwProcessFile_DoWork(object sender, DoWorkEventArgs e)
+		{
+			BackgroundWorker bw = (BackgroundWorker)sender;
+			ProcessFiles(((string[])e.Argument), bw, e);
+		}
+
+		private void bwProcessFile_ProgressChanged(object sender, ProgressChangedEventArgs e)
+		{
+			if (this.FileIndex <= this.lvwFiles.Items.Count-1)
+			{
+				int linesProcessed = ((ProcessFileStatus)e.UserState).LinesProcessed;
+				string  status = ((ProcessFileStatus)e.UserState).Status;
+
+				if (linesProcessed > 0) { status = linesProcessed.ToString(); }
+				this.lvwFiles.Items[this.FileIndex].SubItems[1].Text = status;
+				this.Update();
+			}
+		}
+
+		private void bwProcessFile_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
+		{
+			if (!this._Cancelled)
+			{
+				MessageBox.Show("All files have been processed.", System.Windows.Forms.Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+				this.Close();
+			}
+			else
+			{
+				bwProcessFile_ProgressChanged(this, new ProgressChangedEventArgs(0, new ProcessFileStatus("Error processing")));
+				while (this.FileIndex < this.lvwFiles.Items.Count - 1)
+				{
+					this.FileIndex++;
+					bwProcessFile_ProgressChanged(this, new ProgressChangedEventArgs(0, new ProcessFileStatus("Not processed")));	
+				}
+				this.btnCancel.Enabled = true;				
+			}
+			
+			
+						//// First, handle the case where an exception was thrown.
+			//if (e.Error != null)
+			//{
+			//    MessageBox.Show(e.Error.Message);
+			//}
+			//else if (e.Cancelled)
+			//{
+			//    // Next, handle the case where the user canceled 
+			//    // the operation.
+			//    // Note that due to a race condition in 
+			//    // the DoWork event handler, the Cancelled
+			//    // flag may not have been set, even though
+			//    // CancelAsync was called.
+			//    resultLabel.Text = "Canceled";
+			//}
+			//else
+			//{
+			//    // Finally, handle the case where the operation 
+			//    // succeeded.
+			//    resultLabel.Text = e.Result.ToString();
+			//}
+			
+		}
+	}
+}
+
+
+
+
+===============================================================
+
+
+
+A more elegant implimentation of SetStatusLabel() would be:
+
+        delegate void SetStringDelegate(string parameter);
+
+        private void SetStatusLabel(string tableName)
+        {
+            if (!InvokeRequired)
+                lblStatus.Text = tableName;
+            else
+                Invoke(new SetStringDelegate(SetStatusLabel), new object[] { tableName });
+        }
+
+
+This encapsulates the Invoke dreck into the SetStringDelegate() function rather than having it handled at in bgWorker1_DoWork() calling function.  Now all bgWorker1_DoWork() or any other section of code need do is execute it as follows:
+
+       SetStatusLabel(dr.ToString());
+
+The SetStatusLabel() function determines whether it needs to use a recursive delegate call of itself or whether it can set the lblStatus.Text property directly. 

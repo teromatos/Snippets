@@ -1,0 +1,3 @@
+If you need to perform some work after the Form.Load event, consider telling yourself to do it later when you’re not so busy – the easiest way to do this in WindowsForms is to use the BeginInvoke method.
+
+BeginInvoke(new EventHandler(OnLoadCompleted)); 

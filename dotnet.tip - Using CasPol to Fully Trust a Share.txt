@@ -1,0 +1,26 @@
+Using CasPol to Fully Trust a Share
+Since network shares by default only get LocalIntranet permissions, it's relatively common to want to use CasPol to fully trust some shares that you control and know are safe.  However, CasPol syntax being what it is, the command to do this isn't immediately obvious.  If I wanted to trust everything on the share \\ShawnFa-Srv\Tools, the command:
+
+
+CasPol.exe -m -ag 1.2 -url file://ShawnFa-Srv/Tools/* FullTrust
+
+Would setup the policy to do what I needed.  Lets break down this command:
+
+-m  - modify the machine level of the policy.  This is needed, since the machine level is where all of the default policy lives.  On NT platforms it's also the default level that CasPol works with, however on Win9x, CasPol will default to the user level, so putting -m in the command line explicitly tells CasPol to use the correct level. 
+-ag 1.2  - add a code group under group 1.2.  In the default policy, group 1.2 is the LocalIntranet group, so the new code group that we're creating will only be checked if the file comes from the intranet. 
+-url file://ShawnFa-Srv/Tools/*  - The membership condition for the new code group should be a UrlMembershipCondition, and it should match anything with a URL that starts with file://ShawnFa-Srv/Tools, meaning that any file on the \\ShawnFa-Srv\Tools share will match this code group. 
+FullTrust  - The permission set to grant assemblies that match the code group.  In this case, FullTrust.
+Once you know the pattern, it's pretty easy to modify this command line to do slightly different things.  For instance, if I want to trust only a specific non-strongly named assembly on my share, I might use
+
+
+CasPol -m -ag 1.2 -hash SHA1 -file \\ShawnFa-Srv\Tools\CodeCSS\CodeCSS.exe FullTrust
+
+Which will create a hash membership condition that matches the SHA1 hash of the CodeCSS.exe file.
+
+When I install a new build of the runtime, my install script actually ends with two lines that do just this:
+
+
+CasPol.exe -pp off -m -ag 1.2 -url file://ShawnFa-Srv/Tools/* FullTrust
+copy config\security.config config\security.config.default
+
+Which trusts everything coming off of a share on my computer, and then makes a copy of that policy as the new default, so that all future calls to CasPol -all -reset do not remove this modification.

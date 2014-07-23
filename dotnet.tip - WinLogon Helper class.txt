@@ -1,0 +1,216 @@
+WinLogon Helper class
+
+Here is a class I used in other postings to get authenticate a user/password to Windows and optionally return a WindowsPrincipal object on success.  Useful for the tool bag.
+
+using System;
+using System.Runtime.InteropServices;
+using System.Security.Principal;
+using System.Security.Permissions;
+using System.Reflection;
+
+namespace WSESimpleTCPDLL
+{
+ public enum LogonType : uint
+ {
+  Interactive = 2, // This parameter causes LogonUser to create a primary token.
+  Network,
+  Batch,
+  Service,
+  NetworkCleartext = 8,
+  NewCredentials
+ }
+
+ public enum LogonProvider : uint
+ {
+  Default = 0, // default for platform - use this!
+  WinNT35,     // sends smoke signals to authority.
+  WinNT40,     // uses NTLM.
+  WinNT50      // negotiates Kerb or NTLM.
+ }
+
+ public sealed class WinLogon
+ {
+  [DllImport("advapi32.dll", SetLastError=true)]
+  private static extern bool LogonUser(
+   string principal,
+   string authority,
+   string password,
+   LogonType logonType,
+   LogonProvider logonProvider,
+   ref IntPtr token);
+
+  [DllImport("kernel32.dll", CharSet=CharSet.Auto)]
+  private extern static bool CloseHandle(IntPtr handle);
+
+  [DllImport("advapi32.dll", CharSet=CharSet.Auto, SetLastError=true)]
+  private extern static bool DuplicateToken(IntPtr ExistingTokenHandle,
+   int SECURITY_IMPERSONATION_LEVEL, ref IntPtr DuplicateTokenHandle);
+  
+  private const int SecurityImpersonation = 2;
+
+  // We comment out all the GetErrorMessage stuff as it requires unsafe.
+  // If needed, uncomment.
+  //[DllImport("kernel32.dll", CharSet=System.Runtime.InteropServices.CharSet.Auto)]
+  //private unsafe static extern int FormatMessage(int dwFlags, ref IntPtr lpSource,
+  // int dwMessageId, int dwLanguageId, ref String lpBuffer, int nSize, IntPtr *Arguments);
+
+  // GetErrorMessage formats and returns an error message
+  // corresponding to the input errorCode.
+  //public unsafe static string GetErrorMessage(int errorCode)
+  //{
+  // int FORMAT_MESSAGE_ALLOCATE_BUFFER = 0x00000100;
+  // int FORMAT_MESSAGE_IGNORE_INSERTS = 0x00000200;
+  // int FORMAT_MESSAGE_FROM_SYSTEM  = 0x00001000;
+  //
+  // //int errorCode = 0x5; //ERROR_ACCESS_DENIED
+  // //throw new System.ComponentModel.Win32Exception(errorCode);
+  //
+  // int messageSize = 255;
+  // String lpMsgBuf = "";
+  // int dwFlags = FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS;
+  //
+  // IntPtr ptrlpSource = IntPtr.Zero;
+  // IntPtr prtArguments = IntPtr.Zero;
+  //
+  // int retVal = FormatMessage(dwFlags, ref ptrlpSource, errorCode, 0, ref lpMsgBuf, messageSize, &prtArguments);
+  // if (0 == retVal)
+  //  throw new Exception("Failed to format message for error code " + errorCode + ". ");
+  //
+  // return lpMsgBuf;
+  //}
+
+  [PermissionSetAttribute(SecurityAction.Demand, Name = "FullTrust")]
+  public static bool TryLogonAs(string domainName, string userName, string pw, LogonType logonType)
+  {
+   try
+   {
+    WindowsPrincipal wp = LogonAs(domainName, userName, pw, logonType);
+    if ( wp == null )
+     return false;
+    else
+     return true;
+   }
+   catch
+   {
+    return false;
+   }
+  }
+
+  [PermissionSetAttribute(SecurityAction.Demand, Name = "FullTrust")]
+  public static bool TryLogonAs(string domainName, string userName, string pw, LogonType logonType, out WindowsPrincipal principal)
+  {
+   try
+   {
+    WindowsPrincipal wp = LogonAs(domainName, userName, pw, logonType);
+    if ( wp == null )
+    {
+     principal = null;
+     return false;
+    }
+    else
+    {
+     principal = wp;
+     return true;
+    }
+   }
+   catch
+   {
+    principal = null;
+    return false;
+   }
+  }
+
+  [PermissionSetAttribute(SecurityAction.Demand, Name = "FullTrust")]
+  public static WindowsPrincipal LogonAs(string domainName, string userName, string pw, LogonType logonType)
+  {
+   // If you use the UPN format, user@DNS_domain_name, the domainName parameter must be NULL.
+   IntPtr tokenHandle = IntPtr.Zero;
+   IntPtr dupeTokenHandle = IntPtr.Zero;
+   try
+   {
+    bool returnValue = LogonUser(
+     userName,
+     domainName,
+     pw,
+     logonType,
+     LogonProvider.Default,
+     ref tokenHandle);
+         
+    if ( ! returnValue )
+    {
+     int ret = Marshal.GetLastWin32Error();
+     //Console.WriteLine("LogonUser failed with error code : {0}", ret);
+     //Console.WriteLine("\nError: [{0}] {1}\n", ret, GetErrorMessage(ret));
+     int errorCode = 0x5; //ERROR_ACCESS_DENIED
+     throw new System.ComponentModel.Win32Exception(errorCode);
+    }
+
+    bool retVal = DuplicateToken(tokenHandle, SecurityImpersonation, ref dupeTokenHandle);
+    if ( ! retVal )
+     return null;
+
+    // Note we are creating an *Authenticated Identity here.
+    WindowsIdentity wi = new WindowsIdentity(dupeTokenHandle, "t", WindowsAccountType.Normal, true);
+    WindowsPrincipal wp = new WindowsPrincipal(wi);
+    return wp;
+   }
+   finally
+   {
+    if ( tokenHandle != IntPtr.Zero )
+     CloseHandle(tokenHandle);
+    if ( dupeTokenHandle != IntPtr.Zero )
+     CloseHandle(dupeTokenHandle);
+   }
+  }
+
+  /// <summary>
+  /// Returns true if user's UPN name is in role.  This does not do
+  /// authentication, just role verification for UPN name.
+  /// </summary>
+  /// <param name="upn">User Principal Name (UPN), in the form user@mydomain.com</param>
+  /// <param name="roleName">The role (i.e. group name) to check user membership.</param>
+  /// <returns>true if UPN in role; otherwise false.</returns>
+  public static bool IsInRole(string upn, string roleName)
+  {
+   if ( upn == null )
+    throw new ArgumentNullException("upn");
+   if ( roleName == null )
+    throw new ArgumentNullException("roleName");
+
+   WindowsIdentity id = new WindowsIdentity(upn);
+   WindowsPrincipal p = new WindowsPrincipal(id);
+   return IsInRole(p, roleName);
+  }
+
+  /// <summary>
+  /// A Hack to call a private method of WindowsIdentity to get user groups.
+  /// </summary>
+  /// <param name="identity"></param>
+  /// <returns></returns>
+  internal static string[] UserRoles(WindowsIdentity identity)
+  {
+   if( identity == null )
+    throw new ArgumentNullException("identity");
+   if( identity.Name.Length < 1 )
+    return new string[0];
+
+   string[] roles = (string[])CallPrivateMethod(identity, "GetRoles");
+   return roles;
+  }
+
+  //Note: This method requires ReflectionPermission.
+  [ReflectionPermission( SecurityAction.Assert, MemberAccess=true, TypeInformation=true )]
+  private static object CallPrivateMethod(object o, string methodName)
+  {
+   Type t = o.GetType();
+   MethodInfo mi = t.GetMethod(methodName, BindingFlags.NonPublic |
+    BindingFlags.Instance);
+   if (mi == null)
+   {
+    throw new System.Reflection.ReflectionTypeLoadException(null,null,
+     String.Format("{0}.{1} method wasn't found. The runtime implementation may have changed!", t.FullName, methodName ) );
+   }
+   return mi.Invoke(o, null);
+  }
+ }
+}

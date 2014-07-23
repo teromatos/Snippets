@@ -1,0 +1,3 @@
+URL=http://weblogs.asp.net/lhunt/archive/2006/05/23/Windows-Tools-I-Always-forget-about_2E002E002E00_.aspx
+
+netstat -a -b -v

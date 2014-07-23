@@ -1,0 +1,48 @@
+URL=http://techrepublic.com.com/5208-11184-0.html?forumID=47&threadID=197847&messageID=2062038
+
+here is a sample script from microsoft more info can be found at this URL
+
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/ics/ics/windows_firewall_start_page.asp
+
+and this one:
+
+http://www.microsoft.com/technet/prodtechnol/winxppro/deploy/depfwset/wfsp2ngp.mspx
+
+here is the script:
+
+option explicit
+
+Dim CurrentProfile
+
+' Protocol
+Const NET_FW_IP_PROTOCOL_TCP = 6
+
+'Action
+Const NET_FW_ACTION_ALLOW = 1
+
+' Create the FwPolicy2 object.
+Dim fwPolicy2
+Set fwPolicy2 = CreateObject("HNetCfg.FwPolicy2")
+
+' Get the Rules object
+Dim RulesObject
+Set RulesObject = fwPolicy2.Rules
+
+CurrentProfile = fwPolicy2.CurrentProfileTypes
+
+'Create a Rule Object.
+Dim NewRule
+Set NewRule = CreateObject("HNetCfg.FWRule")
+
+NewRule.Name = "My Application Name"
+NewRule.Description = "Allow my application network traffic"
+NewRule.Applicationname = "%systemDrive%\\Program Files\\MyApplication.exe"
+NewRule.Protocol = NET_FW_IP_PROTOCOL_TCP
+NewRule.LocalPorts = 4000
+NewRule.Enabled = TRUE
+NewRule.Grouping = "@firewallapi.dll,-23255"
+NewRule.Profiles = CurrentProfile
+NewRule.Action = NET_FW_ACTION_ALLOW
+
+'Add a new rule
+RulesObject.Add NewRule 

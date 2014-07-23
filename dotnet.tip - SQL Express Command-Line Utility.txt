@@ -1,0 +1,43 @@
+URL=http://weblogs.asp.net/scottgu/archive/2005/12/15/433284.aspx
+
+Cool SQL Server and SQL Express Command-Line Utility
+Brad on my team recently pointed me at a cool command-line SQL/SQL Express utility that might be useful for people to keep in the tool chest.  It is free and you can download it here.
+It includes a useful doc-file that walks-through the various commands it provides.  I also found this link useful in walking through how to use common SQL commands for creating new databases.
+Here is a simple set of steps that demonstrate how to use it to create a SQL Express database file, attach to it, create a database in it, then add a table, then add values into the table, then do a select query against it (note: all commands I typed are in bold below):
+
+C:\SQLUtility>sseutil -c
+Console mode. Type 'help' for more information.
+1> !create c:\sqlutility\testing123.mdf
+Command completed successfully.
+1> !attach c:\sqlutility\testing123.mdf
+Command completed successfully.
+1> use "c:\sqlutility\testing123.mdf"
+2> go
+Command completed successfully.
+1> create database people
+2> go
+Command completed successfully.
+1> use people
+2> go
+Command completed successfully.
+1> create table names
+2> (id INTEGER NOT NULL,
+3> name VARCHAR(50) NOT NULL)
+4> go
+Command completed successfully.
+1> insert into names values(1, 'bill gates')
+2> go
+1 row(s) affected.
+1> select * from names
+2> go
+id   name
+------------------
+1    bill gates
+1 row(s) affected.
+1> quit
+
+Of course, an easier way to-do this from scratch would be to use Visual Web Developer or VS 2005 and select Add New Item->Database file, name it, and then use the server explorer to create and add the table.  But the nice thing about the above approach is that you can use it execute a SQL script file to quickly create/re-create your database without needing a tool on your system (or a user who knows how to use it).
+Hope this helps,
+
+Scott
+P.S. One other cool thing about this utility is that it allows you to list all databases you have installed on your system.  Just type sseutil –l to list all of the databases and .mdf files being used.  This is very helpful if you have multiple database instances on your system (for example: I have some SQL 2000 databases and some SQL 2005 Express ones).

@@ -1,0 +1,2 @@
+You can pipe the output of a shell command to “open -f” to get that output into TextEdit [via Macworld 10/2004 p. 87 ] 
+Some of this type of stuff can be done with Quicksilver 

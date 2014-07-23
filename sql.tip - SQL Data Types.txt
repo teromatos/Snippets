@@ -1,0 +1,136 @@
+Transact-SQL Reference 
+ 
+Data Types
+In Microsoft® SQL Server™, each column, local variable, expression, and parameter has a related data type, which is an attribute that specifies the type of data (integer, character, money, and so on) that the object can hold. SQL Server supplies a set of system data types that define all of the types of data that can be used with SQL Server. The set of system-supplied data types is shown below.
+
+User-defined data types, which are aliases for system-supplied data types, can also be defined. For more information about user-defined data types, see sp_addtype and Creating User-defined Data Types.
+
+When two expressions that have different data types, collations, precision, scale, or length are combined by an operator: 
+
+The data type of the resulting value is determined by applying the rules of data type precedence to the data types of the input expressions. For more information, see Data Type Precedence.
+
+
+If the result data type is char, varchar, text, nchar, nvarchar, or ntext, the collation of the result value is determined by the rules of collation precedence. For more information, see Collation Precedence.
+
+
+The precision, scale, and length of the result depend on the precision, scale, and length of the input expressions. For more information, see Precision, Scale, and Length. 
+SQL Server provides data type synonyms for SQL-92 compatibility. For more information, see Data Type Synonyms.
+
+Exact Numerics
+Integers
+bigint
+
+Integer (whole number) data from -2^63 (-9223372036854775808) through 2^63-1 (9223372036854775807).
+
+int
+
+Integer (whole number) data from -2^31 (-2,147,483,648) through 2^31 - 1 (2,147,483,647).
+
+smallint
+
+Integer data from 2^15 (-32,768) through 2^15 - 1 (32,767).
+
+tinyint
+
+Integer data from 0 through 255.
+
+bit
+bit
+
+Integer data with either a 1 or 0 value.
+
+decimal and numeric
+decimal
+
+Fixed precision and scale numeric data from -10^38 +1 through 10^38 –1. 
+
+numeric
+
+Functionally equivalent to decimal.
+
+money and smallmoney
+money
+
+Monetary data values from -2^63 (-922,337,203,685,477.5808) through 2^63 - 1 (+922,337,203,685,477.5807), with accuracy to a ten-thousandth of a monetary unit.
+
+smallmoney
+
+Monetary data values from -214,748.3648 through +214,748.3647, with accuracy to a ten-thousandth of a monetary unit.
+
+Approximate Numerics
+float
+
+Floating precision number data from -1.79E + 308 through 1.79E + 308.
+
+real
+
+Floating precision number data from -3.40E + 38 through 3.40E + 38.
+
+datetime and smalldatetime
+datetime
+
+Date and time data from January 1, 1753, through December 31, 9999, with an accuracy of three-hundredths of a second, or 3.33 milliseconds.
+
+smalldatetime
+
+Date and time data from January 1, 1900, through June 6, 2079, with an accuracy of one minute.
+
+Character Strings
+char
+
+Fixed-length non-Unicode character data with a maximum length of 8,000 characters.
+
+varchar
+
+Variable-length non-Unicode data with a maximum of 8,000 characters.
+
+text
+
+Variable-length non-Unicode data with a maximum length of 2^31 - 1 (2,147,483,647) characters.
+
+Unicode Character Strings
+nchar
+
+Fixed-length Unicode data with a maximum length of 4,000 characters. 
+
+nvarchar
+
+Variable-length Unicode data with a maximum length of 4,000 characters. sysname is a system-supplied user-defined data type that is functionally equivalent to nvarchar(128) and is used to reference database object names.
+
+ntext
+
+Variable-length Unicode data with a maximum length of 2^30 - 1 (1,073,741,823) characters.
+
+Binary Strings
+binary
+
+Fixed-length binary data with a maximum length of 8,000 bytes.
+
+varbinary
+
+Variable-length binary data with a maximum length of 8,000 bytes.
+
+image
+
+Variable-length binary data with a maximum length of 2^31 - 1 (2,147,483,647) bytes.
+
+Other Data Types
+cursor
+
+A reference to a cursor.
+
+sql_variant
+
+A data type that stores values of various SQL Server-supported data types, except text, ntext, timestamp, and sql_variant.
+
+table
+
+A special data type used to store a result set for later processing .
+
+timestamp
+
+A database-wide unique number that gets updated every time a row gets updated.
+
+uniqueidentifier
+
+A globally unique identifier (GUID).

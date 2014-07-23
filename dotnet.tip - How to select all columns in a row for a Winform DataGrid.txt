@@ -1,0 +1,10 @@
+private void dataGrid1_MouseUp(object sender, System.Windows.Forms.MouseEventArgs e) 
+{ 
+   System.Drawing.Point pt = new Point(e.X, e.Y); 
+   DataGrid.HitTestInfo hti = dataGrid1.HitTest(pt); 
+   if(hti.Type == DataGrid.HitTestType.Cell) 
+   { 
+      dataGrid1.CurrentCell = new DataGridCell(hti.Row, hti.Column); 
+      dataGrid1.Select(hti.Row); 
+   } 
+} 

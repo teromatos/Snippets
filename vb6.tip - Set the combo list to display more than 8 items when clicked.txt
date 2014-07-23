@@ -1,0 +1,38 @@
+When you drop down the dropdown list of a combobox, VB will set its height to display a maximum of 8 items. If the listcount property is larger than 8, vb adds a vertical scrollbar to the list. You might want to override this behaviour and set the height of the dropdown so that it fits exactly the number of items, within reasonable limits, of course. The SetDropdownHeight procedure does exactly this. This procedure should be called in response to the DropDown event of the combobox in question. The DropDown event is raised just before the dropdown is actually displayed. Set the max_extent parameter to reflect the wanted maximum extent of the dropdown. In this particular case, I set it to the ScaleHeight of the form to prevent the dropdown from extending below the form.
+    Option Explicit
+    
+    Private Declare Function MoveWindow& Lib "user32" (ByVal hwnd As Long, _
+      ByVal x As Long, ByVal y As Long, ByVal nWidth As Long, _
+      ByVal nHeight As Long, ByVal bRepaint As Long)
+    
+    Private Sub Combo1_DropDown()
+      SetDropdownHeight Combo1, ScaleHeight
+    End Sub
+    
+    ' Adjust height of combobox dropdown part; call in response to DropDown event
+    Private Sub SetDropdownHeight(cbo As ComboBox, ByVal max_extent As Integer)
+      ' max_extent is the absolute maximum clientY value that the dropdown may extend to
+      ' case 1: nItems <= 8 : do nothing - vb standard behaviour
+      ' case 2: Items will fit in defined max area : resize to fit
+      ' case 3: Items will not fit : resize to defined max height
+        
+      If cbo.ListCount > 8 Then
+        Dim max_fit As Integer    ' maximum number of items that will fit in maximum extent
+        Dim item_ht As Integer    ' Calculated height of an item in the dropdown
+        
+        item_ht = ScaleY(cbo.Height, ScaleMode, vbPixels) - 8
+        max_fit = (max_extent - cbo.Top - cbo.Height) \ ScaleY(item_ht, vbPixels, ScaleMode)
+        
+        If cbo.ListCount <= max_fit Then
+          MoveWindow cbo.hwnd, ScaleX(cbo.Left, ScaleMode, vbPixels), _
+            ScaleY(cbo.Top, ScaleMode, vbPixels), _
+            ScaleX(cbo.Width, ScaleMode, vbPixels), _
+            ScaleY(cbo.Height, ScaleMode, vbPixels) + (item_ht * cbo.ListCount) + 2, 0
+        Else
+          MoveWindow cbo.hwnd, ScaleX(cbo.Left, ScaleMode, vbPixels), _
+            ScaleY(cbo.Top, ScaleMode, vbPixels), _
+            ScaleX(cbo.Width, ScaleMode, vbPixels), _
+            ScaleY(cbo.Height, ScaleMode, vbPixels) + (item_ht * max_fit) + 2, 0
+        End If
+      End If
+    End Sub

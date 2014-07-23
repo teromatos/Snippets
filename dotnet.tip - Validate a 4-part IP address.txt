@@ -1,0 +1,48 @@
+Here's a simple code snippet that uses the Regex object to validate a 4-part IP address that the user has entered in a TextBox control: 
+
+
+
+' This code assumes the following Imports statement
+'    Imports System.Text.RegularExpressions
+
+Dim pattern As String = "((25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(25[0-5]|2[0-4]\d|1?\d{1,2})"
+Dim re As New Regex("^" & pattern & "$")
+Dim text As String = txtIPAddress.Text
+If Not re.IsMatch(text) Then
+    ' textbox contents isn't correct
+End If
+
+
+
+
+
+// This code assumes the following using statement
+//    using System.Text.RegularExpressions;
+
+string pattern = @"((25[0-5]|2[0-4]\d|1?\d{1,2})\.){3}(25[0-5]|2[0-4]\d|1?\d{1,2})";
+Regex re = new Regex("^" + pattern + "$");
+string text = txtIPAddress.Text;
+if ( ! re.IsMatch(text) )
+{
+    // textbox contents isn't correct
+}
+
+
+The regular expression pattern correctly rejects strings that aren't in the format aaa.bbb.ccc.ddd, where each subportion must be a number in the range from 0 to 255. 
+
+After you have validated the IP address you can extract its four constituent numbers with the following code: 
+
+
+
+Dim a() As String = text.Split("."c)
+Dim addr() As Integer = {CInt(a(0)), CInt(a(1)), CInt(a(2)), CInt(a(3))}
+
+
+
+
+
+string[] a = text.Split('.');
+int[] addr = new int[] {Convert.ToInt32(a[0]), Convert.ToInt32(a[1]), Convert.ToInt32(a[2]
+   ), Convert.ToInt32(a[3]) };
+
+

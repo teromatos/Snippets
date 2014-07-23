@@ -1,0 +1,309 @@
+URL= http://spaces.msn.com/members/staceyw/Blog/cns!1pnsZpX0fPvDxLKC6rAAhLsQ!456.entry
+
+ 
+Generic Method to send secure messages using exchanged session key. 
+ 
+Here is a generic way to pass encrypted data to server using a shared session key included in the message.  I will dress it up some more and maybe include a sample project on Channel9.  Let me know if you see errors:        
+// Method using SecureMessage and MessageDoc objects to send secure message from client to server.
+        private void button3_Click(object sender, EventArgs e)
+        {
+            // Client knows its Private key pair.
+            RSACryptoServiceProvider clientsKeyPair = new RSACryptoServiceProvider();
+            // Client knows Server's Public key via some prior automated (or manual) process such as
+            // included in the Strong Name of the client assembly.  The server's public key is used to
+            // encrypt the AES session key used to encrypt the message data.
+            RSACryptoServiceProvider serversPublicKey = new RSACryptoServiceProvider();
+            RSACryptoServiceProvider serversKeyPair = new RSACryptoServiceProvider();
+            serversPublicKey.FromXmlString(serversKeyPair.ToXmlString(false));
+            byte[] data = Encoding.UTF8.GetBytes("Hello from Michigan.");
+            SecureMessage sm = new SecureMessage(clientsKeyPair, serversPublicKey);
+            MessageDoc md = sm.CreateMessageDoc(data, true, true);
+            PrintMessage(md);
+            // Server side.  Receive the encrypted MessageDoc via Sockets, WSE, etc.
+            SecureMessage servSM = new SecureMessage(serversKeyPair, null);
+            MessageDoc clearMD = servSM.DecryptMessageDoc(md, true);
+            Console.WriteLine();
+            PrintMessage(clearMD);
+            Console.WriteLine("Message Data: " + Encoding.UTF8.GetString(clearMD.Data));
+            // Could also manually verify the signature if you already have the client's public key.
+            // Make sure to pass the "Encrypted" md and not the clear md to the method.
+            //bool goodSig = SecureMessage.VerifySignature(md, servSM.ClientsPublicKey);
+            //Console.WriteLine("Good sig:" + goodSig);
+        }
+// SecureMessage.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Security.Cryptography;
+using System.Collections;
+using System.IO;
+namespace Security
+{
+    /// <summary>
+    /// SecureMessage object.  Contains methods to create encrypted and decrypted MessageDoc objects.
+    /// </summary>
+    public sealed class SecureMessage
+    {
+        private RSACryptoServiceProvider clientsPrivateKey;
+        private RSACryptoServiceProvider serversPublicKey;
+        private RSACryptoServiceProvider clientsPublicKey;
+        private RijndaelManaged rm = (RijndaelManaged)RijndaelManaged.Create();
+        private bool gotDecryptKey = false;
+        private SecureMessage()
+        {
+        }
+        /// <summary>
+        /// Creates a SecureMessage instance.
+        /// </summary>
+        /// <param name="clientsPrivateKey">Private RSA key used only to sign messages.  The Public Key of the key pair may also be sent (encrypted) in the message.</param>
+        /// <param name="serversPublicKey">Public RSA key of server/target used to encrypt shared session key and IV.</param>
+        public SecureMessage(RSACryptoServiceProvider clientsPrivateKey, RSACryptoServiceProvider serversPublicKey)
+        {
+            this.clientsPrivateKey = clientsPrivateKey;
+            this.serversPublicKey = serversPublicKey;
+        }
+        /// <summary>
+        /// Public RSA key set after first DecryptMessageDoc method is called if the message includes a public key.  The clients public key is primarily
+        /// used to verify the signature of the message, however it could also be used to encrypt reply data such as another sKey, etc.
+        /// </summary>
+        public RSACryptoServiceProvider ClientsPublicKey
+        {
+            get { return this.clientsPublicKey; }
+        }
+        /// <summary>
+        /// Session Key used to encrypt MessageDoc elements.  Encryption is RijndaelManaged.
+        /// Key and IV are automatically set to random values when instance is created so do not need to be set again.  Default key size is 32 bytes.
+        /// It is recommended that this value is not changed.
+        /// </summary>
+        public byte[] Key
+        {
+            get { return rm.Key; }
+            set { rm.Key = value; }
+        }
+        /// <summary>
+        /// IV used by Rijndael algorithum.  Default size is 16 bytes.
+        /// It is recommended that this value is not changed.
+        /// </summary>
+        public byte[] IV
+        {
+            get { return rm.IV; }
+            set { rm.IV = value; }
+        }
+        /// <summary>
+        ///// Encrypts the elements of the MessageDoc with the SKey (session key) and IV.  The SKey is encrypted with the serversPublicKey set in the constructor.
+        ///// The server (i.e. target) can then decrypt the SKey with its' the matching private RSA key.  The message can optionally be
+        /// signed and client's public can be included in message and will also be encrypted.
+        /// </summary>
+        /// <param name="data">Data bytes to encrypt.</param>
+        /// <param name="signMessage">Generate and include a signature in the message.</param>
+        /// <param name="includeClientsPublicKey">Encrypt and include the client's public key.</param>
+        /// <returns></returns>
+        public MessageDoc CreateMessageDoc(byte[] data, bool signMessage, bool includeClientsPublicKey)
+        {
+            if ( data == null )
+                throw new ArgumentNullException("data");
+            MessageDoc md = new MessageDoc();
+            md.SessionKey = serversPublicKey.Encrypt(rm.Key, true);
+            md.IV = serversPublicKey.Encrypt(rm.IV, true);
+            ICryptoTransform encryptor = rm.CreateEncryptor();
+            md.Data = RijndaelEncrypt(encryptor, data);
+            
+            if ( includeClientsPublicKey )
+            {
+                string sourcePubXml = clientsPrivateKey.ToXmlString(false);
+                md.SourcePublicKey = RijndaelEncrypt(encryptor, Encoding.UTF8.GetBytes(sourcePubXml));
+            }
+            if ( signMessage )
+            {
+                ArrayList al = new ArrayList();
+                al.Add(md.SourcePublicKey);
+                al.Add(md.SessionKey);
+                al.Add(md.Data);
+                byte[] sigData = JoinArrays(al);
+                md.Signature = clientsPrivateKey.SignData(sigData, new SHA1CryptoServiceProvider());
+            }
+            return md;
+        }
+        /// <summary>
+        /// Decrypts the elements of a message. The SKey and IV is decrypted using the serversPrivateKey.  All other elements are
+        /// decrypted with Rijndael/AES using the SKey included in the message.
+        /// </summary>
+        /// <param name="md">The MessageDoc to decrypt.</param>
+        /// <returns>Decrypted MessageDoc object.</returns>
+        public MessageDoc DecryptMessageDoc(MessageDoc md)
+        {
+            return DecryptMessageDoc(md, false);
+        }
+        /// <summary>
+        /// Decrypts the elements of a message and optionally verifies the message signature.
+        /// The SKey and IV is decrypted using the serversPrivateKey.  All other elements are
+        /// decrypted with Rijndael/AES using the SKey included in the message.
+        /// </summary>
+        /// <param name="md">The MessageDoc to decrypt.</param>
+        /// <param name="verifySignature">Set to true to verify the signature; otherwise false.</param>
+        /// <returns>Decrypted MessageDoc object.</returns>
+        public MessageDoc DecryptMessageDoc(MessageDoc md, bool verifySignature)
+        {
+            if ( md == null )
+                throw new ArgumentNullException("md");
+            ICryptoTransform decryptor = null;
+            if ( ! gotDecryptKey )
+            {
+                if ( md.SessionKey == null )
+                    throw new InvalidOperationException("SessionKey has not been set yet and md.SessionKey is null.  The first MessageDoc to decrypt must contain a SessionKey.");
+                rm = new RijndaelManaged();
+                rm.Key = this.clientsPrivateKey.Decrypt(md.SessionKey, true);
+                rm.IV = this.clientsPrivateKey.Decrypt(md.IV, true);
+                decryptor = rm.CreateDecryptor();
+                gotDecryptKey = true;
+            }
+            decryptor = rm.CreateDecryptor();
+            MessageDoc newMD = new MessageDoc();
+            // Session Key.
+            newMD.SessionKey = (byte[])rm.Key.Clone();
+            // SourcePublicKey
+            if ( md.SourcePublicKey != null )
+            {
+                newMD.SourcePublicKey = RijndaelDecrypt(decryptor, md.SourcePublicKey);
+                string pubXml = Encoding.UTF8.GetString(newMD.SourcePublicKey);
+                this.clientsPublicKey = new RSACryptoServiceProvider();
+                this.clientsPublicKey.FromXmlString(pubXml);
+            }
+            // Data
+            if ( md.Data == null )
+                throw new InvalidOperationException("md.Data is null.");
+            newMD.Data = RijndaelDecrypt(decryptor, md.Data);
+            
+            // Signature
+            if ( md.Signature != null )
+                newMD.Signature = (byte[])md.Signature.Clone();
+            if ( verifySignature )
+            {
+                if ( this.clientsPublicKey == null )
+                    throw new InvalidOperationException("Clients public RSA key not included in message.  Could not verify signature.");
+                if ( ! VerifySignature(md, this.clientsPublicKey) )
+                    throw new InvalidOperationException("Invalid MessageDoc signature.");
+            }
+            return newMD;
+        }
+        /// <summary>
+        /// Gets the public RSA key from the decrypted MessageDoc.  SourcePublicKey must not be null in MessageDoc.
+        /// </summary>
+        /// <param name="clearMD">The decrypted MessageDoc</param>
+        /// <returns>RSA public key.</returns>
+        public static RSACryptoServiceProvider GetPublicKeyFromMessage(MessageDoc clearMD)
+        {
+            if ( clearMD == null )
+                throw new ArgumentNullException("md");
+            if ( clearMD.SourcePublicKey == null )
+                throw new ArgumentNullException("md.SourcePublicKey");
+            string pubXml = Encoding.UTF8.GetString(clearMD.SourcePublicKey);
+            RSACryptoServiceProvider pubRSA = new RSACryptoServiceProvider();
+            pubRSA.FromXmlString(pubXml);
+            return pubRSA;
+        }
+        /// <summary>
+        /// Verifies the Signature of the MessageDoc matches the existing element data.
+        /// </summary>
+        /// <param name="clientsPublicKey">The RSA public key used to verify the message signature.</param>
+        /// <returns>true if signature is valid; otherwise false.</returns>
+        public static bool VerifySignature(MessageDoc md, RSACryptoServiceProvider clientsPublicKey)
+        {
+            if ( clientsPublicKey == null )
+                throw new ArgumentNullException("sendersPublicKey");
+            if ( md == null )
+                throw new ArgumentNullException("md");
+            if ( md.Signature == null )
+                throw new InvalidOperationException("Signature in MessageDoc is null.");
+            ArrayList al = new ArrayList();
+            al.Add(md.SourcePublicKey);
+            al.Add(md.SessionKey);
+            al.Add(md.Data);
+            byte[] sigData = JoinArrays(al);
+            return clientsPublicKey.VerifyData(sigData, new SHA1CryptoServiceProvider(), md.Signature);
+        }
+        private static byte[] RijndaelDecrypt(ICryptoTransform decryptor, byte[] encrypted)
+        {
+            if ( decryptor == null )
+                throw new ArgumentNullException("decryptor");
+            if ( encrypted == null )
+                throw new ArgumentNullException("encrypted");
+            using ( MemoryStream msDecrypt = new MemoryStream(encrypted) )
+            using ( CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read) )
+            {
+                byte[] fromEncrypt = new byte[encrypted.Length];
+                int read = csDecrypt.Read(fromEncrypt, 0, fromEncrypt.Length);
+                if ( read < fromEncrypt.Length )
+                {
+                    byte[] clearBytes = new byte[read];
+                    Buffer.BlockCopy(fromEncrypt, 0, clearBytes, 0, read);
+                    return clearBytes;
+                }
+                return fromEncrypt;
+            }
+        }
+        private static byte[] RijndaelEncrypt(ICryptoTransform encryptor, byte[] data)
+        {
+            if ( encryptor == null )
+                throw new ArgumentNullException("encryptor");
+            if ( data == null )
+                throw new ArgumentNullException("data");
+            //Encrypt the data.
+            using ( MemoryStream msEncrypt = new MemoryStream() )
+            using ( CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write) )
+            {
+                //Write all data to the crypto stream and flush it.
+                csEncrypt.Write(data, 0, data.Length);
+                csEncrypt.FlushFinalBlock();
+                //Get encrypted array of bytes.
+                byte[] encrypted = msEncrypt.ToArray();
+                return encrypted;
+            }
+        }
+        private static byte[] JoinArrays(ArrayList byteArrays)
+        {
+            if ( byteArrays == null )
+                throw new ArgumentNullException("byteArrays");
+            using ( MemoryStream ms = new MemoryStream() )
+            {
+                foreach ( byte[] ba in byteArrays )
+                {
+                    if ( ba == null )
+                        continue;
+                    ms.Write(ba, 0, ba.Length);
+                }
+                return ms.ToArray();
+            }
+        }
+    }
+}
+// MessageDoc.cs
+using System;
+using System.Collections.Generic;
+using System.Text;
+namespace Security
+{
+    /// <summary>
+    /// MessageDoc is the "Data Transfer Object" used as a container to hold message elements required in a Key Exchange and encryption in a secure
+    /// conversation.  The SecureMessage class can construct an encrypted MessageDoc and decrypt previously encrypted MessageDoc.  The normal pattern
+    /// is client-server based.  The client will create an encrypted MessageDoc and send to server, the server will then decrypt the MessageDoc to
+    /// obtain the decrypted (i.e. clear) MessageDoc.  It is up to the developer to deside how to transfer MessageDoc.  It could be serialized using
+    /// the XmlSerializer (for example) or passed directly using WSE, Indigo, etc.  MessageDoc has an empty public constructor to allow for XmlSerializer to
+    /// serialize the object.  However is a MessageDoc should not be created directly, the SecureMessage.CreateMessageDoc() method should be used to
+    /// create an encrypted instance.  Hence, SecureMessage.DecryptMessageDoc() method should be used to create a new decrypted MessageDoc from an encrypted
+    /// MessageDoc sent by the client.
+    /// </summary>
+    public class MessageDoc
+    {
+        public MessageDoc()
+        {
+        }
+        public byte[] SourcePublicKey;
+        public byte[] SessionKey;
+        public byte[] IV;
+        public byte[] Data;
+        public byte[] Signature;
+    }
+}
+ 
+ 

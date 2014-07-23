@@ -1,0 +1,70 @@
+CrashPlan runs out of memory and crashes
+
+Matt O.
+posted this on Jan 06 02:04 pm
+Edited by Xander B. on June 19th, 2013
+
+Affects 
+ CrashPlan+, CrashPlanPRO, CrashPlanPROe, all platforms
+
+Summary
+ In some cases a large file selection (>1TiB or 1 million files) can cause CrashPlan to run out of memory and crash. Symptoms include:
+
+When opening the desktop application, users see "Can't connect to Backup Engine" message.
+Application crashes repeatedly while scanning files.
+Unpredictable application behavior.
+Adjusting the maximum amount of memory allocated to the CrashPlan service can resolve this. 
+
+Diagnosis
+Outlined below is the process for confirming that memory usage is leading to the symptoms described above by looking at the CrashPlan application logs and for raising the maximum amount of memory that CrashPlan has access to. 
+
+Navigate to the log folder for your operating system:
+Windows XP: C:\Documents and Settings\All Users\Application Data\CrashPlan\log
+Windows Vista, 7, 8: C:\ProgramData\CrashPlan\Log
+Mac OS X: /Library/Logs/CrashPlan
+Linux (default): /usr/local/crashplan/log
+Solaris (default): /opt/sfw/crashplan/log
+Open each service.log.# file in a text editor and look for the phrase "OutOfMemoryError":
+[09.23.12 22:33:02.273 ERROR   QPub-BackupMgr       backup42.service.backup.BackupController] OutOfMemoryError occurred...RESTARTING! message=OutOfMemoryError in BackupQueue!
+
+If you this message, adjust the maximum amount of memory that CrashPlan can use at one time.
+Resolution
+Windows
+Stop the backup engine
+Open the Start menu
+Locate the Notepad program, right-click and select Launch as Administrator
+Go to File > Open, and navigate to C:\Program Files\CrashPlan\CrashPlanService.ini
+Find the following line in the file: -Xmx512m
+Edit to something larger such as 768, 896, 1024, 2048. i.e. -Xmx1024m 
+This sets the maximum amount of memory that CrashPlan can use. CrashPlan will not use that much until it needs it. 
+As a rule of thumb set about a gigabyte RAM for every terabyte in the file selection. 
+For example, if you're backing up 1 terabyte of data set the -Xmx value to 1024 like so: -Xmx1024m
+Start the backup engine
+Mac OS X
+Open the Terminal Application (Using Finder, go to: Applications > Utilities > Terminal)
+Stop the backup engine by typing:
+sudo launchctl unload /Library/LaunchDaemons/com.crashplan.engine.plist
+Run the following command to open a command line text editor:
+sudo nano /Library/LaunchDaemons/com.crashplan.engine.plist
+Using the arrow keys on your keyboard, find the line: -Xmx512
+Edit to something larger such as 768, 896, 1024, 2048. i.e. -Xmx1024m 
+This sets the maximum amount of memory that CrashPlan can use. CrashPlan will not use that much until it needs it. 
+As a rule of thumb set about a gigabyte RAM for every terabyte in the file selection. 
+For example, if you're backing up 1 terabyte of data set the -Xmx value to 1024 like so: -Xmx1024m
+Press Control+X to exit. 
+Press Y to confirm the changes.
+You'll see the prompt "File Name to Write". Press Return to save to the existing location.
+Start the backup engine by typing: 
+sudo launchctl load /Library/LaunchDaemons/com.crashplan.engine.plist
+Linux / Solaris
+Stop the backup engine
+Using your favorite Terminal based editor, edit the below line in /usr/local/crashplan/bin/run.conf
+Edit to something larger such as 768, 896, 1024, 2048. i.e. -Xmx1024m 
+This sets the maximum amount of memory that CrashPlan can use. CrashPlan will not use that much until it needs it. 
+As a rule of thumb set about a gigabyte RAM for every terabyte in the file selection. 
+For example, if you're backing up 1 terabyte of data set the -Xmx value to 1024 like so: -Xmx1024m
+ Start the backup engine
+Contacting Support
+Should the issue persist after adjusting the memory, please contact support.
+ 
+8 people found this useful. - Me too!

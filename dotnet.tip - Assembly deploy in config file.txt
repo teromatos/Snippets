@@ -1,0 +1,31 @@
+<!-- Application's Sub Folders -->
+<configuration>
+  <runtime>
+     <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <probing privatePath="MyAssemblies"/>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+
+
+
+<!-- Different folder -->
+<configuration>
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity 
+          name="MyLibrary" publicKeyToken="29989D7A39ACF230" />
+        <codeBase
+          version="1.0.24.0"
+          href="http://www.AcmeCorp.com/Downloads/MyLibrary.dll"/>
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+</configuration>
+
+
+<!-- Web    downloads -->		href="http://www.AcmeCorp.com/Downloads/MyLibrary.dll"
+<!-- PC     downloads -->		href="file:///c:\AcmeCorpSharedAssemblies\MyLibrary.dll"
+<!-- Server downloads -->		href="file://AcmeCorpFileServer1\Downloads\MyLibrary.dll"
+

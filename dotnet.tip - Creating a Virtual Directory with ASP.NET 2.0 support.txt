@@ -1,0 +1,57 @@
+URL= http://weblogs.asp.net/cibrax/archive/2005/06/23/414787.aspx
+Creating a Virtual Directory with ASP.NET 2.0 support 
+This script is helpful when you have different versions of the .NET framework running in your computer and you need to setup a virtual directory in IIS targeting one of them.
+If you have the versions 1.1 and 2.0, when you create a virtual directory in IIS, it takes a version by default, usually 1.1. 
+
+The script is very simple, it creates a virtual directory using WMI and then it uses the tool "aspnet_regiis.exe" to setup the .NET framework scriptmaps. 
+
+Note: It is using the version 2.0, you should change the following line to use another version: 
+
+netPath = fso.BuildPath( winPath, "Microsoft.NET\Framework\v2.0.50215" ) 
+The script looks as follow: 
+
+Sub CreateWebFolder( folderPath, folderName, createApp )
+   Dim vRoot, vDir, tempDir
+
+   Set vRoot = GetObject("IIS://localhost/W3svc/1/Root" )
+
+   On Error Resume Next
+   Set vDir = GetObject( "IIS://localhost/W3svc/1/Root/" + folderName )
+
+   If( vDir is Nothing ) Then
+      Set vDir = vRoot.Create("IIsWebVirtualDir", folderName)
+   End If
+
+   vDir.AccessRead = true
+   vDir.Path = folderPath
+   vDir.AuthFlags = 5
+
+   vDir.DirBrowseFlags = &H4000003E
+
+   vDir.EnableDirBrowsing = False
+   If createApp then vDir.AppCreate( true )
+   vDir.AccessScript = True
+
+   vDir.SetInfo
+
+   UpdateScriptMaps folderName
+End Sub
+
+Sub UpdateScriptMaps( folderName )
+
+   Dim winPath, netPath, toolPath
+   Dim wsShell
+   Dim fso
+
+   Set wsShell = CreateObject("WScript.Shell")
+   Set fso = CreateObject("Scripting.FileSystemObject")
+
+   winPath = wsShell.ExpandEnvironmentStrings( "%windir%" )
+   netPath = fso.BuildPath( winPath, "Microsoft.NET\Framework\v2.0.50215" )
+   toolPath = fso.BuildPath( netPath, "aspnet_regiis.exe" )
+
+   wsShell.Run toolPath & " -sn W3SVC/1/Root/""" & folderName & """", 1, true
+End Sub 
+The following line shows how to use this script : 
+
+CreateWebFolder "c:\temp\SampleVDir", "SampleVDir", false 

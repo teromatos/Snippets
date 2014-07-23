@@ -1,0 +1,16 @@
+Type				Client					Server			Benefits					Drawbacks
+=========================================================================================================================
+Thick client		Presentation			Data Access		Interactive					More for OLTP
+					Business								Data Connection Pooling		Deployment to client
+															Low Developer Cost
+					
+					
+							
+Thin Clien			Presentation			Business		Deployment to servers		scalibility vs cost
+											Data Access		process oriented			user interface, wait for progress
+															bussiness next to data		grow = more servers == cost
+
+
+
+Mobile				Presentation			Data Access		best of both worlds			best of both worlds
+					Business				Business

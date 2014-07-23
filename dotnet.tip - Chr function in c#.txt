@@ -1,0 +1,72 @@
+URL=http://www.planet-source-code.com/vb/scripts/ShowCode.asp?txtCodeId=3828&lngWId=10
+
+   //**************************************
+    //     
+    // Name: C# Chr and Asc Functions
+    // Description:C# lacks VB's Chr and Asc
+    //     functions. Unfortunately, none of the C#
+    //     implementations I've found actually crea
+    //     te the undocumented VB functions. Here a
+    //     re the true implentation of those functi
+    //     ons. Note that simply casting a value as
+    //     a char does not work for the entire rang
+    //     e of characters. To see what I mean, cre
+    //     ate a test program in VB and one in C#. 
+    //     Do a simple loop from 1 to 255 and print
+    //     out the characters using VB's Chr functi
+    //     ons and simple casting in C#. Even using
+    //     the ASCII encoding won't work as one sub
+    //     mission here clains. If you don't want t
+    //     o bother looping and comparing 255 chara
+    //     cters, try just using 137 for a value. Y
+    //     ou'll soon see what I mean. VB's Chr fun
+    //     ction will return one value but casting 
+    //     or using the ASCII encoding in C# will r
+    //     eturn a different value. Not cool if you
+    //     're writing you own encryption algorithm
+    //     or other code where a VB object must com
+    //     municate with a C# object. So here's the
+    //     real, undocumented deal, that will save 
+    //     you many hours of frustration!
+    // By: Darrell Sparti, MCSD
+    //
+    // Inputs:A single string character (for
+    //     the Asc function) or an integer (for the
+    //     Chr function)
+    //
+    // Returns:An integer (for the Asc funct
+    //     ion) or a single character (for the Chr 
+    //     function)
+    //
+    // Assumes:Add clsVB to your project. Th
+    //     e methods are static so you can call the
+    //     m like this: myChar = clsVB.Chr(137) or 
+    //     myInt = clsVB.Asc("B")
+    //
+    //This code is copyrighted and has    // limited warranties.Please see http://
+    //     www.Planet-Source-Code.com/vb/scripts/Sh
+    //     owCode.asp?txtCodeId=3828&lngWId=10    //for details.    //**************************************
+    //     
+    
+    internal class clsVB
+    {	
+    internal static string Chr(int p_intByte)
+    {
+    if( (p_intByte < 0) || (p_intByte > 255) )
+    {
+    throw new ArgumentOutOfRangeException("p_intByte", p_intByte, "Must be between 1 and 255.");
+    }
+    byte[] bytBuffer = new byte[]{(byte) p_intByte};
+    return Encoding.GetEncoding(1252).GetString(bytBuffer);
+    }
+    internal static int Asc(string p_strChar)
+    {
+    if( (p_strChar.Length == 0) || (p_strChar.Length > 1) )
+    {
+    throw new ArgumentOutOfRangeException("p_strChar", p_strChar, "Must be a single character.");
+    }
+    char[] chrBuffer = {Convert.ToChar(p_strChar)}; 
+    byte[] bytBuffer = Encoding.GetEncoding(1252).GetBytes(chrBuffer); 
+    return (int) bytBuffer[0];
+    }
+    }

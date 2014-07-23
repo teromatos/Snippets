@@ -1,0 +1,5 @@
+Diagnosing ASP.NET MVC Problems
+
+install-package MvcDiagnostics
+
+http://localhost:64820/MvcDiagnostics.aspx

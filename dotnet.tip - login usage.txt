@@ -1,0 +1,5 @@
+Common Use	Correction
+Can you login?	Can you log in?
+I tried to login . . . .	I tried to log in . . . .
+Enter your name at the login prompt.	(This is acceptable)
+Please login again.	Please log in again

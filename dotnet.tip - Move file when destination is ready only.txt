@@ -1,0 +1,13 @@
+   public static class FileHelper
+    {
+        public static void MoveWithOverwrite(string sourceFileName, string targetFileName)
+        {
+            if (File.Exists(targetFileName))
+            {
+                if ((File.GetAttributes(targetFileName) & FileAttributes.ReadOnly) == FileAttributes.ReadOnly)
+                    File.SetAttributes(targetFileName, FileAttributes.Normal);
+                File.Delete(targetFileName);
+            }
+            File.Move(sourceFileName, targetFileName);
+        }
+    }

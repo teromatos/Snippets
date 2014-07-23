@@ -1,0 +1,454 @@
+Source: http://chiragrdarji.wordpress.com/2007/07/23/delete-single-row-from-duplicate-rows-in-sql-server-2005-and-2000/
+
+Delete single row from duplicate rows in SQL Server 2005 and 2000
+July 23, 2007 by chiragrdarji 
+
+        Lets assume that you are using SQL Server 2005 for your current project. You found that you have few rows which have duplicate data in all the columns. Lets consider that you have table name “Example” which has two columns ID and Name. 
+
+CREATE TABLE [dbo].[Example]
+(
+[ID] [int] NOT NULL,
+[Name] [nvarchar](50) COLLATE SQL_Latin1_General_CP1_CI_AS NULL
+) 
+ON [PRIMARY]
+
+Fig - (1) Create Statement for Table
+
+    Lets assume that you have following data in Example table.
+    
+ID  Name
+1   Chirag
+1   Chirag
+2   Sahilesh
+3   Dipak
+4   Mihir
+4   Mihir
+4   Piyush 
+
+Fig - (2) Data in Example table.
+
+      You can see that first two and last three rows are duplicate rows. All the values in these rows are same.  Here is the insert script, if you want to do this practically in your local database.
+
+INSERT INTO [Example] ([ID],[Name]) VALUES (1,Chirag)
+INSERT INTO [Example] ([ID],[Name]) VALUES (1,Chirag)
+INSERT INTO [Example] ([ID],[Name]) VALUES (2,‘Shailesh’)
+INSERT INTO [Example] ([ID],[Name]) VALUES (3,‘Dipak’)
+INSERT INTO [Example] ([ID],[Name]) VALUES (4,‘Mihir’)
+INSERT INTO [Example] ([ID],[Name]) VALUES (4,‘Mihir’)
+INSERT INTO [Example] ([ID],[Name]) VALUES (4,‘Piyush’) 
+
+Fig - (2) Insert Script. 
+
+       Now you want to delete duplicate rows in such a way that only one row will be exist after delete statement. First let me write the query which will give return all the duplicate rows from table. 
+
+SELECT 
+        [ID],[NAME],COUNT([ID])
+FROM
+        [Example]
+GROUP BY
+        [ID],[NAME]
+HAVING
+        COUNT([ID]) > 1 
+
+Fig - (3) Query to identify duplicate rows in table. 
+
+       Here I have used COUNT([ID]) in select statement as ID is not null filed. You can use any column which is not NULL. If all the columns in your table allows NULL value than you can use COUNT(*). The Difference between COUNT(Column Name) and COUNT(*) is, if your column allows null value and in table you have 5 records with 2 null values in ColumnA. If you use COUNT(ColumnA) it will returns 3 and if you use COUNT(*) it will returns 5. So COUNT(Column Name) ignores NULL value. Lets get back to our query. I have used all the column in SELECT and GROUP BY clause. You also have to write all the columns of your table in SELECT and GROUP BY clause. This way you can identify all the duplicates row from table. 
+
+        Lets assume that you have to delete the row which has value (1, ‘Chirag’) so that only one row remains. Here is the query, (Note: This will work only in SQL Sever 2005) 
+
+      DELETE TOP(1) FROM [Example] WHERE [ID] = 1 
+
+Fig - (3) Delete single row from duplicate rows. 
+
+          Here I have used TOP(1) , If you have n rows which has all the values same than you have to use TOP(n-1) so that only 1 row will be remain after delete statement. To delete all the duplicate rows you need to write a cursor as shown below, 
+
+DECLARE @ID int
+DECLARE @NAME NVARCHAR(50)
+DECLARE @COUNT int 
+
+DECLARE CUR_DELETE CURSOR FOR
+SELECT [ID],[NAME],COUNT([ID]) FROM [Example] GROUP BY [ID],[NAME] HAVING COUNT([ID]) > 1 
+
+OPEN CUR_DELETE 
+
+FETCH NEXT FROM CUR_DELETE INTO @ID,@NAME,@COUNT
+/* Loop through cursor for remaining ID */
+WHILE @@FETCH_STATUS = 0
+BEGIN 
+
+DELETE TOP(@COUNT -1) FROM [Example] WHERE ID = @ID 
+
+FETCH NEXT FROM CUR_DELETE INTO @ID,@NAME,@COUNT
+END 
+
+CLOSE CUR_DELETE
+DEALLOCATE CUR_DELETE 
+
+Fig - (4) Cursor to delete all duplicate  records 
+
+         This is all about deleting duplicate rows in SQL Server 2005. 
+
+       Now to do the same in SQL server 2000.  There is function called ROWCOUNT in SQL.  I have used same [Example] table. You can do this by,
+
+SET ROWCOUNT 1
+DELETE FROM [Example] WHERE [ID] = 1 
+
+Fig - (5) Delete duplicate row in SQL Server 2000
+
+      ROWCOUNT function specify that how many rows will be affected by the statement which is immediately written below.  Here also you have to write  ROWCOUNT (n -1) to delete n duplicate rows such that only  1 row will remain in database.
+
+Happy Programming !!
+
+
+--------------------------------------------------------------------------------
+
+Possibly related posts: (automatically generated)
+
+Using the inserted and deleted Tables in SQL Sever
+Updating data in mysql
+
+Posted in DotNet 2.0, Sql Server, Techincal | 36 Comments
+
+36 Responses to “Delete single row from duplicate rows in SQL Server 2005 and 2000”
+on July 23, 2007 at 5:34 pm  pinaldave
+This demonstrates good usage of RowCount.
+However to delete duplicate row, I prefer following solution, which works with all version without any issues.
+
+SQL SERVER - Delete Duplicate Records - Rows
+
+Regards,
+Pinal Dave (SQLAuthority.com)
+
+
+
+on July 24, 2007 at 11:30 am  bluff master
+Gr8 thing..
+
+Also can be done by altering the table to create an identity column and then deleting the rows except 1.
+
+
+
+on August 1, 2007 at 1:10 pm  Dipak Patel
+Here is another solution for SQL Server 2005,
+
+WITH
+
+Test AS (SELECT ROW_NUMBER () OVER ( PARTITION BY ID, FNAME , LNAME ORDER BY ID) AS A FROM tbl1 ) DELETE FROM Test WHERE A > 1
+
+
+
+on September 14, 2007 at 4:12 am  Jango Chang
+Pinal Dave,
+
+How can I delete duplicate records? I like your site.
+
+
+
+on September 15, 2007 at 4:09 am  radhika
+deleting duplicate rows : how to perform in oracle ?
+
+
+
+on October 16, 2007 at 10:05 am  sridhar
+Thank You
+
+
+
+on October 25, 2007 at 7:57 am  AMIT DABRAL
+Hi wanna know how to count the null values present in a table in single statement. 
+
+Every one give count in coloum, but I need count for whole table
+
+
+
+on October 26, 2007 at 5:57 pm  chiragrdarji
+Amit,
+
+I have no Idea. However I will try in this weekend and let you know if I found.
+
+
+
+on November 28, 2007 at 9:58 pm  moises
+i have that exact issue but my ID’s are not unique just the names are so i cant do a groupby id so i dont have the id so i dont know which one to delete, it just deletes them both… any help??
+
+
+
+on January 21, 2008 at 12:40 pm  Jaydeep
+this very good. Finally i got this query from you thanks
+
+
+
+on February 8, 2008 at 8:48 am  Meghana
+Thanks…it was very helpful…
+
+
+
+on March 17, 2008 at 6:44 am  ashoknegi84
+Thanks its woriking
+
+
+
+on March 20, 2008 at 11:00 am  Raghav
+Consider that My Table is having structure as follows
+Col1 - ObjectName
+Col2 - PriceValue
+
+for Example my records are like
+ObjectName PriceValue
+—————————————-
+A 20
+A 50
+B 10
+B 30
+C 50
+
+How can I get the difference (Variance) between ObjectName.
+
+I have tried and getting output with SUM Value using Group by clause as,
+
+A 70
+B 40
+C 50
+
+But i need the difference between each two row based on Group By ObjectName as.
+
+A -30
+B -20
+C 50
+
+Would you help me in solving this issue.
+
+Thanks in Advance
+
+Cheers,
+ raghav
+
+
+
+on March 25, 2008 at 7:24 pm  chiragrdarji
+Raghav,
+
+Here is the ans of ur query. Let me know if I am wrong,
+
+select RemainingSum.productname,(maxprice.price - RemainingSum.price) price
+FROM
+(
+select productname,sum( price)-max( price) price from test
+group by productname
+) as RemainingSum
+inner join
+(
+select productname,max( price) price from test where productname in(
+select distinct productname from test) group by productname
+) as maxprice
+on RemainingSum.productname = maxprice.productname
+
+
+
+on April 8, 2008 at 3:09 pm  kishore
+waste
+
+
+
+on April 23, 2008 at 6:21 pm  sushmitha
+when i typed ‘delete rows in sql2005' in google - I got your website. But your website looks pretty simple and dont find meta tag/data, did you run some SEO tools?
+
+Just curious!
+
+
+
+on April 29, 2008 at 6:21 am  ali
+really your solution was very much helpful for me
+thank
+
+
+
+on May 20, 2008 at 11:19 am  Sunil
+Hi all
+
+i don’t think using cursors would be the good option to delete duplicate records. 
+
+this can be achieved easily by another query. i am saying this because it slower down the process when it comes to delete duplicate records in table contains 1000s of records.
+
+
+
+on May 20, 2008 at 11:19 am  Sunil
+Hi all
+
+i don’t think using cursors would be the good option to delete duplicate records. 
+
+this can be achieved easily by another query. i am saying this because it slower down the process when it comes to delete duplicate records in table contains 1000s of records.
+
+But thanks for this cocept. thank you
+
+
+
+on June 28, 2008 at 4:13 pm  Suneetha
+Can you tell hoe to delete top n records from the table
+
+
+
+on July 1, 2008 at 9:59 am  vishnu
+This really good solution and it was very useful for me very thank you.
+
+
+
+on July 1, 2008 at 10:00 am  vishnu
+can you tell me how to select the top second record in the table without using top2 command pls reply me as soon as you can
+
+
+
+on July 5, 2008 at 6:23 am  Ankit Agarwal
+hello
+I as using SQL Server 2000, and i have tried ur duplication row deleting cursor. But when I am using 
+
+set ROWCOUNT (@count-1)
+DELETE FROM [Example] WHERE [ID] = 1 
+
+then it gives a error message
+incorrect syntax near ‘(’
+
+when in used
+set ROWCOUNT @count-1
+DELETE FROM [Example] WHERE [ID] = 1 
+
+then it gives a error message
+incorrect syntax near ‘-’
+
+but when i give a no intead of parameter then it works fine
+can u help me regarding this problem 
+
+thanks
+
+
+
+on August 2, 2008 at 8:04 am  krish
+Thanks, it was very helpful for delete duplicate record
+
+
+
+on August 9, 2008 at 11:38 am  John Spencer
+I Have the same table as Raghav’s see below
+
+13 Raghav
+
+Consider that My Table is having structure as follows
+Col1 - ObjectName
+Col2 - PriceValue
+
+for Example my records are like
+ObjectName PriceValue
+—————————————-
+A 20
+A 50
+B 10
+B 30
+C 50
+
+I want to be left with the record with the lowest price and delete the rest.
+
+any ideas
+thanks
+
+John.
+
+
+
+on August 31, 2008 at 6:35 am  Yogesh
+Hii…
+
+This is just to say thanks to you.
+Some time i stuck on problem and then i always use your ideas and solution to solve it out.
+
+If it is possible can u please forward me your all suggestion on any query into my email address i will greatly thank full to you.
+
+Thanks chiragrdarji
+yogesh
+
+
+
+on September 16, 2008 at 2:41 pm  mahesh
+I have Table Like this
+
+Id Name
+1 ABC
+2 XYZ
+
+I want to display this record like this in sql 2005
+tell me the query for disply record shown below.
+
+Id 1 2
+Name ABC XYZ
+
+
+
+on September 27, 2008 at 7:24 am  Gayatri
+Thanks. Information was helpful……..
+
+
+
+on October 8, 2008 at 1:07 pm  Kenosi
+The best, simplest and cleanest solution for deleting duplicate rows when the table does not have unique identifiers.
+Works like magic! Thanks a mullion guys.
+
+
+
+on October 15, 2008 at 6:20 am  samvida
+Nice write-up. It was quite helpful to understnd the concept.
+
+
+
+on November 13, 2008 at 6:43 am  Pavan Thakur
+Please refer this very nice helpful article, commented by Vamshi
+
+http://blog.sqlauthority.com/2007/03/01/sql-server-delete-duplicate-records-rows/
+
+
+
+on November 18, 2008 at 5:34 pm  Tommie Carter
+John Spencer,
+
+Why not try a MIN (FIELD) function call to isolate the minimum value you would like to retain and then exclude that value from the delete statement?
+
+??
+
+
+
+on November 19, 2008 at 5:54 am  MAMTA
+if want to give two primary keys to delete the row from the sql the how will be the code?
+
+
+
+on November 28, 2008 at 12:09 pm  kranti
+hi friends,
+
+i want to use a comment box in my application which data type can i use for that.
+i am using the varbinary .
+
+is it correct or any other solution is there for that.
+please send me a correct answer as soon as possible to my gmail id.
+
+and another problem is there
+
+how to upload and download the document files in asp .net using C# and sqlserver-2005 which datatype can i used for this??
+
+Thanks & Regards
+A.kranti Kumar
+
+
+
+on December 6, 2008 at 3:10 pm  Jayanth
+Hi,
+I have only a 1 column in a table and i need it to break it into 2 columns
+
+plz help me about doing it
+
+Thanks in advance
+Jayanth
+
+
+
+on December 17, 2008 at 7:07 pm  Leslie
+Excellent solution for deleting duplicate rows, it helped me a ton in a keyword search application.
+
+Thanks!

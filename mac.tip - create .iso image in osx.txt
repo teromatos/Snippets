@@ -1,0 +1,36 @@
+Launch "Finder" - "Applications" - "Utilities" - "Disk Utility".
+
+Insert the source CD-ROM (which ISO image should be created) into the CD/DVD-ROM drive on your Mac.
+
+Select that CD/DVD-ROM drive from the Disk Utility device list.
+
+Click the "New Image" button on the top of the Disk Utility window.
+
+Choose name and location for the image (you can leave the default settings).
+
+Set "Image Format" to "read-only".
+
+Click "Save" and wait for the image creation process to finish.
+
+Locate the created image, open its pop-up menu (by Ctrl+clicking the file) and select "Get Info" from the pop-up menu.
+
+Expand "Name & Extension" section and change file's extension from ".dmg" to ".iso".
+
+Now you should be able to connect this image to virtual machine’s CD/DVD-ROM drive: launch Parallels Desktop for Mac, click on the "CD/DVD-ROM" in the main configuration window to open the settings, choose the "Use image file" option, click the browse (“…”) button to locate the ISO image file.
+
+======================================================
+
+Create a folder with the contents you want on your ISO.
+
+Open Disk Utility and use the New Image from Folder menu item to create an image. Ensure it is uncompressed and use the CD/DVD master option.
+
+In my experience this creates HFS+ masters which are no good in Windows.
+
+Open the Terminal
+
+Assuming your new image is called ~/Desktop/Master.cdr (the file is on your desktop and called Master.cdr) type:
+
+
+Code:
+cd ~/Desktop
+hdiutil makehybrid -iso -joliet -o Master.iso Master.cdrThis will create an ISO/Joliet .iso file.

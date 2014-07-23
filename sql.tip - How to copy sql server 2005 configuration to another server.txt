@@ -1,0 +1,4 @@
+There's also the SAC command line tool used to export a hardened SQL Server 2005 configuration and import it on other servers without having to repeat the configuration steps. This tool (sac.exe) is located in \Program Files\Microsoft SQL Server\90\Shared and its command-line switches are shown in Figure 5 below. 
+
+Keep in mind that previous SQL Server versions will retain their settings when upgraded to SQL Server 2005, so running the Surface Area Configuration tool is a must. 
+

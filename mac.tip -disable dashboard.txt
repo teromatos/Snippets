@@ -1,0 +1,25 @@
+To Disable Dashboard
+
+Launch Terminal, located at /Applications/Utilities.
+
+At the Terminal prompt, enter the following text exactly as shown, then press the return or enter key on your keyboard:
+defaults write com.apple.dashboard mcx-disabled -boolean YES
+
+
+When the Terminal prompt returns, enter the following text exactly as shown, then press the return or enter key on your keyboard:
+killall Dock
+
+The Dock will disappear for a moment. When it returns, Dashboard will no longer be running. The Dashboard icon will remain in the Dock, but clicking on it won't do anything. I recommend keeping the Dashboard Dock icon, in case you wish to use Dashboard in the future.
+
+To Enable Dashboard
+
+Launch Terminal, located at /Applications/Utilities.
+
+At the Terminal prompt, enter the following text exactly as shown, then press the return or enter key on your keyboard:
+defaults write com.apple.dashboard mcx-disabled -boolean NO
+
+
+When the Terminal prompt returns, enter the following text exactly as shown, then press the return or enter key on your keyboard:
+killall Dock
+
+The Dock will disappear for a moment. When it returns, Dashboard will be running again. You can access Dashboard and all installed widgets by clicking the Dashboard Dock icon.

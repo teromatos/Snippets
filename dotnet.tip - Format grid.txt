@@ -1,0 +1,63 @@
+        private void FormatGrid()
+        {
+            dgvDiscounts.AutoGenerateColumns = false;
+            dgvDiscounts.ReadOnly = true;
+            dgvDiscounts.AllowUserToAddRows = false;
+            dgvDiscounts.AllowUserToDeleteRows = false;
+            dgvDiscounts.AllowUserToOrderColumns = false;
+            
+            dgvDiscounts.RowHeadersWidth = 25;
+            dgvDiscounts.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill; 
+            dgvDiscounts.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;
+            dgvDiscounts.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
+            dgvDiscounts.Columns.Add("DrugName", "DrugName");
+            dgvDiscounts.Columns.Add("DiscountType", "DiscountType");
+            dgvDiscounts.Columns.Add("SimpleValue", "SimpleValue");
+            dgvDiscounts.Columns.Add("LessThanAmount", "LessThanAmount");
+            dgvDiscounts.Columns.Add("LessThanPercentage", "LessThanPercentage");
+
+            dgvDiscounts.Columns.Add("BetweenLowAmount", "BetweenLowAmount");
+            dgvDiscounts.Columns.Add("BetweenHighAmount", "BetweenHighAmount");
+            dgvDiscounts.Columns.Add("BetweenPercentage", "BetweenPercentage");
+
+            dgvDiscounts.Columns.Add("GreaterThanAmount", "GreaterThanAmount");
+            dgvDiscounts.Columns.Add("GreaterThanPercentage", "GreaterThanPercentage");
+
+            dgvDiscounts.Columns.Add("Non3TierDiscountPercentage", "Non3TierDiscountPercentage");
+
+            for (int i = 0; i < dgvDiscounts.Columns.Count; i++)
+			{
+                dgvDiscounts.Columns[i].DataPropertyName = dgvDiscounts.Columns[i].Name;
+			}
+                        
+            dgvDiscounts.Columns["DrugName"].DisplayIndex = 0;
+            dgvDiscounts.Columns["DiscountType"].DisplayIndex = 1;
+            dgvDiscounts.Columns["SimpleValue"].DisplayIndex = 2;
+            dgvDiscounts.Columns["LessThanAmount"].DisplayIndex = 3;
+            dgvDiscounts.Columns["LessThanPercentage"].DisplayIndex = 4;
+
+            dgvDiscounts.Columns["BetweenLowAmount"].DisplayIndex = 5;
+            dgvDiscounts.Columns["BetweenHighAmount"].DisplayIndex = 6;
+            dgvDiscounts.Columns["BetweenPercentage"].DisplayIndex = 7;
+
+            dgvDiscounts.Columns["GreaterThanAmount"].DisplayIndex = 8;
+            dgvDiscounts.Columns["GreaterThanPercentage"].DisplayIndex = 9;
+
+            dgvDiscounts.Columns["Non3TierDiscountPercentage"].DisplayIndex = 10;
+            
+            dgvDiscounts.Columns["DrugName"].Width = 82;
+            dgvDiscounts.Columns["DiscountType"].Width = 97;
+            dgvDiscounts.Columns["SimpleValue"].Width = 88;
+            dgvDiscounts.Columns["LessThanAmount"].Width = 114;
+            dgvDiscounts.Columns["LessThanPercentage"].Width = 132;
+
+            dgvDiscounts.Columns["BetweenLowAmount"].Width = 130;
+            dgvDiscounts.Columns["BetweenHighAmount"].Width = 132;
+            dgvDiscounts.Columns["BetweenPercentage"].Width = 129;
+
+            dgvDiscounts.Columns["GreaterThanAmount"].Width = 130;
+            dgvDiscounts.Columns["GreaterThanPercentage"].Width = 148;
+
+            dgvDiscounts.Columns["Non3TierDiscountPercentage"].Width = 171;
+        }

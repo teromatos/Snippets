@@ -1,0 +1,4 @@
+Only load the top nodes
+Allows for fast loading and unlimited number of nodes
+Create a dummy child node for all parent nodes containing children
+In the TreeView’s BeforeExpand event handler remove the dummy child node and then add all the children

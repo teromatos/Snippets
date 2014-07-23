@@ -1,0 +1,61 @@
+Source: http://ppetrov.wordpress.com/2008/09/12/usuful-methods-11-of-n-copymove-directory/
+
+public static void CopyDirectory(string source, string destination)   
+{   
+    if (destination[destination.Length - 1] != Path.DirectorySeparatorChar)   
+    {   
+        destination += Path.DirectorySeparatorChar;   
+    }   
+    if (!Directory.Exists(destination))   
+    {   
+        Directory.CreateDirectory(destination);   
+    }   
+    var entries = Directory.GetFileSystemEntries(source);   
+    foreach (var e in entries)   
+    {   
+        if (Directory.Exists(e))   
+        {   
+            CopyDirectory(e, destination + Path.GetFileName(e));   
+        }   
+        else  
+        {   
+            File.Copy(e, destination + Path.GetFileName(e), true);   
+        }   
+    }   
+}  
+
+        public static void CopyDirectory(string source, string destination)
+        {
+            if (destination[destination.Length - 1] != Path.DirectorySeparatorChar)
+            {
+                destination += Path.DirectorySeparatorChar;
+            }
+            if (!Directory.Exists(destination))
+            {
+                Directory.CreateDirectory(destination);
+            }
+            var entries = Directory.GetFileSystemEntries(source);
+            foreach (var e in entries)
+            {
+                if (Directory.Exists(e))
+                {
+                    CopyDirectory(e, destination + Path.GetFileName(e));
+                }
+                else
+                {
+                    File.Copy(e, destination + Path.GetFileName(e), true);
+                }
+            }
+        }
+public static void MoveDirectory(string source, string destination)   
+{   
+    CopyDirectory(source, destination);   
+    Directory.Delete(source);   
+}  
+
+        public static void MoveDirectory(string source, string destination)
+        {
+            CopyDirectory(source, destination);
+            Directory.Delete(source);
+        }
+Explore posts in the same categories: .NET Framework, C# 

@@ -1,0 +1,26 @@
+IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForDomain();
+
+IsolatedStorageFileStream archivo = new IsolatedStorageFileStream("personal.txt", System.IO.FileMode.Create, store);
+
+StreamWriter writer = new StreamWriter(archivo);
+
+writer.WriteLine("Some info valid only for this user and app domain");
+
+writer.Close();
+
+
+===============================================================================
+
+
+IsolatedStorageFile store = IsolatedStorageFile.GetUserStoreForDomain();
+
+IsolatedStorageFileStream archivo = new IsolatedStorageFileStream("personal.txt", System.IO.FileMode.Open, store);
+
+StreamReader reader = new StreamReader(archivo);
+
+string linea = reader.ReadLine();
+
+reader.Close();
+
+this.label1.Text = linea;
+

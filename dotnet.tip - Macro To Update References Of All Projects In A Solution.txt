@@ -1,0 +1,108 @@
+URL= http://www.csharphelp.com/archives2/archive369.html
+
+Macro To Update References Of All Projects In A Solution
+By Doug Doedens
+
+When working in enterprise development there are occasions when you have a solution file with 10 or more projects in it all using private assemblies. When a low level assembly's location changes you end up with a solution file with 10 or more broken references. The macro listed below is designed to save you from the pain staking task of fixing each reference one by one. When the macro listed below is run it will display a window file dialog at which point you will point to the new location of the assembly. Next the macro will walk through each project file and update the reference to the assembly you choose if there is one. 
+
+In order to run the macro you need to navigate to the "TOOLS" menu and choose macro IDE. Next choose File --> Add New Item . From the dialog screen choose a new module. Finally cut and paste the entire code listed below inside the code window overwriting the default module framework that is listed. 
+
+Imports EnvDTE
+Imports System.Diagnostics
+Imports Microsoft.VisualBasic
+Imports Microsoft.VisualBasic.ControlChars
+Imports System.Windows
+Imports System.Windows.Forms
+Imports System
+
+Public Module Module1
+
+      Public Class WinWrapper
+        Implements System.Windows.Forms.IWin32Window
+
+        Overridable ReadOnly Property Handle() As System.IntPtr Implements
+System.Windows.Forms.IWin32Window.Handle
+            Get
+                Dim iptr As New System.IntPtr(DTE.MainWindow.HWnd)
+                Return iptr
+            End Get
+        End Property
+    End Class
+
+
+    Public Sub UpdateReference()
+
+        Dim startDir
+        Dim newAssembLocation
+        Dim outdirectory As String
+        Dim stemp, Macroprojname As String
+        Dim prjSolution As EnvDTE.Project
+
+        Dim openfile As Forms.FileDialog
+        Dim result As Forms.DialogResult
+        Dim tlbimppath As Microsoft.Win32.RegistryKey
+        Dim winptr As WinWrapper
+
+
+        winptr = New WinWrapper()
+        openfile = New Forms.OpenFileDialog()
+
+        'set the initial directory to SystemDrive
+        startDir = System.Environment.SystemDirectory()
+        startDir = Left(startDir, InStr(startDir, "\", CompareMethod.Text))
+        openfile.InitialDirectory = startDir
+
+
+        If openfile.ShowDialog(winptr) = result.OK Then
+
+             newAssembLocation = Right(openfile.FileName,
+Len(openfile.FileName) - Len(System.Environment.CurrentDirectory) - 1)
+
+        End If
+
+
+        Dim myProj As Integer
+        Dim prjVSProject As VSLangProj.VSProject
+
+        Try
+            For myProj = 1 To DTE.Solution.Projects.Count
+
+
+                prjVSProject = DTE.Solution.Projects.Item(myProj).Object
+
+                If prjVSProject Is Nothing Then
+                    MsgBox("Unable to get reference to solution file")
+                    Exit Sub
+                End If
+
+                Dim myRef As VSLangProj.Reference
+
+                ' Strip off the .dll ext so we can use the find command
+                newAssembLocation = newAssembLocation.Replace(".dll", "")
+
+                myRef = prjVSProject.References.Find(newAssembLocation)
+
+                If Not myRef Is Nothing Then
+
+                    ' remove the old reference
+                    myRef.Remove()
+                    ' add the new one
+                    prjVSProject.References.Add(openfile.FileName)
+
+                Else
+
+                    ' We did not find a reference to this assembly here
+
+                End If
+
+            Next
+
+        Catch err As System.Exception
+
+        End Try
+
+
+    End Sub
+
+End Module
+

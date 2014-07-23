@@ -1,0 +1,4 @@
+When creating a class that derives from a typed dataset, we must create
+2 contstructors. The first of these is for the normal construction. and the
+second is fo XML deserialization. The constructor that is used for deserialization
+must be implemented or there will be no support for XML serialization.

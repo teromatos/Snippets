@@ -1,0 +1,7 @@
+Enable client-side script debugging in Internet Explorer 
+Open Microsoft Internet Explorer. 
+On the Tools menu, click Internet Options. 
+On the Advanced tab, locate the Browsing section, and uncheck the Disable script debugging check box, and then click OK. 
+Close Internet Explorer.
+In your JavasSript function add the keyword debugger . This causes VS.NET to switch to debug mode when it runs that line. 
+Run your ASP.Net application in debug mode.

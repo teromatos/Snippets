@@ -1,0 +1,17 @@
+In a comment to my most recent post, Scott asks, “what is the proper way to remove an item from source control?“  
+
+You won't find an answer to this question in the Visual Studio .NET documentation (vers 2002 or 2003) but you will in VS-Whidbey and beyond because I'm gonna write it as soon as I finish this entry.
+
+To (permanently) remove a project or solution from source control
+
+1.      In Visual Studio, click File, click Source Control, and then click Change Source Control.
+
+2.      In the Change Source Control dialog box, select the project and/or solution you want to remove from source control, and then click Unbind.
+
+3.   Delete all solution or project files in the source control database.
+
+4.      In Windows Explorer, locate the working directory for your solution/project and then delete all *.scc files.
+
+Note   In Visual SourceSafe and many other SCC systems, if other users have checked out the solution/project in the past, even if they have since checked in their changes, the next time they attempt to Get or Check Out the solution/project, they will be prompted to add the items to source control from their working copies on disk. On the SourceSafe team, we call this a “pending add“, which is a little confusing. Anyway, if you want to guarantee that a solution/project is permanently, permanently, permanently removed from source control and will never again re-appear in your database, you should repeat the final step in the preceding procedure for all solution/project enlistees.
+
+To NON-permanently remove a project or solution from source control in Visual Studio, do not complete the final step in the preceding procedure.

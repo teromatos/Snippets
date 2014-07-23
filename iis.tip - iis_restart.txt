@@ -1,0 +1,85 @@
+IIS 6
+
+### LISTING ###
+
+Example 1:
+The following example displays the Web sites on the local computer. Omitting the WebSite parameter limits the search to the local computer, eliminating the need for the /s parameter. The /u and /p parameters are omitted because the user running the command prompt must be logged on as an administrator for the local machine.
+	iisweb /query
+In response, iisweb displays all of the IIS Web sites that are on the local computer, including their site names, metabase paths, status, IP addresses, ports, and host names.
+
+Site Name (Metabase Path) Status IP Port Host
+Default Web Site (W3SVC/1) STARTED ALL 90 N/A
+Products (W3SVC/1948497947) STARTED 172.30.163.244 80 N/A
+Finance (W3SVC/1211348328) STARTED 172.30.152.249 80 N/A
+Marketing (W3SVC/1907510956) STARTED ALL 95 www.contoso.com
+
+Example 2:
+The following example searches for the "Marketing" Web site on the remote computer SVR01. It uses the /s parameter to specify the remote computer, and the /u and /p parameters to run the script with the permissions of the user's administrator account.
+	iisweb /query Marketing /s SVR01 /u Admin6 /p A76QVJ32#
+In response, iisweb displays the "Marketing" Web site on SVR01.
+
+Site Name (Metabase Path) Status IP Port Host
+Marketing (W3SVC/1907510956) STOPPED ALL 80 www.contoso.com
+
+Example 3:
+The following example displays the status of the "Marketing" and "Finance" Web sites on the local computer. It uses site names to identify the Web sites, although metabase paths are also valid.
+	iisweb /query Marketing Finance
+In response, iisweb displays the status of the "Marketing" and "Finance" Web sites.
+
+Site Name (Metabase Path) Status IP Port Host
+Marketing (W3SVC/1907510956) STARTED ALL 80 www.contoso.com
+Finance (W3SVC/1509060625) STARTED 192.168.125.225 80 www.contosofinance.com
+
+
+
+### STARTING ###
+
+Example 1:
+The following example starts the "Products" Web site on the local computer. The command identifies the site by its name. In this example, the /s parameter is omitted because the server is local. The /u and /p parameters are omitted because the current user of the local computer must be logged on as an administrator in order to run the command.
+	iisweb /start Products
+In response, iisweb displays the following message confirming that the site has been started, and identifying it by its metabase path:
+
+Connecting to server ...Done.
+Server W3SVC/1977437537 has been STARTED.
+
+Example 2:
+The following example starts the "Products" and "Marketing" Web sites on the SVR01 remote computer. The command identifies the "Products" site by its metabase path, "W3SVC/1509060225", and the "Marketing" site by name. In addition, the command uses the /s parameter to specify the remote computer, and the /u and /p parameters to run the commands with the permissions of the user's administrator account.
+	iisweb /start w3svc/1509060225 Marketing /s SVR01 /u Alice /p p@##word
+In response, iisweb displays the following message confirming that the sites have been started, and identifying each by its metabase path:
+
+Connecting to server ...Done.
+Server W3SVC/1509060225 has been STARTED.
+Server W3SVC/1977437537 has been STARTED.
+
+
+
+### STOPPING ###
+
+Example 1:
+The following example stops the "Products" Web site on the local computer. The command identifies the site by its name. In this example, the /s parameter is unnecessary because the server is local. The /u and /p parameters are omitted because the current user of the local computer must be logged on as an administrator in order to run the command.
+	iisweb /stop Products
+In response, iisweb displays the following message confirming that the site has been stopped, and identifying it by its metabase path:
+
+Connecting to server ...Done.
+Server W3SVC/1977437537 has been STOPPED.
+
+Example 2:
+The following example stops the "Products" and "Marketing" Web sites on the SVR01 remote computer. The command identifies the "Products" site by its metabase path, "W3SVC/1509060225", and the "Marketing" site by name. In addition, the command uses the /s parameter to specify the remote computer, and the /u and /p parameters to run the commands with the permissions of the user's administrator account.
+	iisweb /stop w3svc/1509060225 Marketing /s SVR01 /u Alice /p p@##word
+In response, iisweb displays the following message confirming that the sites have been stopped, and identifying each by its metabase path:
+
+Connecting to server ...Done.
+Server W3SVC/1509060225 has been STOPPED.
+Server W3SVC/1977437537 has been STOPPED.
+
+
+
+===========================================================================
+IIS7
+
+To start or stop a Web site, use the following syntax:
+	appcmd start | stop site /site.name:string
+The variable string is the name of the Web site that you want to start or stop.
+
+For example, to stop a Web site named contoso, type the following at the command prompt, and then press ENTER:
+	appcmd stop site /site.name:contoso

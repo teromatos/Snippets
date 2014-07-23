@@ -1,0 +1,29 @@
+Private Function TestURL(ByVal testURL As String) As Boolean
+      Dim request1 As WebRequest
+      Dim request2 As HttpWebRequest
+      Dim response2 As HttpWebResponse
+      Dim flag1 As Boolean
+      Dim response1 As WebResponse = Nothing
+      Try 
+            request1 = WebRequest.Create(testURL)
+            request1.Timeout = 10000
+            If TypeOf request1 Is HttpWebRequest Then
+                  request2 = TryCast(request1,HttpWebRequest)
+                  request2.Method = "HEAD"
+            End If
+            response1 = request1.GetResponse
+            response1.Close
+            Return True
+      Catch exception1 As  WebException
+            If (exception1.Status = WebExceptionStatus.ProtocolError) Then
+                  response2 = CType(exception1.Response,HttpWebResponse)
+                  If ((response2.StatusCode >= HttpStatusCode.BadRequest) AndAlso (response2.StatusCode <= HttpStatusCode.InternalServerError)) Then
+                        Return False
+                  End If
+            End If
+            Return True
+      Catch Object
+            Return False
+      End Try
+      Return flag1
+End Function

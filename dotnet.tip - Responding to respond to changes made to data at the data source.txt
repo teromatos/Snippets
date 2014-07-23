@@ -1,0 +1,92 @@
+The ADO.NET DataAdapter exposes three events you can use to respond to changes made to data at the data source. The following table shows the DataAdapter events.
+
+Event 		Description 
+RowUpdating 	An UPDATE, INSERT, or DELETE operation on a row (by a call to one of the Update methods) is about to begin. 
+RowUpdated 	An UPDATE, INSERT, or DELETE operation on a row (by a call to one of the Update methods) is complete. 
+FillError 	An error has occurred during a Fill operation. 
+
+RowUpdating and RowUpdated
+RowUpdating is raised before any update to a row from the DataSet has been processed at the data source. RowUpdated is raised after any update to a row from the DataSet has been processed at the data source. As a result, you can use RowUpdating to modify update behavior before it happens, to provide additional handling when an update will occur, to retain a reference to an updated row, to cancel the current update and schedule it for a batch process to be processed later, and so on. RowUpdated is useful for responding to errors and exceptions that occur during the update. You can add error information to the DataSet, as well as retry logic, and so on.
+
+The RowUpdatingEventArgs and RowUpdatedEventArgs arguments passed to the RowUpdating and RowUpdated events include: a Command property that references the Command object being used to perform the update; a Row property that references the DataRow object containing the updated information; a StatementType property for what type of update is being performed; the TableMapping, if applicable; and the Status of the operation.
+
+You can use the Status property to determine if an error has occurred during the operation and, if desired, to control the actions against the current and resulting rows. When the event occurs, the Status property will equal either Continue or ErrorsOccurred. The following table shows the values to which you can set the Status property in order to control subsequent actions during the update.
+
+Status 			Description 
+Continue 		Continue the update operation. 
+ErrorsOccurred 		Abort the update operation and throw an exception. 
+SkipCurrentRow 		Ignore the current row and continue the update operation. 
+SkipAllRemainingRows 	Abort the update operation but do not throw an exception. 
+
+Setting the Status property to ErrorsOccurred will cause an exception to be thrown. You can control which exception is thrown by setting the Errors property to the desired exception. Using one of the other values for Status will prevent an exception from being thrown.
+
+You can also use the ContinueUpdateOnError property to handle errors for updated rows. If DataAdapter.ContinueUpdateOnError is true, when an update to a row results in an exception being thrown the text of the exception is placed into the RowError information of the particular row and processing continues without throwing an exception. This enables you to respond to errors when the Update is complete, in contrast to the RowUpdated event that enables you to respond to errors when the error is encountered.
+
+The following code sample shows how to both add and remove event handlers. The RowUpdating event handler writes a log of all deleted records with a time stamp. The RowUpdated event handler adds error information to the RowError property of the row in the DataSet, suppresses the exception, and continues processing (mirroring the behavior of ContinueUpdateOnError = true).
+
+[Visual Basic]
+Dim custDA As SqlDataAdapter = New SqlDataAdapter("SELECT CustomerID, CompanyName FROM Customers", nwindConn)
+
+' Add handlers.
+AddHandler custDA.RowUpdating, New SqlRowUpdatingEventHandler(AddressOf OnRowUpdating)
+AddHandler custDA.RowUpdated, New SqlRowUpdatedEventHandler(AddressOf OnRowUpdated)
+
+' Set DataAdapter command properties, fill the DataSet, and modify the DataSet.
+
+custDA.Update(custDS, "Customers")
+
+' Remove handlers.
+RemoveHandler custDA.RowUpdating, New SqlRowUpdatingEventHandler(AddressOf OnRowUpdating)
+RemoveHandler custDA.RowUpdated, New SqlRowUpdatedEventHandler(AddressOf OnRowUpdated)
+
+Private Shared Sub OnRowUpdating(sender As Object, args As SqlRowUpdatingEventArgs)
+  If args.StatementType = StatementType.Delete Then
+    Dim tw As System.IO.TextWriter = System.IO.File.AppendText("Deletes.log")
+    tw.WriteLine("{0}: Customer {1} Deleted.", DateTime.Now, args.Row("CustomerID", DataRowVersion.Original))
+    tw.Close()
+  End If
+End Sub
+
+Private Shared Sub OnRowUpdated(sender As Object, args As SqlRowUpdatedEventArgs)
+  If args.Status = UpdateStatus.ErrorsOccurred
+    args.Status = UpdateStatus.SkipCurrentRow
+    args.Row.RowError = args.Errors.Message
+  End If
+End Sub
+
+
+
+
+============================================================================================================================================
+
+
+To avoid having to respond each time a row error occurs while you are editing values in a DataTable, you can add the error information to the row, to be used later. The DataRow object supports this capability by providing a RowError property on each row. Adding data to the RowError property of a DataRow marks the HasErrors property of the DataRow to true. If the DataRow is part of a DataTable, and DataRow.HasErrors is true, the DataTable.HasErrors property is also true. This applies as well to the DataSet to which the DataTable belongs. When testing for errors, you can check the HasErrors property to determine if error information has been added to any rows. If HasErrors is true, you can use the GetErrors method of the DataTable to return and examine only the rows with errors, as shown in the following example.
+
+[Visual Basic]
+Dim workTable As DataTable = New DataTable("Customers")
+workTable.Columns.Add("CustID", Type.GetType("System.Int32"))
+workTable.Columns.Add("Total", Type.GetType("System.Double"))
+
+AddHandler workTable.RowChanged, New DataRowChangeEventHandler(AddressOf OnRowChanged)
+
+Dim I As Int32
+
+For I = 0 To 10
+  workTable.Rows.Add(New Object() {I, I*100})
+Next
+
+If workTable.HasErrors Then
+  Console.WriteLine("Errors In Table " & workTable.TableName)
+
+  Dim myRow As DataRow
+
+  For Each myRow In workTable.GetErrors()
+    Console.WriteLine("CustID = " & myRow("CustID").ToString())
+    Console.WriteLine(" Error = " & myRow.RowError & vbCrLf)
+  Next
+End If
+
+Private Shared Sub OnRowChanged(sender As Object, args As DataRowChangeEventArgs)
+  ' Check for zero values.
+  If CDbl(args.Row("Total")) = 0 Then args.Row.RowError = "Total cannot be 0."
+End Sub

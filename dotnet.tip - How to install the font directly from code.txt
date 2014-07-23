@@ -1,0 +1,42 @@
+URL= http://deventerprise.blogspot.com/2009/03/installing-and-removing-fonts-using-c.html
+
+To Install the font directly from your application using code:
+This is also relatively simple but you need to use some external calls. To add fonts add the following to the class that will contain the method to install the font:
+
+[DllImport("gdi32", EntryPoint = "AddFontResource")]
+public static extern int AddFontResourceA(string lpFileName);
+
+To remove fonts add the following to the class that will contain the method to uninstall the font:
+
+[DllImport("gdi32", EntryPoint = "RemoveFontResource")]
+public static extern int RemoveFontResourceA(string lpFileName);
+
+These methods can then easily be called in any method of the class, all you need to pass in is the full path of the font. A return value of 1 means the operation was successful, anything else means there was a problem. Here is some example code:
+
+using System;
+using System.Runtime.InteropServices;
+
+namespace InstallMyFontExample
+{
+ class Program
+ {
+   [DllImport("gdi32", EntryPoint = "AddFontResource")]
+   public static extern int AddFontResourceA(string lpFileName);
+
+   [DllImport("gdi32", EntryPoint = "RemoveFontResource")]
+   public static extern int RemoveFontResourceA(string lpFileName);
+
+   static void Main(string[] args)
+   {
+     int result = -1;
+     result = RemoveFontResourceA(@"C:\MY_FONT_LOCATION\MY_NEW_FONT.TTF");
+     Console.WriteLine((result == 0) ? "Font was not found." : "Font removed successfully.");
+     result = AddFontResourceA(@"C:\MY_FONT_LOCATION\MY_NEW_FONT.TTF");
+     Console.WriteLine((result == 0) ? "Font is already installed." : "Font installed successfully.");
+
+     Console.ReadKey();
+   }
+ }
+}
+
+And that's all there is to it. 

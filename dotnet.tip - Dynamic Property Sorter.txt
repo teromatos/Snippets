@@ -1,0 +1,149 @@
+URL=http://codebetter.com/blogs/ben.reichelt/archive/2006/01/16/136568.aspx
+Dynamic Property Sorter
+
+I had a need to sort collections of objects that were stored in ArrayLists. There were about 30 different business objects that could potentially be used, and none of them had a custom collection class, ArrayLists were always used. None of the objects implemented IComparable, and I didn’t want to write an IComparer for each object type either. So I came up with this PropertySorter class that contains a string, the name of the property, and a bool to determine if we are sorting ascending or descending. The PropertySorter implements IComparer and it uses reflection to find the given property on each object that it compares, so now I can use this same class for all my comparisons, I just need to supply it with the name of the property that I want to sort on.
+
+What I realized I needed later on was the ability to sort on multiple properties, corresponding to the SQL syntax “ORDER BY FirstName, LastName”  which returns your results sorted by the firstname, and then last name in a hierarchical fashion. So I changed the string property on the PropertySorter to an array of strings and implementing the cascading sort was actually rather easy.  This class works like a charm, I love it! I don’t care that it uses reflection, it saved me a BUNCH of time and my web pages don’t seem the least bit slower. The only restriction that the PropertySorter has is that the property on which you want to sort has to implement IComparable, otherwise it wouldn’t know how to determine which was less than, greater than, or equal to, this is also no problem as I only want to sort on strings, numbers, and dates anyways. Here is the PropertySorter class:
+
+public class PropertySorter : IComparer
+
+    {
+
+        string[] _fields;
+
+        bool _isAsc;
+
+ 
+
+        public bool IsAscending
+
+        {
+
+            get { return _isAsc; }
+
+            set { _isAsc = value; }
+
+        }
+
+ 
+
+        public PropertySorter(bool isAsc, params string[] fields)
+
+        {
+
+            IsAscending = isAsc;
+
+            _fields = fields;
+
+        }
+
+ 
+
+        public PropertySorter(params string[] fields) : this(true, fields)
+
+        {
+
+        }
+
+ 
+
+        public int Compare(object x, object y)
+
+        {
+
+            if (_fields == null || _fields.Length == 0)
+
+                throw new ApplicationException("There are no fields to compare to.");
+
+ 
+
+            object o1 = x;
+
+            object o2 = y;
+
+            //
+
+            // not sorting ascending, so flip flop
+
+            // the objects so they will compare descending
+
+            //
+
+            if (!IsAscending)
+
+            {
+
+                object temp = o1;
+
+                o1 = o2;
+
+                o2 = temp;
+
+            }
+
+ 
+
+            //
+
+            // compare each field in the list
+
+            // as soon as there is an inequality,
+
+            // or we are on the last sort field
+
+            // return that result of the comparison
+
+            //
+
+            int comparison = 0;
+
+            for(int i=0;i < _fields.Length;i++)
+
+            {
+
+                string f = _fields[i];
+
+                IComparable prop1 = GetProperty(f, o1);
+
+                IComparable prop2 = GetProperty(f, o2);
+
+                comparison = prop1.CompareTo(prop2);
+
+                if (comparison != 0)
+
+                    return comparison;
+
+            }
+
+            return comparison;
+
+        }
+
+ 
+
+        IComparable GetProperty(string field, object obj)
+
+        {
+
+            Type type = obj.GetType();
+
+            PropertyInfo prop = type.GetProperty(field);
+
+            if (prop == null)
+
+                throw new ApplicationException("Property does not exist on object. Property : " + field + " Object Type : " + type.FullName);
+
+ 
+
+            object value = prop.GetValue(obj, null);
+
+            if (!(value is IComparable))
+
+                throw new ApplicationException("Cannot compare properties that are not of type IComparable. Property : " + field + " Object Type : " + type.FullName);
+
+            return (IComparable)value;
+
+        }
+
+    }
+

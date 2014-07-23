@@ -1,0 +1,66 @@
+				Assembly assm = Assembly.LoadFrom(filename);
+				bool found = assm.GetCustomAttributes(typeof(DebuggableAttribute), false).Length > 0;
+				buildType = found ? "Debug" : "Release";
+
+
+URL=http://www.hanselman.com/blog/HowToProgrammaticallyDetectIfAnAssemblyIsCompiledInDebugOrReleaseMode.aspx
+
+How to Programmatically Detect if an Assembly is Compiled in Debug or Release mode
+Last Week
+How to Programmatically Detect if an Assembly is Compiled in Debug or Release mode
+||||Wednesday, August 30, 2006 7:05:02 PM|Scott Hanselman|ComputerZen.com - Scott Hanselman
+Nagaraj from my company made this little util recently to run against a compiled assembly and see if it is a Debug or Release version. I added the DOS ErrorLevel return codes.
+using System;
+using System.IO;
+using System.Diagnostics;
+using System.Reflection;
+namespace Foo.Tools
+{
+    classBuildFind
+    {
+        publicstaticint GetBuildType(string AssemblyName)
+        {
+            Assembly assm = Assembly.LoadFrom(AssemblyName);
+            object[] attributes = assm.GetCustomAttributes(typeof(DebuggableAttribute), false);
+            if (attributes.Length == 0)
+            {
+                Console.WriteLine(String.Format("{0} is a RELEASE Build....", AssemblyName));
+                return 0;
+            }
+            foreach (Attribute attr in attributes)
+            {
+                if (attr isDebuggableAttribute)
+                {
+                    DebuggableAttribute d = attr asDebuggableAttribute;
+                    Console.WriteLine(
+                       String.Format("Run time Optimizer is enabled : {0}", !d.IsJITOptimizerDisabled));
+                    Console.WriteLine(
+                        String.Format("Run time Tracking is enabled : {0}", d.IsJITTrackingEnabled));
+                    if (d.IsJITOptimizerDisabled == true)
+                    {
+                        Console.WriteLine(String.Format("{0} is a DEBUG Build....", AssemblyName));
+                        return 1;
+                    }
+                    else
+                    {
+                        Console.WriteLine(String.Format("{0} is a RELEASE Build....", AssemblyName));
+                        return 0;
+                    }
+                }
+            }
+            return 3;
+        }
+        [STAThread]
+        staticint Main(string[] args)
+        {
+            if (args.Length == 0)
+            {
+                Console.WriteLine("Usage GetBuildType <assemblyName>");
+                return 2;
+            }
+            returnBuildFind.GetBuildType(args[0]);
+        }
+    }
+}
+
+ 

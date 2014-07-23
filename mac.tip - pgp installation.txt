@@ -1,0 +1,8 @@
+gnupg.org - does not include IDEA encrypt
+
+.configure
+make clean (clean before make)
+make (also available make -j4 (4 processors))
+make check (check that make run correctly)
+sudo make install (install app)
+

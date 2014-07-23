@@ -1,0 +1,18 @@
+URL= http://spaces.msn.com/members/staceyw/Blog/cns!1pnsZpX0fPvDxLKC6rAAhLsQ!503.entry
+
+Get Windows Groups from WindowsIdentity 
+ 
+Here is a simple way to enumerate the Windows Groups associated with a WindowsIdentity:
+ 
+        public static List<string> GetWindowsGroups(WindowsIdentity id)
+        {
+            List<string> groups = new List<string>();
+            IdentityReferenceCollection irc = id.Groups;
+            
+            foreach ( IdentityReference ir in irc )
+            {
+                NTAccount acc = (NTAccount)ir.Translate(typeof(NTAccount));
+                groups.Add(acc.Value);
+            }
+            return groups;
+        } 

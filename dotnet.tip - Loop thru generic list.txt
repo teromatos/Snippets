@@ -1,0 +1,13 @@
+List<User> users = UserRepository.GetAll();
+foreach (User myUser in users.FindAll(delegate(User user) { return (user.Name == "Fredrik"); }))
+{
+    Console.WriteLine(myUser.Name);
+}
+
+============================================================
+
+List<User> users = UserRepository.GetAll();
+
+var users = from user in users
+            where user.Name == "Fredrik"
+            select user;  

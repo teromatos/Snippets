@@ -1,0 +1,6 @@
+                List<string> groups = new List<string>();
+                foreach (System.Security.Principal.IdentityReference group in wi.Groups)
+                {
+                    System.Security.Principal.IdentityReference group2 = group.Translate(typeof(System.Security.Principal.NTAccount));
+                    groups.Add(group.Translate(typeof(System.Security.Principal.NTAccount)).ToString());
+                }

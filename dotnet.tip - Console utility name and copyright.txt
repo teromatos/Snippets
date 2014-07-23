@@ -1,0 +1,7 @@
+Dim an As New System.Reflection.AssemblyName(System.Reflection.Assembly.GetExecutingAssembly.FullName)
+
+Console.Write(an.Name & " ")
+Console.Write(an.Version.Major.ToString & "." & an.Version.Minor & " ")
+Console.WriteLine("(Build " & an.Version.ToString & ")")
+Console.WriteLine("Copyright (C) Antero Matos 2005. All rights reserved.")
+Console.WriteLine("")

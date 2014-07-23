@@ -1,0 +1,31 @@
+URL=http://stackoverflow.com/questions/807030/combobox-bound-to-an-enum-types-values-while-also-having-a-blank-entry
+
+public static string[] GetEnumValues<T>(bool includeBlank) 
+{    
+  List<string> values = new List<string>((Enum.GetValues(typeof(T)) as T[]).Select(t => t.ToString()));
+  if (includeBlank)    
+  {        
+    values.Insert(0, string.Empty);    
+  }    
+  
+  return values.ToArray();
+}
+
+==============================================================
+
+ 
+static IEnumerable<String> getValues<T>(String initialValue)
+{    
+  yield return initialValue;    
+  foreach (T t in Enum.GetValues(typeof(T)))        
+    yield return t.ToString();
+}
+static IEnumerable<String> getValues<T>()
+{    
+  return getValues<T>(String.Empty);
+}
+
+This will allow you to bind to the results of this function like this:
+  combo1.DataSource = getValues<myEnumType>().ToArray();
+or like this, if you wish to specify a different value for the initial item:
+  combo1.DataSource = getValues<myEnumType>("Select").ToArray();

@@ -1,0 +1,236 @@
+Setting up a FTP server on your own computer, by Virus1824
+
+------------
+introduction
+------------
+This tutorial will teach you how to setup a FTP server on ure own computer and how to use it aswell.
+
+----------------
+getting started
+----------------
+First get Bulletproof FTP Version 2.15 from
+http://download.com.com/3000-2160-7441289.html?tag=lst-0-2
+Its and old version but it works like it should and i haven't encountered any bugs yet.
+
+--------------
+Setting up
+-------------
+1. Install the program as u would normally, then start the program.
+2. You'll see a menu at the top, and pictograms beneath it.
+3. First we have to make a new user account, goto the pictogram bar and click user accounts (the pictogram with 1 head on it).
+4. When u click on that a new menu pops up, goto the far right of that menu and you'l see "user accounts" right click in the white empty space,
+and select "add", and enter a new account name.
+5. Then when u returned to the main menu you'l see under setup some basic options which u can set.
+
+---Login---
+The login name you use to access you're ftp
+---Password---
+The password for the ftp server it generates a random 1 but u can change it for anything else
+---home IP---
+Select the IP of your computer.
+---group name---
+Best to leave that empty
+
+When u did all that goto access rights and right click in the white plane, select "Add" and select the map u wish to run ure FTP in.
+When done look at the right you will see some options you can check or uncheck, i'll explain themem.
+
+---read---
+A remote computer can download from your FTP server
+---write---
+A remote computer can upload files to your computer
+---Delete---
+A Remote computer can delete files from your computer, i suggest you don't use that
+---append---
+This option will alow resume downloading, if someone is uploading to you're computer and he gets disconnect or something he can always resume downloading from the point he left, the same applies for downloading.
+
+-----------
+Directories
+-----------
+
+---Make---
+A remote computer can make a new folder in ure server but only in the directory u run ure dtp server in.
+---list---
+This allows a remote computer to see the list of directories
+---Delete---
+This allows a remote computer to delete maps and directories i suggest u don't use this.
+---SubDirs---
+This will allow a remote computer to access sub directories in the ftp server.
+
+
+ok now we have done that lets take a look at the left side of the menu.
+u'l see a row of pictograms
+-setup
+-Miscellanous
+-links & messages
+-ratio, Quota , Bps
+-IP & banned files
+-notes
+-status
+
+I'm gonna discuss everyone of them, since we already have handles setup i leave that out.
+
+----------
+Miscellanous
+----------
+---Enable account---
+should always be checked if not you cannot login using that account
+---Enable timeout---
+If the user of the account is been inactive for the secons u apply he will be disconnected.
+---User by-passes server max. user limit---
+if the maximal users on the server is reached this account can still login, if checked.
+---Max no of users---
+This is the maximum number of people that can login under the account.
+---Max no of conenctions per IP---
+The maximum times a user can connect through the same IP
+
+
+------files------
+
+---Show relative path---
+If you are in a subdir it will make a map with "/" that returns u to the main dir
+---hide files/dirs with "hidden" attribute set---
+If a file is hidden it wont be shown on the server if checked.
+
+
+-----commands-----
+
+---allow NOOP command---
+This command keeps connections alive nothing more u should keep it checked.
+---user can change his password---
+As it says a user can change his password whenever he wants too
+---user can chat with other users---
+A user can chat with other people on the ftp server through the command <user> <message>
+---user can know who is connected---
+The user can see who else is on the FTP server
+
+
+-------------
+Links & messages
+-------------
+
+------virtual file system-------
+
+---Links to add to directories---
+This command add links to other directories displayed as maps.
+
+---Treat as Links---
+Redirects the people to the link directory
+
+---Treat as Virtual Directories---
+This leads to people to the target directory but it still looks like you are in the Home directory
+
+---Add links from this file---
+
+File's that contain links will be added in the main directory
+
+---Resolve windows shortcuts---
+
+When you do that the link will be shown as a a map with a shortcut arrow like on the Desktop
+
+---Auto-include link pointing to home directory---
+
+this will add a shortcut map so if ure in a other directory u can lick it and return to the home directory
+
+---Show login message---
+
+Shows a Welcome message after the user has logged into the FTP---
+
+---Show change dir message---
+
+Sends a message to the user when he changes to a  different directory
+
+-------------
+Ratio, Quota, Bps
+-------------
+
+-------Ratio------
+
+---Enable ratio---
+Speaks for itself check this box to enbale the ratio
+
+---upload/download---
+The amount of bytes a user may Download or upload during 1 session
+
+---credit---
+I do'n really understand what this does i think it works with a knid of point system
+
+---Count method---
+The method the server counts the bytes and credits for a session
+
+-------Disk Quota------
+
+---enable disk quota---
+Again it speaks for itself check the box to activate Disk quota
+
+---current---
+The actual disk zie occupation
+
+---max---
+Maximum disk space granted to a user
+
+------speed limit------
+
+---up/down---
+The amount of data a user can download or upload from your computer
+
+-------------
+IP & Banned Files
+-------------
+
+---Banned Files---
+Put banned extensions in the list like *.jpg and so on
+
+---IP Access---
+Put Banned IP addresses here, u can also use it to only give authorized users access
+
+-------------
+Notes
+-------------
+Put ure personal notes in the box
+
+-------------
+Status
+-------------
+Status of all download uploaded files and so on are stored here.
+
+
+-------------
+Conclusion
+-------------
+In this tutorial i showed you how to setup a FTP server on your own computer, and how to use its basic functions.
+If you stumble upon errors or mistakes or you have a problem with understanding the tutorial, you can mail me at the e-mail address i provided below.
+I hope you enjoyed reading this tutorial as much as i enjoyed writing it and i hope you had any use with it.
+
+-------------
+Disclaimer
+-------------
+I accept no responsibilities with any damage this tutorial may cause to your or anyone's computer, this tutorial
+is for educational purposes only.
+
+-------------
+Credits
+-------------
+2003 Virus1824
+E-mail: virus1824@subseven.ws
+you can also visit me at
+irc.subseven.ws
+#euyulio
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

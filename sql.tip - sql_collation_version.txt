@@ -1,0 +1,203 @@
+/*
+        Background : SQL2000 supports collation at different levels.
+        Collation can be based on the Windows Collation or SQL Collation.
+        Collation can be specified at the server, database & column level.
+        For more details, see the BOL topics on COLLATION. So this small
+        article should give a fairly detailed view of the various options
+        available & gotchas! COLLATION is very powerful but requires good
+        understanding to use them efficiently.
+*/
+-- To determine all the available collations use the system function
+-- fn_helpcollations. The example below gets all the SQL Latin collations.
+SELECT * FROM ::fn_helpcollations()
+WHERE [name] LIKE 'SQL_Latin%';
+/*
+name                            description
+------------------------------- ---------------------------------------------------------------
+SQL_Latin1_General_CP437_BIN	Latin1-General, binary sort for Unicode Data, 
+                                SQL Server Sort Order 30 on Code Page 437 for non-Unicode Data
+SQL_Latin1_General_CP437_CI_AI	Latin1-General, case-insensitive, accent-insensitive,
+                                kanatype-insensitive, width-insensitive for Unicode Data,
+                                SQL Server Sort Order 34 on Code Page 437 for non-Unicode Data
+SQL_Latin1_General_CP437_CI_AS	Latin1-General, case-insensitive, accent-sensitive,
+                                kanatype-insensitive, width-insensitive for Unicode Data,
+                                SQL Server Sort Order 32 on Code Page 437 for non-Unicode Data
+SQL_Latin1_General_CP437_CS_AS	Latin1-General, case-sensitive, accent-sensitive,
+                                kanatype-insensitive, width-insensitive for Unicode Data,
+                                SQL Server Sort Order 31 on Code Page 437 for non-Unicode Data
+SQL_Latin1_General_CP850_BIN	Latin1-General, binary sort for Unicode Data,
+                                SQL Server Sort Order 40 on Code Page 850 for non-Unicode Data
+SQL_Latin1_General_CP850_CI_AI	Latin1-General, case-insensitive, accent-insensitive,
+                                kanatype-insensitive, width-insensitive for Unicode Data,
+                                SQL Server Sort Order 44 on Code Page 850 for non-Unicode Data
+SQL_Latin1_General_CP850_CI_AS	Latin1-General, case-insensitive, accent-sensitive,
+                                kanatype-insensitive, width-insensitive for Unicode Data,
+                                SQL Server Sort Order 42 on Code Page 850 for non-Unicode Data
+*/
+GO
+
+-- To determine the server-wide collation established during SETUP do:
+SELECT SERVERPROPERTY( 'Collation' ) AS Server_Default_Collation;
+/*
+Server_Default_Collation
+------------------------------
+SQL_Latin1_General_CP437_CI_AS
+*/
+GO
+
+-- Now let's create a database with a different collation
+-- than the server's i.e., the SQL Latin with binary sort order
+CREATE DATABASE CollateTestDB COLLATE SQL_Latin1_General_CP850_BIN;
+GO
+USE CollateTestDB;
+GO
+-- To check the database collation do:
+SELECT DATABASEPROPERTYEX( 'CollateTestDB' , 'Collation' ) AS Database_Default_Collation
+/*
+Database_Default_Collation
+----------------------------
+SQL_Latin1_General_CP850_BIN
+*/
+GO
+
+-- Default table creation behavior
+CREATE TABLE Tbl1 (
+Col1 char( 10 ) NOT NULL ,
+Col2 varchar( 10 ) NULL
+);
+INSERT INTO Tbl1 VALUES( 'a' , 'b' );
+INSERT INTO Tbl1 VALUES( 'A' , 'B' );
+GO
+/* Column properties from "EXEC sp_help 'Tbl1';" output is shown below:
+
+Column_name Type    Length Collation
+----------- ------- ------ ----------------------------
+Col1        char        10 SQL_Latin1_General_CP850_BIN
+Col2        varchar     10 SQL_Latin1_General_CP850_BIN
+*/
+GO
+-- To verify binary sort order / collation
+SELECT * FROM Tbl1 WHERE Col1 = 'a' And Col2 = 'b';
+-- Expected output:
+/*
+Col1       Col2      
+---------- ----------
+a          b
+*/
+GO
+-- To force a case-sensitive check
+SELECT * FROM Tbl1
+WHERE Col1 COLLATE SQL_Latin1_General_CP850_CI_AI = 'a' And
+      Col2 COLLATE SQL_Latin1_General_CP850_CI_AI = 'b';
+-- Expected output:
+/*
+Col1       Col2      
+---------- ----------
+a          b
+A          B
+*/
+
+-- Create a table with columns having case-sensitive collation
+CREATE TABLE Tbl2 (
+Col1 char( 10 ) COLLATE SQL_Latin1_General_CP850_CS_AS NOT NULL ,
+Col2 varchar( 10 ) COLLATE SQL_Latin1_General_CP850_CI_AI NULL
+);
+INSERT INTO Tbl2 VALUES( 'a' , 'b' );
+INSERT INTO Tbl2 VALUES( 'A' , 'B' );
+GO
+/* Column properties from "EXEC sp_help 'Tbl2';" output is shown below:
+
+Column_name Type    Length Collation
+----------- ------- ------ ----------------------------
+Col1        char        10 SQL_Latin1_General_CP850_CS_AS
+Col2        varchar     10 SQL_Latin1_General_CP850_CI_AI
+*/
+GO
+
+-- Some sample SELECT statements:
+SELECT * FROM Tbl2 WHERE Col1 = 'a';
+/*
+Col1       Col2       
+---------- ---------- 
+a          b
+*/
+SELECT * FROM Tbl2 WHERE Col2 = 'b';
+/*
+Col1       Col2       
+---------- ---------- 
+a          b
+A          B
+*/
+
+-- Now let's take this problem a step further & create a temporary table
+-- using Tbl1 by performing a SELECT INTO. Notice that the columns are
+-- created with the collation of the columns of Tbl1.
+SELECT * INTO #Tbl1 FROM Tbl1;
+EXEC( 'Use Tempdb EXEC sp_help ''#Tbl1''');
+DROP TABLE #Tbl1;
+/* Column properties from output is shown below:
+
+Column_name Type    Length Collation
+----------- ------- ------ ----------------------------
+Col1        char        10 SQL_Latin1_General_CP850_BIN
+Col2        varchar     10 SQL_Latin1_General_CP850_BIN
+*/
+Go
+
+
+-- Similarly , to create a table using SELECT INTO with a different
+-- collation for the columns, do:
+SELECT Col1 COLLATE SQL_Latin1_General_CP437_CI_AS AS Col1,
+       Col2 COLLATE SQL_Latin1_General_CP437_CI_AS AS Col2
+INTO #Tbl1 FROM Tbl1;
+EXEC( 'Use Tempdb EXEC sp_help ''#Tbl1''');
+DROP TABLE #Tbl1;
+/* Column properties from sp_help output is shown below:
+
+Column_name Type    Length Collation
+----------- ------- ------ ----------------------------
+Col1        char        10 SQL_Latin1_General_CP437_CI_AS
+Col2        varchar     10 SQL_Latin1_General_CP437_CI_AS
+*/
+Go
+
+-- Now do the same by creating a temporary table using CREATE TABLE statement.
+-- The created table will use the default of tempdb & not the current user db.
+CREATE TABLE #Tbl1 (
+Col1 char( 10 ) NOT NULL ,
+Col2 varchar( 10 ) NULL
+);
+EXEC( 'Use Tempdb EXEC sp_help ''#Tbl1''');
+DROP TABLE #Tbl1;
+/* Column properties from output is shown below:
+
+Column_name Type    Length Collation
+----------- ------- ------ ----------------------------
+Col1        char        10 SQL_Latin1_General_CP437_CI_AS
+Col2        varchar     10 SQL_Latin1_General_CP437_CI_AS
+*/
+Go
+
+/*
+        To force the creation of the temporary table with the current user database
+        collation default, use the DATABASE_DEFAULT clause with COLLATION like:
+*/
+CREATE TABLE #Tbl1 (
+Col1 char( 10 ) COLLATE database_default NOT NULL ,
+Col2 varchar( 10 ) COLLATE database_default NULL
+);
+EXEC( 'Use Tempdb EXEC sp_help ''#Tbl1''');
+DROP TABLE #Tbl1;
+/* Column properties from output is shown below:
+
+Column_name Type    Length Collation
+----------- ------- ------ ----------------------------
+Col1        char        10 SQL_Latin1_General_CP850_BIN
+Col2        varchar     10 SQL_Latin1_General_CP850_BIN
+*/
+Go
+
+-- Now we are all set, drop the test database
+USE master;
+DROP DATABASE CollateTestDB;
+GO

@@ -1,0 +1,52 @@
+Configuration section handler 		Return type 
+
+SingleTagSectionHandler			Systems.Collections.IDictionary 
+DictionarySectionHandler 		Systems.Collections.IDictionary 
+NameValueSectionHandler 		Systems.Collections.Specialized.NameValueCollection 
+
+
+<configuration>
+	<configSections>	
+		<section name="dictionarySection" type="System.Configuration.DictionarySectionHandler"></section>
+		<section name="singleTagSection" type="System.Configuration.SingleTagSectionHandler"></section>
+		<section name="nameValueSection" type="System.Configuration.NameValueSectionHandler"></section>
+	</configSections>    
+
+	<dictionarySection>
+		<add key="key1" value="value1"></add>
+	</dictionarySection>
+	
+	<singleTagSection setting1="Value1" setting2="value two" setting3="third value"></singleTagSection>
+	
+	<nameValueSection>
+		<add key="key1" value="value1"></add>
+	</nameValueSection>
+</configuration>
+
+
+Imports System
+Imports System.Collections
+Imports System.Configuration
+
+
+    Sub Main()
+
+        Dim sampleTable As IDictionary
+        Dim value1 As String
+        Dim value2 As String
+        Dim value3 As String
+
+        sampleTable = CType(ConfigurationSettings.GetConfig("singleTagSection"), IDictionary)
+        value1 = CType(sampleTable("setting1"), String)
+        value2 = CType(sampleTable("setting2"), String)
+        value3 = CType(sampleTable("setting3"), String)
+
+
+        Dim ht As Specialized.NameValueCollection
+        ht = CType(System.Configuration.ConfigurationSettings.GetConfig("nameValueSection"), Specialized.NameValueCollection)
+        value1 = ht("key1")
+
+
+        sampleTable = CType(ConfigurationSettings.GetConfig("dictionarySection"), IDictionary)
+
+    End Sub

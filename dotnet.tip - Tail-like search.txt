@@ -1,0 +1,25 @@
+public void TargetFile_Changed(object source, FileSystemEventArgs e)
+  {
+   lock (this)
+   {
+    byte[] bytesRead = new byte[maxBytes];
+    FileStream fs = new FileStream(this.filename, FileMode.Open);
+    if (fs.Length > maxBytes)
+    {
+     this.previousSeekPosition = fs.Length - maxBytes;
+    }
+    this.previousSeekPosition = (int)fs.Seek(
+        this.previousSeekPosition, SeekOrigin.Begin);
+    int numBytes = fs.Read(bytesRead, 0, maxBytes);
+    fs.Close();
+    this.previousSeekPosition += numBytes;  
+
+    StringBuilder sb = new StringBuilder();
+    for (int i=0; i<numBytes; i++)
+    {
+     sb.Append((char)bytesRead[i]);   
+    }
+
+    this.MoreData(this, sb.ToString());
+   }
+  }

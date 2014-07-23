@@ -1,0 +1,17 @@
+url=http://weblogs.asp.net/palermo4/archive/2007/07/05/getting-the-friendly-control-id.aspx
+
+Getting the Friendly Control ID
+
+Here is a simple utility method that will take a string argument such as  
+"ctl00$ContentPlaceHolder1$DropDownList1" and return "DropDownList1"
+
+public static string GetFriendlyControlId(string renderedControlId)
+{
+    // PageIdSeparator is a property returning Page.IdSeparator
+    int indexOfSeparator = renderedControlId.LastIndexOf(PageIdSeparator);
+    if (indexOfSeparator >= 0)
+    {
+        renderedControlId = renderedControlId.Substring(indexOfSeparator + 1);
+    }
+    return renderedControlId;
+}

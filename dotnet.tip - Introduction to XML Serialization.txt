@@ -1,0 +1,59 @@
+Many projects that I work on require me to serialize objects out to the file system and then retrieve them later. When I am serializing out program settings that are loaded in every time the program runs, I tend to use the Settings that come as a part of C# projects. If however the user can load or save settings, documents or projects, then I use the XmlSerializer class to save instances of a class out to XML. This allows me to automatically create a new document type based on my data classes and save them out with a few lines of code.
+
+Because I do this so often, I have created a static helper class that has two methods that serialize/deserialize any type to/from an XML file. The two methods are:
+
+public static void Serialize<T>( string filename, T data )
+{
+   TextWriter writer = null;
+   try
+   {
+      writer = new StreamWriter( filename );
+      XmlSerializer serializer = new XmlSerializer( typeof(T) );
+      serializer.Serialize( writer, data );
+   }
+   finally
+   {
+      if ( writer != null )
+      {
+         writer.Close();
+      }
+   }
+}
+
+public static T Deserialize<T>( string filename )
+{
+   TextReader reader = null;
+   T data = default(T);
+   try
+   {
+      reader = new StreamReader( filename );
+      XmlSerializer serializer = new XmlSerializer( typeof(T) );
+      data = ( T )serializer.Deserialize( reader );
+   }
+   finally
+   {
+      if ( reader != null )
+      {
+         reader.Close();
+      }
+   }
+   return data;
+}
+With these two methods, you can serialize a class out to XML or restore a class from XML with one line of code.
+
+// Serialize out a person to XML
+XmlSerializerHelper.Serialize<Person>( "person.xml", person );
+
+// Deserialize the person from XML
+Person person = XmlSerializerHelper.Deserialize<Person>( "person.xml" );
+The XmlSerializer class will serialize out/in all public properties and members of the given class. One common error is that the class that you are serializing and all contained classes must have a public constructor that takes no parameters.
+
+The class that you are serializing does not need to be modified, but if you want to control how the XML is serialized out, you can use several attributes.
+
+By default, all properties are serialized out as XML elements. If you want to specify how the elements are serialized out, you can use the XmlElementAttribute and set properties on it such as ElementName.
+
+Simple types such as string and int can be serialized out as Xml attributes if you prefer. To do this, mark the properties with the XmlAttributeAttribute.
+
+If you want properties in your class to not be serialized, use the XmlIgnoreAttribute. This will usually be used for properties that are calculated based on the values of other properties.
+
+For more, look at this Xml Serialization example project

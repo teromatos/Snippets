@@ -1,0 +1,56 @@
+   [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool DragDetect(IntPtr intPtr, Point point);
+ 
+        Point dragEnterPoint;
+ 
+        private void dataGridView1_MouseMove(object sender, MouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.None)
+            {
+                this.dataGridView1.MouseMove -= new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseMove);
+            }
+            DataGridView.HitTestInfo info = dataGridView1.HitTest(e.X, e.Y);
+            bool lDragDetect = DragDetect(this.Handle, dragEnterPoint);
+            if (lDragDetect)
+            {
+                if (info.RowIndex >= 0)
+                {
+                    IDataObject dataObject = getDataObject();
+                    if (dataObject != null)
+                        dataGridView1.DoDragDrop(dataObject, DragDropEffects.Copy);
+                }
+            }
+        }
+ 
+        private void dataGridView1_CellMouseDown(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            if (e.Button == MouseButtons.Left)
+            {
+                if (e.ColumnIndex >=0 )
+                {
+                    dragEnterPoint = new Point(e.X, e.Y);
+                    this.dataGridView1.MouseMove += new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseMove);
+                }
+            }
+        }
+ 
+        private void dataGridView1_CellMouseUp(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            this.dataGridView1.MouseMove -= new System.Windows.Forms.MouseEventHandler(this.dataGridView1_MouseMove);
+        }
+		
+		
+		private IDataObject getDataObject()
+        {
+            //TODO: why does this return plaintext(tsv) and CSV that has empty first column?
+            DataObject clipboardData = this.dataGridView1.GetClipboardContent();
+ 
+            Employee[] employees =
+                new Employee[dataGridView1.SelectedRows.Count];
+            for (int i = 0; i < dataGridView1.SelectedRows.Count; i++)
+            {
+                employees[i] = dataGridView1.SelectedRows[i].DataBoundItem as Employee;
+            }
+            clipboardData.SetData(employeeDataFormat.Name, employees);
+            return clipboardData;
+        }

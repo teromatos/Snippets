@@ -1,0 +1,53 @@
+URL= http://codebetter.com/blogs/john.papa/archive/2005/06/06/64145.aspx
+
+Find a Column, Find a Table in SQL Server
+OK, so this isn’t rocket science, but then again some of the best things are the simplest. You can do a lot with the information_schema views in SQL Server. 
+
+Here is a short stored procedure that you can use to find:
+
+a table by its full name 
+a table by partial name 
+a column by its full name 
+a column by its partial name
+ It comes in handy for me when I am looking for a field in related tables, or a spec I am reading refers to a field by name but not by the table it is in. Like I said, it is simple, but I have used this type of a proc for a long time. 
+
+Table or Column Finder
+
+CREATE PROCEDURE prFindTableOrColumn
+(
+	@table_name VARCHAR(128) = NULL,
+	@search_data VARCHAR(128) = NULL
+)
+AS
+	
+	DECLARE @search1 VARCHAR(128)
+	SET @search1 = '%' + @table_name + '%'
+	IF @search1 IS NULL
+		SET @search1 = '%'
+	
+	DECLARE @search2 VARCHAR(128)
+	SET @search2 = '%' + @search_data + '%'
+	IF @search2 IS NULL
+		SET @search2 = '%'
+	
+	SELECT
+		c.table_name,
+		c.column_name,
+		c.data_type,
+		c.character_maximum_length,
+		c.numeric_precision,
+		c.numeric_scale
+	FROM	
+		information_schema.columns c
+		INNER JOIN information_schema.tables t 
+			ON c.table_name = t.table_name 
+	WHERE
+		c.table_name LIKE @search1
+		AND c.column_name LIKE @search2
+		AND t.table_type = 'BASE TABLE'
+	ORDER BY 
+		c.table_name,
+		c.column_name
+
+ 
+

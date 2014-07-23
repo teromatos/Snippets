@@ -1,0 +1,14 @@
+URL= http://blogs.geekdojo.net/richard/archive/2005/03/23/7520.aspx
+
+NUnit test a WinForm without the fuss 
+VS.NET is a funny thing, it won't let you reference an .exe and yet csc.exe will.  That's a bit of a pain when you want to reference, say, a WinForm for unit testing purposes.  Sure, you can create a separate assembly project for the entry point leaving your forms project as a class library, but I have enough projects crowded in my solution as it is - plus it just feels wrong to me.
+
+So I put this pre and post build event in my WinForms project and set my unit test project to be dependant on my WinForms projects build and voila! I get a reference assembly that VS.NET can live with via a hard link.
+
+Pre build event:
+erase /q $(TargetFileName).dll
+
+Post build event:
+fsutil hardlink create $(TargetFileName).dll $(TargetFileName)
+
+Then I just reference the resulting .dll as a normal reference and everything just works.

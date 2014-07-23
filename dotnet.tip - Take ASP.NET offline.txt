@@ -1,0 +1,4 @@
+URL= http://weblogs.asp.net/eporter/archive/2005/10/05/426708.aspx
+
+Take Your ASP.NET 2.0 App Offline 
+I just learned this a few minutes ago, but you can take an ASP.NET 2.0 application offline temporarily by uploading a file called App_Offline.htm.  It will spin down the appdomain and redirect all requests to that page.  Neato! 

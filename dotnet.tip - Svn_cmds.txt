@@ -1,0 +1,74 @@
+C:\svn\proj\Ainfo
+C:\svn\repo\Ainfo
+
+C:\svn\proj\ainfo
+C:\svn\proj\ainfo\branches
+C:\svn\proj\ainfo\tags
+C:\svn\proj\ainfo\trunk
+
+C:\temp\ainfo
+C:\temp\ainfo\branches
+C:\temp\ainfo\tags
+C:\temp\ainfo\trunk
+
+
+:Create Repository
+C:\svn\proj\AInfo>svnadmin create c:\svn\repo\ainfo
+
+:Import project
+C:\svn\proj\AInfo>svn import c:\temp\ainfo file:///c:/svn/repo/ainfo -m "Initial
+ Import"
+Adding         C:\Temp\AInfo\trunk
+Adding  (bin)  C:\Temp\AInfo\trunk\AInfo.suo
+Adding         C:\Temp\AInfo\trunk\AInfo.sln
+Adding         C:\Temp\AInfo\trunk\AInfo
+Adding         C:\Temp\AInfo\trunk\AInfo\AssemblyInfo.vb
+Adding         C:\Temp\AInfo\trunk\AInfo\StrongName.vb
+Adding         C:\Temp\AInfo\trunk\AInfo\build.bat
+Adding         C:\Temp\AInfo\trunk\AInfo\debug.build
+Adding         C:\Temp\AInfo\trunk\AInfo\Startup.vb
+Adding         C:\Temp\AInfo\trunk\AInfo\AInfo.vbproj.user
+Adding         C:\Temp\AInfo\trunk\AInfo\AInfo.vbproj
+Adding         C:\Temp\AInfo\trunk\AInfo\release.build
+Adding         C:\Temp\AInfo\branches
+Adding         C:\Temp\AInfo\tags
+
+Committed revision 1.
+
+
+:Checkout project to workspace
+C:\svn\proj\AInfo>svn checkout file:///c:/svn/repo/ainfo .
+A    trunk
+A    trunk\AInfo.suo
+A    trunk\AInfo.sln
+A    trunk\AInfo
+A    trunk\AInfo\AssemblyInfo.vb
+A    trunk\AInfo\StrongName.vb
+A    trunk\AInfo\build.bat
+A    trunk\AInfo\debug.build
+A    trunk\AInfo\Startup.vb
+A    trunk\AInfo\AInfo.vbproj.user
+A    trunk\AInfo\AInfo.vbproj
+A    trunk\AInfo\release.build
+A    branches
+A    tags
+Checked out revision 1.
+
+:Create branch to branches/myainfo under the workspace
+C:\svn\proj\AInfo>svn copy trunk branches/myainfo
+A         branches\myainfo
+
+
+:Commiting branch to repository
+C:\svn\proj\AInfo>svn commit -m "Creating a private branch of ainfo/truunk"
+Adding         branches\myainfo
+
+Committed revision 2.
+
+: Create a branch on the repo instead of the workspace
+C:\svn\proj\AInfo>svn copy file:///c:/svn/repo/ainfo/trunk file:///c:/svn/repo/a
+info/branches/myainfo2  -m "Creating a secondary private branch of ainfo/trunk i
+n the repo"
+
+Committed revision 3.
+

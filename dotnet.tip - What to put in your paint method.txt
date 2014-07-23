@@ -1,0 +1,7 @@
+What to put in your paint method
+
+Painting code, that’s it. Sounds silly, but it needs to be said. OnPaint is not the time to fetch stuff out of the database, change the location or size of controls, etc. Changing properties like this can cause side-effects which could get you into an infinite painting loop. 
+
+If you need to perform some work after the Form.Load event, consider telling yourself to do it later when you’re not so busy – the easiest way to do this in WindowsForms is to use the BeginInvoke method.
+
+BeginInvoke(new EventHandler(OnLoadCompleted)); 

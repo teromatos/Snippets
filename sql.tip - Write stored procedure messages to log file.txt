@@ -1,0 +1,26 @@
+CREATE PROC write_to_file
+@msg VARCHAR(100),
+@file VARCHAR(100),
+@overwrite BIT = 0
+AS
+
+/*
+  Written by: Narayana Vyas Kondreddi
+  Date written: January 12th 2001
+  Purpose: To log messages to text files from stored procedures/triggers/sql scripts
+  Input parameters: message, file name, overwrite flag (1 to overwrite, 0 to append to file, 0 is the default)
+  Example: EXEC write_to_file 'Duplicates found','C:\logfile.txt',0
+  Tested on: SQL Server Version 7.0, 2000
+  Remarks: You should have permissions required through access file system through xp_cmdshell
+           See SQL Server Books Online for xp_cmdshell if you are having problems with this procedure
+  Email: answer_me@hotmail.com
+  Homepage: http://vyaskn.tripod.com
+*/
+
+BEGIN
+	SET NOCOUNT ON
+	DECLARE @execstr VARCHAR(255)
+	SET @execstr = RTRIM('echo ' + COALESCE(LTRIM(@msg),'-') + CASE WHEN (@overwrite = 1) THEN ' > ' ELSE ' >> ' END + RTRIM(@file))
+	EXEC master..xp_cmdshell @execstr
+	SET NOCOUNT OFF
+END

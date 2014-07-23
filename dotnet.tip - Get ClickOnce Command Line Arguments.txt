@@ -1,0 +1,27 @@
+Thanks to Jamie Cool, Microsoft PM for ClickOnce, for providing the answer on a question I am often asked in talking about ClickOnce:
+
+Question: How can I use command line parameters with a ClickOnce deployed application?
+
+To answer that, you need several pieces of information:
+
+1) How do you pass command line arguments to a ClickOnce application?
+
+ClickOnce applications are launched using a URL to the deployment manifest (.application) file. So you use web querystring parameter syntax:
+
+http://mydeploymentserver/MyApplicationFolder/MyApplication.application?param1=foo&param2=bar
+
+2) How do you tell ClickOnce and .NET Security to allow you to use the command line parameters?
+
+Under the covers, you need to add a trustURLParameters=“true“ attribute to the deployment element in the .application (deployment) manifest file. In Beta 2, or at least by release, this should just be a checkbox in the poject properties Publish section. You can do this by dragging the .application file into Notepad.
+
+You then need to open the manifest with the mage.exe tool (located in the <vstudio 8>\SDK\bin folder), and save it again, specifying a key file to re-sign the manifest. If you try to launch the app without doing this, the runtime won't do it on the client machine because it sees that the manifest has been tampered with since it was published. 
+
+Make sure to check the .application file again after signing to see if your trustURLParameters attribute is still there. If you screwed up the (case sensitive) name (as I did the first couple times), the Beta 1 mage tool will throw away any attributes it doesn't recognize when you save to re-sign the manifest.
+
+3) How do you harvest the values passed via querystring assuming you have done 1 & 2?
+
+string cmdLine = AppDomain.CurrentDomain.SetupInformation.ActivationArguments.ActivationData[0];
+
+This will give you back the entire command line (URL with parameters), so you just need to parse that string for the ? separator between the path and the params, and then parse the remainder for the & and = separators.
+
+Piece of cake!

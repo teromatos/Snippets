@@ -1,0 +1,203 @@
+    Public Function CountOfApplicationInstances() As Integer
+
+        Dim counter As Integer
+
+        ' Get a handle to the current proces
+        Dim currentProcess As Process = Process.GetCurrentProcess()
+
+        ' Get an array of all instances of the application
+        Dim Instances() As Process = Process.GetProcessesByName(currentProcess.ProcessName)
+
+        ' Iterate all processes with the same name
+        Dim processTmp As Process
+        For Each processTmp In Instances
+
+            ' Check the name to see that it is running from the same path
+            Dim strPath As String = _
+                System.Reflection.Assembly.GetExecutingAssembly.Location
+
+            ' Fixup paths
+            Dim strFixedPath As String = strPath.Replace("/", "\")
+
+            ' See if we have a match
+            If strFixedPath = currentProcess.MainModule.FileName Then
+                counter += 1
+            End If
+
+            MessageBox.Show(strPath & vbCrLf & strFixedPath & vbCrLf & currentProcess.MainModule.FileName)
+        Next
+
+        Return counter
+
+    End Function
+
+
+=================================================
+
+Hello Breck,
+
+You can use the Mutex class to ensure your application unique. Also, you 
+can use the Application.Run method to keep your application running without 
+showing the Form modally. Basically, you may perform these actions to 
+achieve the target:
+
+1.	Detect if an Application instance already exists
+2.	If yes open the file with the previous Application
+
+The first one is very easy. You may use a Mutex object to ensure the only 
+single instance exists. This is sample code:
+
+[STAThread]
+static void Main() 
+{
+	Mutex appMutex = new Mutex(false, "Applicatinon");
+	if(appMutex.WaitOne(0, false))
+		Application.Run(new Form1());
+	else
+		//Open the file with the previous Application
+}
+
+The second action is a little complex. You should tell the previous 
+Application which file will be opened. I suggest you use the SendMessage 
+API to send a user defined message to the Application. There is a sample 
+code demonstrates how to use user defined message in C#:
+
+Please Note: this is only a sample code demonstrates how to send and handle 
+the message. There are still lots of work to do, such as retrieve the 
+target window's handle, get the file name and send the file name via wParam 
+or lParam.
+
+[DllImport("user32.dll")]
+private static extern bool SendMessage(
+	IntPtr hWnd,      // handle to destination window
+	UInt32 Msg,       // message
+	Int32 wParam,  // first message parameter
+	Int32 lParam   // second message parameter
+	);
+
+private const int WM_USER = 0x0400;
+private const int MSG_COMMAND_OPEN = WM_USER + 200;
+
+protected override void WndProc(ref Message m)
+{
+	if(m.Msg == MSG_COMMAND_OPEN)
+		//Open the file
+	base.WndProc(ref m);
+}
+
+[STAThread]
+static void Main() 
+{
+	Mutex appMutex = new Mutex(false, "Applicatinon");
+	if(appMutex.WaitOne(0, false))
+		Application.Run(new Form1());
+	else
+		SendMessage (Target.Handle, MSG_COMMAND_OPEN, 0, 0);
+}
+
+I hope this helps you.
+
+Best regards, 
+
+Lion Shi [MS]
+MCSE, MCSD
+Microsoft Support Engineer
+
+This posting is provided "AS IS" with no warranties, and confers no rights. 
+You assume all risk for your use.  2001 Microsoft Corporation. All rights 
+reserved.
+--------------------
+    From: breck_ryker@mpsisys.com (Breck)
+    Newsgroups: microsoft.public.dotnet.general
+    Subject: Converting to Single-Instance App
+    Date: 13 Nov 2002 14:19:54 -0800
+    Organization: http://groups.google.com/
+    Lines: 40
+    Message-ID: <2e4e13f6.0211131419.20e55120@posting.google.com>
+    NNTP-Posting-Host: 208.35.49.138
+    Content-Type: text/plain; charset=ISO-8859-1
+    Content-Transfer-Encoding: 8bit
+    X-Trace: posting.google.com 1037225994 21869 127.0.0.1 (13 Nov 2002 
+22:19:54 GMT)
+    X-Complaints-To: groups-abuse@google.com
+    NNTP-Posting-Date: 13 Nov 2002 22:19:54 GMT
+    Path: 
+cpmsftngxa06!tkmsftngp01!newsfeed00.sul.t-online.de!t-online.de!news.stealth
+net!news.stealth.net!telocity-west!TELOCITY!sn-xit-03!sn-xit-01!sn-xit-04!s
+upernews.com!postnews1.google.com!not-for-mail
+    Xref: cpmsftngxa06 microsoft.public.dotnet.general:73613
+    X-Tomcat-NG: microsoft.public.dotnet.general
+    
+    [Windows 2000, VB.NET]
+    
+    I have the following situation:
+    
+    ProjectA  [A.exe], a Windows app, contains a Main() procedure which
+    displays a form in ProjectB [B.dll], a Class Library.  A.exe's sole
+    purpose in life is to display this window in B.dll.  A.exe is often
+    (but not always) executed by a user double-clicking a file whose file
+    extension is registered to A.exe.  This A.exe, having received that
+    file as a command-line parameter, then calls the form in B.dll.
+    
+    In order to keep A.exe's Main() from immediately executing after
+    displaying B.dll's form, A.exe calls that form modally.  So, A.exe
+    sits there until the window is closed.  Then A.exe finally exits.
+    
+    Here's what I need:
+    
+    First and foremost, I need A.exe to be a single-instance application
+    (like, say, MS Word).  That is, if a user double-clicks a file, A.exe
+    should display B.dll's form, and the file (which A.exe accepts as a
+    command-line parameter) should display (this is how the app currently
+    works).  But if a user double-clicks *another* such file, then the
+    *same* A.exe instance needs to be summoned, and it should add this
+    file to the already-displayed form from the same B.dll.  Right now, as
+    I have coded it, a new instance of A.exe would instantiate a new B.dll
+    and a new window would display.
+    
+    So that's the main thing--A.exe should be a single-instance app. 
+    Secondly, as you can see, I have a problem in the way A.exe calls
+    B.dll's form.  At the moment, having it call that form modally is
+    fine--that's the only (clean) way I can keep A.exe from exiting
+    execution almost immediately.  But this modal stuff obviously has to
+    go--if I suddenly made A.exe a single-instance app *now*, it wouldn't
+    be ready to accept that second file as a command-line parameter--it
+    would still be sitting there from the previous file's call, waiting
+    for the (modal) form of B.dll to be closed.  So this is a related
+    issue--I've got to pull off the single-instancing, but I also have to
+    quit calling the form in B.dll the way I am:  modally.
+    
+    Thanks a lot for your help.
+    
+
+
+
+
+
+'Public Class PrevInstance
+'    Const ERROR_ALREADY_EXISTS As Integer = 183
+
+'    <System.Runtime.InteropServices.DllImport("coredll.dll", EntryPoint:="GetLastError")> _
+'    Private Shared Function GetLastError() As Integer
+'    End Function
+
+'    <System.Runtime.InteropServices.DllImport("coredll.dll", EntryPoint:="CreateMutexW")> _
+'    Private Shared Function CreateMutex(ByVal lpMutexAttributes As IntPtr, ByVal InitialOwner As Boolean, ByVal MutexName As String) As Integer
+'    End Function
+
+'    Public Shared Function IsInstanceRunning() As Boolean
+'        Try
+'            Dim appname As String = System.Reflection.Assembly.GetExecutingAssembly().GetName().Name
+'            If CreateMutex(IntPtr.Zero, True, appname) <> 0 Then
+'                If GetLastError() = ERROR_ALREADY_EXISTS Then
+'                    Return True
+'                Else
+'                    Return False
+'                End If
+'            End If
+'            Return False
+'        Catch ex As Exception
+'            MsgBox("IsInstanceRunning Error: " & ex.ToString)
+'        End Try
+'    End Function 'IsInstanceRunning
+'End Class

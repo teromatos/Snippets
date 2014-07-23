@@ -1,0 +1,46 @@
+Source=http://weblogs.sqlteam.com/mladenp/archive/2007/03/03/60125.aspx
+Related=http://msdn2.microsoft.com/en-us/library/ms162843.aspx
+
+
+TableDiff.exe is a table comparison tool that comes with the sql server.
+
+It's installed on the server in the:
+
+"C:\Program Files\Microsoft SQL Server\90\COM\TableDiff.exe"
+
+if your SQL Server is installed in the program files on c: drive.
+
+ 
+
+Example use:
+
+This compares 2 tables in the same database on the same server and creates a new table called DiffsTable that holds the differences:
+
+ 
+
+"C:\Program Files\Microsoft SQL Server\90\COM\tablediff.exe" -sourceserver MyServer1 
+                                                             -sourcedatabase MyDatabase1 
+                                                             -sourcetable MyTable1 
+                                                             -destinationserver MyServer1  
+                                                             -destinationdatabase MyDatabase1 
+                                                             -destinationtable MyTable2 
+                                                             -et DiffsTable
+
+ 
+
+This compares 2 tables in the same database on the same server and creates a new table called DiffsTable that holds the differences and
+
+creates a T-SQL script file at d:\MyTable1_MyTable2_diff.sql
+
+that holds the UPDATE/INSERT/DELETE statements to synchronize the 2 tables:
+
+ 
+
+"C:\Program Files\Microsoft SQL Server\90\COM\tablediff.exe" -sourceserver MyServer1  
+                                                             -sourcedatabase MyDatabase1 
+                                                             -sourcetable MyTable1 
+                                                             -destinationserver MyServer1  
+                                                             -destinationdatabase MyDatabase1 
+                                                             -destinationtable MyTable2 
+                                                             -et DiffsTable 
+                                                             -f d:\MyTable1_MyTable2_diff.sql

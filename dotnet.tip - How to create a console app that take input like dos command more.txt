@@ -1,0 +1,63 @@
+Imports System.Windows
+Imports System.Windows.Forms
+
+Module Module1
+
+    Sub Main()
+
+        Dim s As String = Console.In.ReadToEnd()
+        Using sw As New System.IO.StreamWriter("x.txt")
+            sw.WriteLine(s)
+        End Using
+
+        System.Windows.Forms.Clipboard.Clear()
+        System.Windows.Forms.Clipboard.SetDataObject(s, True)
+
+        Console.WriteLine("")
+        Console.WriteLine("xxx")
+        Console.WriteLine(s)
+        Console.WriteLine("xxx")
+        Console.ReadLine()
+
+    End Sub
+
+
+
+End Module
+
+
+' example of output
+'
+''C:\TMP\ConsoleApplication1\ConsoleApplication1\bin\Debug>type "c:\TMP\ConsoleAp
+''lication1\ConsoleApplication1\Module1.vb" | ConsoleApplication1.exe
+
+''xxx
+''Imports System.Windows
+''Imports System.Windows.Forms
+
+''Module Module1
+
+''    Sub Main()
+
+''        Dim s As String = Console.In.ReadToEnd()
+''        Using sw As New System.IO.StreamWriter("x.txt")
+''            sw.WriteLine(s)
+''        End Using
+
+''        System.Windows.Forms.Clipboard.Clear()
+''        System.Windows.Forms.Clipboard.SetDataObject(s, True)
+
+''        Console.WriteLine("")
+''        Console.WriteLine("xxx")
+''        Console.WriteLine(s)
+''        Console.WriteLine("xxx")
+''        Console.ReadLine()
+
+''    End Sub
+
+
+
+''End Module
+
+''xxx
+

@@ -1,0 +1,11 @@
+methodinvoker (no args), synchronous
+Waitcallback  (no args), asynchronous
+public event OnClick as EventHandler (system defined delegate)
+
+Use for i = 0 to 10 when dealing with strings (faster), for objects either "for i " or "for each"
+
+use datareader (faster)
+use connection pool
+use binary when comparing text
+use i += 1 instead of i = i + 1 (easier on the compiler)
+

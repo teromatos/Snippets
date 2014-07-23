@@ -1,0 +1,6 @@
+:: How to create zips for a project with a datetime stamp
+
+for /F "tokens=1-4 delims=/- " %%a in ('date/T') do set CDATE=%%b%%c%%d
+for /F "tokens=1-4 delims=:., " %%a in ('time/T') do set CTIME=%%a%%b%%c
+wzzip -rPee projectname%CDATE%%CTIME% *.*
+move projectname%CDATE%%CTIME%.zip U:\

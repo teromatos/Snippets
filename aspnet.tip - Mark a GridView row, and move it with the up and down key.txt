@@ -1,0 +1,288 @@
+url=http://fredrik.nsquared2.com/viewpost.aspx?PostID=403
+
+Mark a GridView row, and move it with the up and down key
+Category:  ASP.Net 2.0
+
+I have notice that some people would like to add a way of using the key (up & down) buttons to move and mark a row in a GridView control, so I decided to write a post how you can easy add that kind of functionality to a GridView.
+
+To add client-side script event to the row to handle the event onKeyDown (we can use onKeyUp or Press also if we would like) we hook up to the GridView’s RowDataBoundEvent to make access to the current row that will be data bound. We can use the GridViewRowEventArgs’s Row property to get access to the current row. By using the Attri butes collection of t he Row property we can easy add attributes to our GridView (In this case the <tr> element that the GridView will render for us). We need to add three attributes to the row, id (to unique identify the row on the client-side), onKeyDown (to see if we press t he down or up button, for moving the marker) and the onClick (to make sure we can select a row and start moving from the selected row). The following code will add the “id” attribute to the <tr> element and it will only have the value of a counter (only to make this example simple), it will also add the onKeyDown event and call the method SelectRow when a key is pressed, and to the last the onClick event to make sure to select a start row:
+
+ 
+
+private int _i = 0;
+
+ 
+
+ protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+
+ {
+
+       if (e.Row.RowType == DataControlRowType.DataRow && (e.Row.RowState == DataControlRowState.Alternate || e.Row.RowState == DataControlRowState.Normal))
+
+       {
+
+            e.Row.Attributes.Add("id", _i.ToString());
+
+            e.Row.Attributes.Add("onKeyDown", "SelectRow();");
+
+            e.Row.Attributes.Add("onClick", "MarkRow(" + _i.ToString() + ");");
+
+       
+
+            _i++;
+
+       }
+
+ }
+
+ 
+
+The code above will make sure the GridView will render something similar to (at runtime):
+
+ 
+
+<table cellspacing="0" rules="all" border="1" id="GridView1" style="border-collapse:collapse;">
+
+    <tr>
+
+       <th scope="col">CategoryID</th><th scope="col">Name</th>
+
+    </tr>
+
+   <tr id="0" onKeyDown="SelectRow();" onClick="MarkRow(0);">
+
+       <td>1</td><td>.Net 1.1</td>
+
+   </tr>
+
+   <tr id="1" onKeyDown="SelectRow();" onClick="MarkRow(1);">
+
+       <td>2</td><td>.Net Framework 2.0</td>
+
+    </tr><tr id="2" onKeyDown="SelectRow();" onClick="MarkRow(2);">
+
+       <td>3</td><td>ADO.Net 2.0</td>
+
+    </tr>
+
+</table>
+
+ 
+
+As you can see in the code above, the attribute id, onKeyDown and onClick is added to the <tr> element.  The onClick event will call the MarkRow method and pass the current row as an argument to make sure the row we click on will be marked and used as a start row.
+
+ 
+
+Now when we have done this, we need to add the client-side code that should handle the movement of the marker etc.  We can start with the MarkRow method that will be used to mark a row (change its background color):
+
+ 
+
+var currentRowId = 0;
+
+ 
+
+function MarkRow(rowId)
+
+ {
+
+        if (document.getElementById(rowId) == null)
+
+               return;
+
+           
+
+         if (document.getElementById(currentRowId) != null )
+
+                document.getElementById(currentRowId).style.backgroundColor = '#ffffff';
+
+ 
+
+         currentRowId = rowId;
+
+         document.getElementById(rowId).style.backgroundColor = '#ff0000';
+
+ }
+
+ 
+
+The MarkRow will make sure a row will be marked and that a previous marked row will be remarked. The MarkRow takes one argument, rowId, which have the value of the row id to mark. The MarkRow will not do anything if the element with the specified rowId can’t be found (this will happen if we try to move out from the GridView when moving the marker with the up or down key).  The curretnRowId which is a global variable will be set to the current marked row, to keep track on which row that is selected. To remark a previous selected row we use the doecument.getElementById method to get the <tr> element with the currentRowId and see if it’s not null. If it’s not null a row is already selected and we need to clear its background color (The background color of the row is used to show what row is marked). After we have cleared a selected row, we set the currentRowId to the rowId that is passed as an argument to the MarkRow method. After this is done we set the background color of the selected row to a background color used to display that the row is marked.
+
+ 
+
+The MarkRow will be called when the onClick event is fired and it will make sure to set the currentRowId to the row that we have clicked on to be the start row (from where we can move the marker with the up and down key). It will also be called when we press the key up or down button to mark a new row. The method that handles the up and down keys is the SelectRow:
+
+ 
+
+function SelectRow()
+
+{
+
+    if (event.keyCode == 40)
+
+         MarkRow(currentRowId+1);
+
+    else if (event.keyCode == 38)
+
+          MarkRow(currentRowId-1);
+
+ }
+
+ 
+
+The SeletRow method will check if the down key is pressed (keyCode = 40) or if the up key is pressed (keyCode = 38). Note: I’m so bad of naming methods so have that in mind, but I use the name SelectRow because when a key is pressed a row should be selected ;)
+
+ 
+
+When the down key is pressed, the MarkRow method will be called with the currentRowId as an argument. The currentRowId has the value of the id (which is the value of the “counter” that can also represents the index of a row) and add 1 to the id, so if we start or movement from row with id 1, we will move to row with the id 2. If we press the up key, we will decrease 1 from the current row, so if we start to move up from row with id 2, we will move to row with the id 1.
+
+Here is the whole code:
+
+ 
+
+Default.aspx.cs
+
+ 
+
+public partial class _Default : System.Web.UI.Page
+
+{
+
+    private int _i = 0;
+
+ 
+
+    protected void GridView1_RowDataBound(object sender, GridViewRowEventArgs e)
+
+    {
+
+        if (e.Row.RowType == DataControlRowType.DataRow && (e.Row.RowState == DataControlRowState.Alternate || e.Row.RowState == DataControlRowState.Normal))
+
+        {
+
+            e.Row.Attributes.Add("id", _i.ToString());
+
+            e.Row.Attributes.Add("onKeyDown", "SelectRow();");
+
+            e.Row.Attributes.Add("onClick", "MarkRow(" + _i.ToString() + ");");
+
+       
+
+            _i++;
+
+        }
+
+    }
+
+}
+
+ 
+
+Default.aspx
+
+ 
+
+<%@ Page Language="C#" AutoEventWireup="true"  CodeFile="Default.aspx.cs" Inherits="_Default" %>
+
+ 
+
+<%@ Register Src="WebUserControl.ascx" TagName="WebUserControl" TagPrefix="uc1" %>
+
+ 
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+ 
+
+<html xmlns="http://www.w3.org/1999/xhtml" >
+
+<head runat="server">
+
+    <title>Untitled Page</title>
+
+    <script type="text/javascript">
+
+ 
+
+        var currentRowId = 0;       
+
+ 
+
+        function SelectRow()
+
+        {
+
+            if (event.keyCode == 40)
+
+                MarkRow(currentRowId+1);
+
+            else if (event.keyCode == 38)
+
+                MarkRow(currentRowId-1);
+
+        }
+
+       
+
+        function MarkRow(rowId)
+
+        {
+
+            if (document.getElementById(rowId) == null)
+
+                return;
+
+           
+
+            if (document.getElementById(currentRowId) != null )
+
+                document.getElementById(currentRowId).style.backgroundColor = '#ffffff';
+
+ 
+
+            currentRowId = rowId;
+
+            document.getElementById(rowId).style.backgroundColor = '#ff0000';
+
+        }
+
+   
+
+    </script>
+
+</head>
+
+<body>
+
+    <form id="form1" runat="server">
+
+        <asp:GridView ID="GridView1" runat="server" AutoGenerateColumns="False" DataKeyNames="CategoryID"
+
+            DataSourceID="SqlDataSource1" OnRowDataBound="GridView1_RowDataBound">
+
+            <Columns>
+
+                <asp:BoundField DataField="CategoryID" HeaderText="CategoryID" InsertVisible="False"
+
+                    ReadOnly="True" SortExpression="CategoryID" />
+
+                <asp:BoundField DataField="Name" HeaderText="Name" SortExpression="Name" />
+
+            </Columns>
+
+        </asp:GridView>
+
+        <asp:SqlDataSource ID="SqlDataSource1" runat="server" ConnectionString="<%$ ConnectionStrings:MyBlogConnectionString %>"
+
+            SelectCommand="SELECT [CategoryID], [Name] FROM [Categories]"></asp:SqlDataSource>
+
+ 
+
+    </form>
+
+</body>
+
+</html>
+
+ 
+
+Note: This example uses a my blog database, so you can’t simply copy the whole code and think it will run, the code is only for demonstration purpose.

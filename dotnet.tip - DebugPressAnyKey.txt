@@ -1,0 +1,12 @@
+#If DEBUG Then
+        DebugPressAnyKey()
+#End If
+
+
+#If DEBUG Then
+    Private Sub DebugPressAnyKey()
+        Console.WriteLine()
+        Console.WriteLine("Running in debug configuration, press any key to continue.")
+        Console.ReadKey(True)
+    End Sub
+#End If

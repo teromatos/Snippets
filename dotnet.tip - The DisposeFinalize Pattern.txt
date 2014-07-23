@@ -1,0 +1,29 @@
+   public class Base: IDisposable
+   {
+     private bool isDisposed = false;
+   
+      public void Dispose() 
+      {
+         Dispose(true);
+         GC.SuppressFinalize(this); 
+      }
+      protected virtual void Dispose(bool disposing) 
+      {
+         if(!isDisposed)
+         {
+          if (disposing) 
+          {
+             // Code to dispose the managed resources 
+             // held by the class
+          }
+         }      
+        // Code to dispose the unmanaged resources 
+        // held by the class
+       isDisposed = true;
+       base.Dispose(disposing);
+      }
+      ~Base()
+      {
+         Dispose (false);
+      }
+   }

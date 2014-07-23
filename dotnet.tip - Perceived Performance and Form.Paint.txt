@@ -1,0 +1,73 @@
+Original tip is below
+
+also we can use the following in the Form_Load event
+
+        Me.Show()
+        Application.DoEvents()
+	'-- call to long method here
+
+
+
+1   Private IsFirstPaint As Boolean = True  
+2   
+3     Private Sub DoWork()   
+4         Cursor = Cursors.WaitCursor   
+5         StatusBar1.Text = "Loading..."  
+6         System.Threading.Thread.Sleep(2000)   
+7         For i As Integer = 0 To 99   
+8             ComboBox1.Items.Add("ComboBoxItem " & i)   
+9             System.Threading.Thread.Sleep(5)   
+10         Next  
+11         ComboBox1.SelectedIndex = 4   
+12         System.Threading.Thread.Sleep(2000)   
+13         For i As Integer = 0 To 99   
+14             ListBox1.Items.Add("ListBoxItem " & i)   
+15             System.Threading.Thread.Sleep(5)   
+16         Next  
+17         ListBox1.SelectedIndex = 4   
+18         StatusBar1.Text = "Ready."  
+19         Cursor = Cursors.Default  
+20     End Sub  
+21   
+22     Private Sub Form1_Load(ByVal sender As System.Object, _   
+23       ByVal e As System.EventArgs) Handles MyBase.Load   
+24         DoWork()   
+25     End Sub  
+26   
+27     Private Sub Form1_Paint(ByVal sender As Object, _   
+28       ByVal e As System.Windows.Forms.PaintEventArgs) _   
+29       Handles MyBase.Paint   
+30         If IsFirstPaint Then  
+31             IsFirstPaint = False  
+32             Application.DoEvents()   
+33             DoWork()   
+34         End If  
+35     End Sub  
+
+
+
+Just answered my own question. DoEvents and Refresh do nothing until the form is visible. So how about this.Show() in Form_Load? I tested it, and it appears to do the same thing as the Form_Paint solution above, and it's only one line of code.
+
+The only problem that I see is that there may be some way to load a form without showing it, although I don't know of any. This "trick" would affect that. I would say that the this.Show() solution would work for most, if not all situations.
+
+- Joshua
+
+Posted by: Joshua Bair at January 8, 2005 12:23 PM 
+Interesting. That does appear to work, and the debugger picks up the correct line of code in Load() exceptions, too.
+
+
+Posted by: Jeff Atwood at January 8, 2005 07:36 PM 
+So, the moral of the story is:
+
+Always call this.Show() in the Form_Load event?
+
+I'll have to go back and add this to my last project. There are several instances where a dialog will appear after a few seconds of waiting, causing the user to usually try to open it 2 or 3 times.
+
+- Joshua
+
+Posted by: Joshua Bair at January 8, 2005 08:47 PM 
+I wouldn't say "always" because we don't know if there are any side-effects yet. But yes, if you have a form that does a few seconds (or more) worth of work, I'd say try one of the Paint() or Load() DoEvents techniques first as a quick easy solution. If you need *real* threaded background processing, then look into the BackgroundWorker solution.
+
+Anyway definitely try it and post your feedback here. I'd try it in our project but that's in offshore mode now. I'm disinclined to make a bunch of sweeping changes in the way we display forms..
+
+Posted by: Jeff Atwood at January 8, 2005 10:02 PM 

@@ -1,0 +1,23 @@
+/*************************************************************************************************
+Purpose:	To concatenate the values of a column in all rows into one row.
+
+Written by:	Allan Mitchel
+		http://www.allisonmitchell.com
+
+Tested on: 	SQL Server 7.0 and SQL Server 2000
+
+Date modified:	March-22-2001 6:30 PM
+
+Email: 		vyaskn@hotmail.com
+
+NOTE:		A limitation to be aware of is that varchar can go upto a max size of
+		8000 characters. If your data occupies more space, the output will be
+		truncated.
+*************************************************************************************************/
+
+USE pubs
+GO
+DECLARE @title_ids varchar(150), @delimiter char
+SET @delimiter = ','
+SELECT @title_ids = COALESCE(@title_ids + @delimiter, '') + title_id FROM titles
+SELECT @title_ids AS [List of Title IDs]

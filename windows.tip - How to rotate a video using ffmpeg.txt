@@ -1,0 +1,40 @@
+ffmpeg -i <input_video_filename> -vf "transpose=1" -r 30 -qscale 0 -acodec copy <output_video_filename>
+
+
+0 = 90CounterCLockwise and Vertical Flip (default)
+1 = 90Clockwise
+2 = 90CounterClockwise
+3 = 90Clockwise and Vertical Flip
+
+“-acodec copy” parameter, which instructs ffmpeg to copy the audio, not process it again (Note: Thanks to a comment on this blog entry from Tim;
+“-sameq” parameter so that the video’s original quality was not lost during the rotation because without it ffmpeg degraded quality;
+“-r 30? to maintain a framerate of 30 frames per second.
+
+
+
+ffmpeg -i input -vcodec libx264 -preset medium -crf 24 -threads 0 -vf transpose=1 -acodec copy output.mkv
+
+
+
+
+For Quicktime Pro users:
+1. In QuickTime Player, choose Window > Show Movie Properties.
+2. In the Properties window, select a video track and click Visual Settings.
+3. To resize the movie, type new numbers in the Current Size fields.
+4. To keep the same height-to-width proportions, select Preserve Aspect Ratio.
+5. To rotate the movie, click one of the rotate buttons.
+
+
+I would like to rotate mov with Quicktime Player v10 and have tried to follow other instructions but the Window menu does not have Show Movie Properties, only Show Movie Inspector and Show Export Progress.
+
+You need to use QuickTime Player 7. You can install it from the DVD that came with your mac.
+
+
+
+ffmpeg -i c:\temp\001.MOV -vf "transpose=1" -r 30 -qscale 0 -acodec copy -metadata model="iPhone 4" -metadata make-eng="Apple" c:\tmp\001.MOV
+
+vflip,hflip
+
+ffmpeg -i c:\temp\_curr\001.MOV -vf "transpose=1" -r 30 -qscale 0 -acodec copy c:\temp\_new\001_ffmpeg.MOV
+
+ffmpeg -i c:\temp\_curr\001.MOV -vf "transpose=1" c:\temp\_new\001_ffmpeg_simple.MOV

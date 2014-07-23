@@ -1,0 +1,21 @@
+Here's approximately how we do this. Basically, you 'stash' the referrer url away somewhere on the page's first view. You can use ViewState or a custom hidden field.
+
+void Page_Load(...)
+{
+  if( !IsPostBack )
+  {
+    ViewState["ReferrerUrl"]  = Request.UrlReferrer.ToString()
+  } 
+}
+
+void returnToSender()
+{
+  object referrer = ViewState["ReferrerUrl"];
+  if(referrer != null)
+      Response.Redirect((string)referrer);
+  else
+      Response.Redirect("Default.aspx");
+} 
+
+Duncan Smart 
+Thursday, May 29, 2003 

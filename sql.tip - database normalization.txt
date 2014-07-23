@@ -1,0 +1,25 @@
+FIRST NORMAL FORM
+==================
+Remove repeating columsn by creating a new table,
+moving the columns into the new table, and linking
+back to the old table in a one-to-many relationship
+Ex: Groups table
+    Copay dates 1-6
+    
+table 1: Group 
+table 2: GroupCopays
+
+SECOND NORMAL FORM
+==================
+Move repeating fields into a new table that
+contain a primary key and relate it back
+to the table using a foreign key.
+Ex Members table, member id
+
+table 1: members
+table 2: member details
+
+
+THIRD NORMAL FORM
+==================
+

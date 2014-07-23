@@ -1,0 +1,13 @@
+url:http://blogs.technet.com/b/sqlman/archive/2009/01/26/verifying-if-a-connection-to-sql-server-is-encrypted.aspx
+
+Verifying if a connection to SQL Server is Encrypted
+
+ Shashank Pawar 26 Jan 2009 6:25 AM 0
+If you do not have a network parser such as netmon and want to verify if the connection from the client to the SQL server is encrypted, the following query can be utilised:
+
+
+SELECT encrypt_option 
+FROM sys.dm_exec_connections 
+WHERE session_id = @@SPID
+
+-- Note: remove the WHERE clause to see all connections.

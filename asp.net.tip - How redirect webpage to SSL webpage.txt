@@ -1,0 +1,32 @@
+URL=http://stackoverflow.com/questions/1698207/partial-ssl-in-asp-net-webforms-without-changing-iis-configuration
+
+I ended up overriding the OnInit method on the page I wanted to secure, using the solution described here:
+
+protected override void OnInit(EventArgs e)
+{
+    if (!Request.IsSecureConnection && !Request.IsLocal)
+    {
+        UriBuilder builder = new UriBuilder(Request.Url)
+        {
+            Scheme = Uri.UriSchemeHttps,
+            Port = 443
+        };
+        Response.Redirect(builder.Uri.ToString());
+    }
+    base.OnInit(e);
+}
+For the rest of the pages, I inherited from a base page with the following code on the OnInit method:
+
+protected override void OnInit(EventArgs e)
+{
+    if (Request.IsSecureConnection)
+    {
+        UriBuilder builder = new UriBuilder(Request.Url)
+        {
+            Scheme = Uri.UriSchemeHttp,
+            Port = 80
+        };
+        Response.Redirect(builder.Uri.ToString());
+    }
+    base.OnInit(e);
+}

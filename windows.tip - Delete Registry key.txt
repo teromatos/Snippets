@@ -1,0 +1,21 @@
+Can be done. Two ways: 
+
+• Deleteing a tree 
+
+Add a - symbol before the placement. EG: 
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\^DELETE ME] would be 
+
+[-HKEY_LOCAL_MACHINE\SOFTWARE\^DELETE ME] to delete. 
+
+• Deleting a key 
+
+Make the key equal -. EG: 
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\^DELETE ME] would be 
+meh=1 
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\^DELETE ME] to delete 
+meh=- 
+
+PS - be vary careful with these.

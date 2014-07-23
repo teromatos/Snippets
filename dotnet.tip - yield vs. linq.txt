@@ -1,0 +1,38 @@
+public static IEnumerable<int> GetIntCollectionFromString(string SomeString)
+{    
+	string[] val = SomeString.Split(' ');    
+	int intToAdd;    
+	foreach (string token in val)    
+	{        
+		if (int.TryParse(token, out intVal))        
+		{            
+			yield return intVal;        
+		}        
+		else        
+		{            
+			yield break;        
+		}    
+	}
+}
+
+========================================================================================
+
+var ints = SomeString.Split(' ').TakeWhile(v => v.IsInt32()).Select(v => int.Parse(v));
+
+once I encapsulate int.TryParse with an extension method
+
+static class Int32Util
+
+{
+
+   static public bool IsInt32(this string value)
+
+   {
+
+       int foo;
+
+       return int.TryParse(value, out foo);
+
+   }
+
+}

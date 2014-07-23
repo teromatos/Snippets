@@ -1,0 +1,37 @@
+Why doesn't #IF Not DEBUG work the way I'd expect in VB.NET?
+
+#If DEBUG Then
+   Console.WriteLine("Debug")
+#End If
+
+#If Not DEBUG Then
+   Console.WriteLine("Not Debug")
+#End If
+
+#If DEBUG = False Then
+   Console.WriteLine("Not Debug")
+#End If
+' Outputs: Debug, Not Debug
+
+But, a manually set const does:
+
+#Const D = True
+#If D Then
+   Console.WriteLine("D")
+#End If
+
+#If Not D Then
+   Console.WriteLine("Not D")
+#End If
+' Outputs: D
+
+And, of course, C# has the expected behavior as well:
+
+#if DEBUG
+    Console.WriteLine("Debug");
+#endif
+
+#if !DEBUG
+    Console.WriteLine("Not Debug");
+#endif
+// Outputs: Debug

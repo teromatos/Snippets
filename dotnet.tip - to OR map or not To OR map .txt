@@ -1,0 +1,445 @@
+Solving the Data Access problem: to O/R map or not To O/R map 
+
+On the www.asp.net forums (the architecture section), a person asked in the 'Your favorite O/R mapper' thread, why someone would use a 3rd party component for data-access and why would that be an O/R mapper and if so, which one? I've tried to answer these questions in that thread, but because I think it can be of benefit for more people than just the readers of that long forum thread, I've reworked the text into an article you'll find below. Keep in mind I've tried to keep things simple to understand, so perhaps I've left out a detail here and there, however I don't think these details will matter much to the overall conclusions and descriptions. As I've addressed a couple of questions, which I think are related to each other, I've re-written the forum response as a Q & A. 
+
+Q: why would I go out and buy a 3rd party component / library?
+A: With every task you have to perform during a software development project, you have to make a calculation: if I perform this task myself, how much time will that take, and given my hourly fee, how much money is involved in it, minus the knowledge I gain from doing it myself and the insight it gives me. The number resulting from that calculation is compared to what a 3rd party component costs + how much time it will take to get used to the 3rd party component + the time to figuring out which component is good + some risk calculation (because a 3rd party component can turn out to be a bad choice after all after a month or so). 
+
+This sounds awkward, but it's common sense. It's not always more efficient to go out and buy a component to do things for you, like it's not always more efficient to do things yourself. However without making a simple calculation, it's hard to tell in which situation you're in. Software projects are hard to manage, and without tight cost control, or better: cost insight, it's hard to make a project be run efficient and profitable. 
+
+So even if it's tempting to go out and buy a component or use an open source component, is it really more efficient to do so? Often it is, don't get me wrong on that, but don't forget the costs of using a 3rd party component, especially when it's a freebee without any documentation and just a raw example program without a lot of comments. 
+
+Q: why should I implement an O/R Mapper in my projects?
+A: O/R mapping is in theory very simple: you have a table field and you have an entity field and you define a connection between them and use that connection in your logic to provide functionality like load a class' data, save it, etc. etc. However using solely the terms 'O/R mapping' and 'O/R mapper' is only making things more complicated. The problem description is: 
+
+"I have to make a connection between my business logic and my persistent storage, how do I do that?".
+The answer: "use an O/R mapper" is not helpful, as it would require knowledge about what an O/R mapper is. If you don't know what it is, how can you judge if an O/R mapper is helpful and if that answer holds some truth? You can't. 
+
+The right answer is a question: "how do I see my data?". It's the cornerstone of the answer leading to the solution of the dreaded Data-Access problem. There are a couple of different views on 'data' which result in different ways of how the DataAccess problem is solved. You have: 
+
+   1) table approach
+   2) entity (Chen/Yourdon) approach
+   3) domain model (Fowler/Evans) approach
+
+(these are the top 3. There are others, most of them fall in either of these 3 categories though). 1) and 2) look the same, but aren't. Let's discuss these 3 views more in detail.
+
+1) Table approach
+The table approach is the plain 'I use tables and query them' approach. No theory used, just a set of tables, not based on any abstract model, they're created right there in DDL. The developer uses tables and is expecting to work with tables in memory as well, so a plain dataset/datatable approach with stored procedures or VS.NET-generated SQL statements is an appealing approach. Typically, the developers using this approach use terms like 'rows' and 'customer record'. It might sound odd, but this is a very widely used approach on .NET. The reasons for that are that Microsoft preaches it through VS.NET designers and -examples and because in the pre-.NET period, ADO with recordset objects was the way to go. 
+
+2) Entity (Chen / Yourdon) approach
+The entity approach is different. The relational model is build with an abstract model and is based on theory. This means people speak of entities (or if you want to go really deep into theory, relation) and attributes. An approach with solely DataTables / DataSets is often not appealing, as the relational model speaks of Customer Entity and not about Customer record. Developers using this approach want to use these type of elements also in their code. As they use a relational model as their base of their thinking, the entities by definition don't contain behavior/rules or just low level behavior/rules, like the checkconstraints/unique constraints and other constraints defined like 'shippingdate >=orderdate' or 'id >=0'. 
+
+Also important is the way the developers want to utilize the relational model. They understand that the data in the database is just data, and an entity is just a relation based on attributes, which can be constructed dynamically as well, with a select statement. This is important for lists of combined attributes from different entities and reporting functionality. The entity approach uses a combination of O/R mapping for the entity data and generic data functionality like Datasets / DataTables for the dynamic data retrieval requests. The entity approach is also widely used, you see it more in the larger applications as these applications often require a system architect and data analyst. It's proven technology which exists since the late '70-ies of the past century. 
+
+3) Domain model (Fowler / Evans) approach
+The Domain model is an approach which is the most used approach for solving the Data Access problem in the Java world, but interesting enough rather rare in the microsoft world. This is not that surprising, as in the Microsoft world it was simply unknown: Microsoft never talked about it, the techniques mostly used by the tools used by developers didn't support it very well, so running into it was not that common, only perhaps when you talked about Data Access with Java developers for example. Another reason it is not that widely used, is that it requires an OO approach which wasn't often possible with COM objects and/or VB5/6. 
+
+The domain model focusses on domains, like the Customer domainor the Order domain. It starts with classes, like a Customer class, which contains the data for a customer but also all behavior for the customer, so all business rules for the customer are stored there. (This is somewhat simplistically said, there are a couple of variants of course, but for the sake of the argument, let's keep it with this description). Through inheritance you can create a compact model of classes and store the behavior you have to define in the class it belongs in, using polymorphism to override/modify behavior through the hierarchy. The classes / class hierarchy is then stored in a persistent storage, typically a database. 
+
+This is a fundamental difference with 2) : with the Domain model, the relational model follows classes, classes don't follow the relational model. Typically, behavior in 2) (and also 1)) are stored in functionality objects like CustomerManager, which embeds the customer functionality, and which is applied to behaviorless entity objects. In 3) you have the behavior in the class, no manager classes. 3) requires an O/R mapper to work with the data in the persistent storage or better: the O/R mapper is required to (re-)instantiate entity objects from their persistent state in the persistent storage. Because the system focus on data is through objects, working with data like in 2) and 1) is not available, it's working with objects. 
+
+What's the best approach?
+Hard to say. 25 years of 2) in millions of software systems around the world can't be wrong, however millions of software systems in Java using approach 3) can't be wrong either. I think it largely depends on what you think is more logical, how you want to work with data. I'm in camp 2), and our product LLBLGen Pro is a tool which tries to help with 2) by offering both O/R mapping and flexible relational model data access power. It's therefore not a pure O/R mapper as it doesn't fit that much in 3), it offers more functionality, to help with 2) than with 3). Also Paul Wilsons WilsonORMapper is more of a category 2) than category 3) application. More pure O/R mappers, like EntityBroker, DataObjects.NET, NHibernate and others focus on 3) (most of the time). 
+
+Don't think lightly about this, the differences are fundamental and will influence how your system structure is designed for a great deal. So it's important to pick the approach which fits your way of thinking. To test how you think about data, ask yourself: "A customer gets the Gold status when the customer has bought at least 25,000$ worth of goods in one month. Where is that logic placed? in which class/classes?". Inside the Customer object, reading inside the customer object order data to test the rule? Or in a CustomerManager which executes rules and consumes customer and order objects? 
+
+Also don't let your decision be influenced by "but this example proves x is better than y!": at the end of the day, data is data and not information. Information is data placed into context, and it requires interpretation to give it any value/meaning. How you do that is not important, as long as you meet requirements as: maintainability, scalability and efficiency in development, deployment and perhaps (but not necessarily) performance. 
+
+So if your way of writing software is clearly in the Fowler/Evans camp, 3), don't use datasets, don't use a Data Access solution targeting 2) because it will be a struggle: the way of thinking doesn't fit the tool used: you want to drive in a nail with a screwdriver, you should either switch the nail with a screw or use a hammer instead of a screwdriver. So if you're in camp 3), use a pure O/R mapper, it will fit like a glove. 
+
+If your way of thinking is clearly in the 2) camp, using a pure O/R mapper can give you headaches when you want to write a lot of reports, you want to use a lot of lists combined from attributes of multiple entities, you need functionality which allows you to perform scalar queries, and an approach which allows you to think from the relational model, so an application which has an approach tailored on starting with the relational model. 
+
+Update: Paul Wilson explained that his mapper is more of a category 2) than category 3) application. I've changed that in the article. 
+
+posted on Saturday, October 09, 2004 5:54 PM 
+Comments 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Johan Normén
+Posted @ 10/9/2004 7:06 PM
+Very interesting post. Must agree with you in most of your arguments. I like solution 3 better then the other solutions. DDD is more my way of thinking so if fall in my nature. 
+
+I don't like that Dabases should explian how my entities will looklike. 
+
+Best, 
+Johan 
+# Un ottimo articolo sul perch 
+Lorenzo Barbieri @ UGIblogs!
+Posted @ 10/9/2004 1:15 PM
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Lorenzo Barbieri
+Posted @ 10/9/2004 7:20 PM
+Hi Frans, 
+I posted a blog entry on my Italian blog about this post, your products, and the BOF session that you did at TechEd Europe... 
+I liked your post... and your deep knowledge on the subject! 
+
+# Un ottimo articolo sul perch 
+Lorenzo Barbieri @ UGIblogs!
+Posted @ 10/9/2004 1:20 PM
+
+# O/R mapper, s 
+Marco Russo
+Posted @ 10/9/2004 1:56 PM
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/9/2004 7:58 PM
+Lorenzo: Thanks !! :) 
+
+Johan: The difference in insights is understandable, some methods appeal more to one group, other methods more to other groups. 
+# Re: Solving the Data Access problem: to O/R map or not To O/R map 
+mats.helander@matssoft.com
+Posted @ 10/10/2004 2:23 PM
+Hi Frans, 
+
+Another one of your truly excellent posts! I couldn't agree more with the whole ot of it. 
+
+For the record, NPersist is definitely a category 3) O/R mapper, but I'm looking at implementing more cat. 2 capabilities in it...do you agree when I say that I think a mapper /could/ take care of both 2) and 3) scenarios (although I'm certainly not there yet)? 
+
+/Mats 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/10/2004 4:33 PM
+Hi Mats :) 
+
+thanks! :) I think what you mean with your question is if it's logical to do. Most pure O/R mappers which do also tabular data-access don't use entity fields to build up the queries, but fall back to low level tabular approaches. I find that the same as offering a way to get the ADO.NET connection to the database and execute a raw SqlCommand directly. :) 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Paul Gielens
+Posted @ 10/10/2004 8:13 PM
+Impressive post Frans! 
+
+Neo, another category 3 O/R mapper. Neo's focus lies on object-based domain models. 
+# O/R Mappers - Entities and Domain Model 
+David Hayden - Sarasota Web Design Development - F
+Posted @ 10/10/2004 2:17 PM
+
+# O/R Mappers - Entities and Domain Model 
+David Hayden - Sarasota Web Design Development - F
+Posted @ 10/10/2004 2:18 PM
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/10/2004 9:07 PM
+Hi Frans, 
+
+I wonder in which category will you put a DAL that has an Order class with Order.Id and Order.CustomerId (not Order.Customer). 
+
+This could be seen as a 1) because is totally based on tables (but it does not use DataSets), or as 2) because these are the the 'entities'. 
+
+I think the approach that uses Order.CustomerId is the one that's being used for a long time. 
+# Re: Solving the Data Access problem: to O/R map or not To O/R map 
+mats.helander@matssoft.com
+Posted @ 10/10/2004 9:30 PM
+Ah, good point. 
+
+NPersist uses an OPath-like text-based query language called NPath and doesn't support Query Objects (at least not yet) and I agree that this brings several of the drawbacks that can put one in the mind of going back to just using SQL (such as typos etc)...but, still, using this approach can become a bit of a &quot;bridge&quot; between cat. 3) and 2) mappers, wouldn't you say? 
+
+/Mats 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+John Rusk
+Posted @ 10/11/2004 1:29 AM
+Frans, 
+
+Great post! 
+
+I'd be interested in your thoughts on how the architecture of the sytem as a whole influences the choice bettween 2 and 3. For instance, rich client systems versus web client systems. (i.e. C#/Java code on the client verus web browser only on the client.) 
+
+In a rich client system, 2 seems more natural than 3 (to me). With domain objects, if the _same_ objects exist on both client and server, then there's the problem that some of their behaviours will only be meaningful on the server. But with behaviourless entities, it is safe, and meaningful, to pass them back and forward between client and server. 
+
+I wonder if this explains some of the differences you've noted between the MS and Java communities. I haven't seen any stats on this, but I'd guess that the Java world is dominated by web clients, while the MS world has a higher percentage of rich clients. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/11/2004 12:04 PM
+@Andres: 1) would have: ds.Tables["Orders"].Rows[index]["CustomerID"] kind of constructs. 2) works with entities as the focus, cornerstone. Although an entity likely ends up as a table, you're not dealing with a table. So you can do order.Customer = myCustomer, but you can also do (for performance reasons) order.CustomerID = theCustomerID; Option 1) doesn't give you that flexibility, besides the traversal of the relationships between order and customer from both sides :) 
+
+@mats: to some extend it indeed would yes :). In the end it might be a nittpicking game how to call it. :) What I think is most important is that the developer can use the same constructs with entities as with dynamic constructed lists of data. So the developer should be able to refer to entity fields when constructing the lists, not table fields. 
+
+@John: the differences show up mostly in the aspect of n-tier development: with domain model oriented systems, the BL code is inside the entity class (mostly), which means there is not a separate middle tier doing just BL code, the code is largely inside entity classes. Most of the time you see the entity definitions defined in the BL tier with domain models, if you would place them in a separate tier, the BL tier would be rather thin. With behaviorless entities this is different: you have a rather thick BL tier, which contains the BL code to apply to entity objects. Most of the time, designers opt for BL classes which are representations of the processes taking place in the system. 
+
+The difference with Java is mostly because Java uses application servers, which offer generic (!) Enterprise java beans /container managed persistence and JDO support. So it's natural to go the pure O/R mapper route as it is offered by the platform you're dealing with. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/11/2004 2:03 PM
+Frans, 
+
+I understand the difference between your 1) and 2), but I still don't see in which category you put the one that only has Order.CustomerId 
+
+Regards 
+
+Andres 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/11/2004 2:10 PM
+Well, not 1) because Order is an entity, not tabular data in a generic container. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/11/2004 2:37 PM
+OK 
+
+IMHO, here you have really two ways, not three. 
+
+You can see the relational model as your main model or you can see the object model as your main model. 
+
+In the first case, you want to deal with data structures that map the relational model. These can be generic data structures like a DataSet or a Hashtable, or plain .NET classes. I don't see why you need to talk about 'records' when you use a DataSet. Is essentially the same thing as when you use a class. The relational model rules, and you can use the same terms. 
+
+Where you load the data is not relevant. If I follow your reasoning, a typed DataSet is probably #2), and it's not essentially different than an untyped dataset. 
+
+The other approach is your #3. 
+
+Now, DeKlarit does not qualify in any of these categories, so I think there's another one ;). DeKlarit works with Business Components, that don't map to one table and that don't map to an object model. 
+
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Deyan Petrov
+Posted @ 10/11/2004 4:49 PM
+"...however millions of software systems in Java using approach 3) ..." 
+
+Do you really believe there are so many systems in Java using pure Domain Model approach? ;) I won't ask for sources ;)) 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Christoffer Skjoldborg
+Posted @ 10/11/2004 5:24 PM
+Hi Frans 
+
+I really don't get the difference between 1 & 2??? 
+To me 2 just sounds like the (acedemic) theory behind 1)...but in reality there is no real difference I think. 
+1 is an API that is perfectly capable of working with "real-theoretically-correct-the-Chen-way" entities - it might very well be that most of the users of 1 don't really understand the theory behind relational databases fully...but they nevertheless use the concepts anyway just without knowing the exact Chen definition of an Entity ;-) 
+
+I think the main distinction is 1/2 vs. 3. Do you prefer your database or your Business/Domain objects to be the center of your modelling efforts. I think both can be perfectly valid approaches and both can be done to various degrees of theoretically correctness ;-)...heck in a lot of cases they will even produce similar models. 
+IMHO the Domain Model is preferable when it comes to modelling complex _behaviour_ in your app...but in many (if not most) apps the data is really the important part and the behaviour scarce, and then the Domain Model might be overkill (dealing with the impedence mismatch does have a price). 
+
+/Chris 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/11/2004 5:34 PM
+The difference between 1 and 2 is more 'mindset': do you think in tables, or do you think in entities? Thinking in tables will not start you thinking in entity classes or will not drive you towards classes representing these tables, why would you, you think in tables and records, and a class is not a record nor a table. 
+
+Entity thinkers do think in that definition and want to see it represented in a class. 
+
+At least that's my idea of the matter :) As I said earlier, it can become nittpicking after a while.... :) 
+
+So basicly it's indeed 2 vs. 3 with as background: model drives classes vs. classes drive model. I added 1) because of the lack of necessity for a class-based data-access approach. This means that these people don't need an O/R mapper or O/R mapping technology application at all. 
+
+@Andres: is deklarit using entity objects like 'customer' under the hood or is that layer non-existend? 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/11/2004 6:26 PM
+If 1) is people who just define tables without any care about how they are defined, and that use untyped DataSets, then I'm not sure if it's worth to have a category for them ;) 
+
+Anyway, people in 1) still need a way to load data from the database to data structures, and they could use a O/R mapper. 
+
+People in 2) don't require an 'O/R mapper'. They require an easy way to load data from the database to data structures. For example, people in 2) could use DeKlarit, and we don't see it as an O/R mapper. 
+
+I see many people using the O/R mapper term for any DAL technology that loads a data structure, and that's not the case. 
+
+DeKlarit is using the entities defined in the relational model under the hood ;). 
+
+We don't see the need of having the 'Customer' entity in addition to the Business Component, as you always want to deal with Business Components (sometimes a BC just maps to one table..). 
+
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/11/2004 6:38 PM
+"If 1) is people who just define tables without any care about how they are defined, and that use untyped DataSets, then I'm not sure if it's worth to have a category for them ;) " 
+heh :) Well, for an article about solving the data-access problem, I thought it would be ok to include that 'solution' as well... 
+
+I have tried to avoid 'people in 2 need an O/R mapper', I hope I succeeded ;) because an O/R mapping technology using application is what they need, which could indeed be DeKlarit as you described. 
+
+Your last sentence is interesting: what if I have a business component SalesOrder, which contains 'Customer', 'Order' and 'OrderDetails' entities. Do I have to create a BC for Customer to use Customer separately (for example I want a customer and its orders) or can I use the entities defined under the hood, because they're already used in the BC's ? 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/11/2004 7:01 PM
+A Business Component maps to the data you need for a CRUD use case. 
+
+If you want to create Customers separately from the Orders, then you'll need to define a Customers BC, that will probably have all the related customer Information like addresses, contacts, etc. 
+
+You probably won't have an Orders collection in the Customers BC. You can retrieve them easily if you want (orders.FillByCustomerId) but if there's no use case doing CRUD with that set of data, then you won't have a BC with that structure. 
+
+On the other hand, you could create a SalesOrders BC that has, as part of the header level, Customer attributes. For example, I could want to retrieve/update the Customer.Balance. In that case I'll be able to load/update the Customer fields I want without loading the Customer data structure. 
+
+Mapping this to existing concepts, it's a hierarchical updateable view that's eagerly loaded, and, roughly, you build one for each use case. 
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Christoffer Skjoldborg
+Posted @ 10/11/2004 7:21 PM
+I'm not sure I really see a big difference between the "Entity camp" and the "Domain Model camp" when it comes to O/R mappers. The minute you decide to "objectify" your relationships so that you can navigate directly from order to OrderLines without going to the Orderlines table and look for the Order Id, is when you get the need to map from the relational model to the object one i.e _Object-Relational mapping_. 
+
+This mapping can obviously be done by hand but since it's tedious, repetitive and occurs all over the place then it makes sense using a tool to abstract that functionality away. 
+Most O/R mappers go a lot further than that and offers you all kinds of extra productivity enhancing stuff...but such productivity tools also exists in the pure data driven camp as well.(MS Datasets and all the tools built around those, the old LLBLGen perhaps?). 
+
+My point is that both 2 and 3 probably have the same O/R mapping needs because they have both choosen to "objectify their relationships". 
+
+So much for the technical part. Strategically I can understand if Frans is trying to position LLBLGen Pro as a tool for all the MS developers currently moving from 1 to 3...but that's probably another discussion ;-) 
+
+/Chris 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/11/2004 7:53 PM
+I also see your category 2) to be very broad. 
+
+In that category you have : 
+
+- O/R mappers that try to navigate relationships and that have a query language or similar that let you express queries in term of the object model 
+
+- a DAL that loads shallow entities from a database without navigation 
+
+- DeKlarit ;) 
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Jimmy Nilsson
+Posted @ 10/11/2004 8:52 PM
+Hi Frans, 
+
+Sorry for being a bit late here. 
+:-) 
+
+The way I understood your classification was that you saw two dimensions: 
+
+- Modeling focus (OO or Relational) 
+- API (OO or Relational) 
+
+1) Relational for both Modeling focus and API. 
+2) Relational for Modeling focus, OO for API. 
+3) OO for both Modeling focus and API. 
+
+Did I totally misunderstand you? 
+
+Best Regards, 
+Jimmy 
+www.jnsk.se/weblog/ 
+### 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Darrell
+Posted @ 10/11/2004 9:08 PM
+Very good Frans, I think you've done a great job of clarifying the playing field. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Frans Bouma
+Posted @ 10/11/2004 9:16 PM
+Chris: heh :) Well, the primary focus of the article is: what are my options for solving the data-access problem? I've tried to avoid to think in aspects of applications which follow a given philosophy, I've tried to document exactly those philosophies. 
+
+So instead of looking at the wide range of applications on the market, I've tried to start with the problem, and what are the theoretical solutions for it. 
+
+Of course 2) and 3) rely heavily on O/R mapping as a technology. I've tried to make the distinction between the two because I find it a fundamental difference that you start from the relational model vs. you start from the domain classes. In the past year I've learned that it is very hard to talk about O/R mapping as a data-access solution. The reason is simple: people don't know what O/R mapping is. 
+
+Most developers do know the problems with data-access however. So, to make the problem more solveable, i.e.: to present solutions in a more understandable way, I opted for the approach I've chosen in this article: once the person who HAS the problem knows in which area (niche if you will ;)) he/she has to look for a solution, the quest for that solution will be more efficient and satisfying. 
+
+I for example see category 2) tools more an area for the tools which utilize O/R mapping under the hood but do more than just O/R mapping and the category 3) tools more for tools which do solely O/R mapping 
+
+Jimmy: Exactly, your list is a good summary :) 
+
+Andres: Your last posting covers it ok :), although DeKlarit also creates databases following the classes you designed. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Paul Wilson
+Posted @ 10/11/2004 9:26 PM
+Mark Fussel defined 4 levels of OR/M : 
+(1) Pure relational -- no classes, focus on tables, sql or stored procs (think DataSets), 
+(2) Light object mapping -- uses classes, but manually mapped to tables (think CSLA and most other frameworks), 
+(3) Medium object mapping -- object model, sql either code gen or at runtime by engine -- usually support relationships, some caching, portability, and object queries (most O/R mappers), 
+(4) Full object mapping -- supports composition, inheritance, polymorphism, no base classes or interfaces (supposedly Hibernate in Java). 
+
+I know my WilsonORMapper falls short on some of the level 4 things, although it doesn't require a base class and interfaces are optional, while the few mappers in .NET that "might" have most of the level 4 features seem to fall short on the implementation side by requiring base classes and interfaces. Maybe NHibernate will succeed, but from what I've seen of their source code, I agree with Frans that they've got a long way to go still. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Andres Aguiar
+Posted @ 10/11/2004 9:44 PM
+Jimmy/Frans 
+
+I'm sorry to be a PITA but I still don't see how 
+
+>2) Relational for Modeling focus, OO for API. 
+
+If you do Order.CustomerId and not Order.Customer then I'm not sure if you can say that the API is OO. If I follow Jimmy, then Order.CustomerId is 1) but if I follow Frans it's 2) 
+
+Cheers ;) 
+
+
+
+
+
+
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Philip Nelson
+Posted @ 10/12/2004 2:57 AM
+OK, I just read through all this. I'm not sure my model is represented exactly. If you assume that a domain model approach must persisted to a database, and you're starting from scratch, #3 makes sense. But, if you think of a domain model without a requirement for a database at all does it look different? 
+
+What is the source of the values/data that constitutes your objects? If you use an O/R tool, it must be a database. It can't be a cache, web service, message queue, test data, serialized object from your qa copy, index data from lucene, a sharepoint list, and well, hopefully you get the idea. OK, you can probably come up with examples to solve some of these, but do you see what I mean? Consider a statement where when new it's built from a query to a relational database, but after it's run, its constructed from a saved denormalized table in a reporting database. Same object, same attributes, same entity, different sql, different connection. 
+
+Jimmy's idea of a Repository he has been blogging about answers part of the question I think, but not if it and all it does are generated code ;-) So, have I missed something? 
+
+# Re: Solving the Data Access problem: to O/R map or not To O/R map 
+mats.helander@matssoft.com
+Posted @ 10/12/2004 11:23 AM
+&gt;What I think is most important is that the developer can use the same constructs with entities as with dynamic constructed lists of data. So the developer should be able to refer to entity fields when constructing the lists, not table fields. &lt; 
+
+I'm certainly with you there! :-) 
+
+/Mats 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Jimmy Nilsson
+Posted @ 10/12/2004 1:47 PM
+Hi Philip, 
+
+Long time, no see! 
+
+That's a good point that the Domain Model doesn't have to be persisted to a database. I have some texts about that coming up... But don't hold your breath. 
+:-) 
+
+Oh, and my Repositories aren't generated code. Instead, different Aggregates have pretty different Repositories so they are currently hand-written, and most of the work are off-loaded to the chosen infrastructure. That said, I can see a point in generating the basic stuff for each Repository for a certain infrastructure choice. 
+
+Best Regards, 
+Jimmy 
+www.jnsk.se/weblog/ 
+### 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Paul Wilson
+Posted @ 10/12/2004 4:55 PM
+I don't think its fair to say an O/R mapper requires a database. My mapper simply requires an ADO.NET provider that communicates with something that understands basic sql syntax. I've built an open-source XmlDbClient (on GotDotNet) that is just such an ADO.NET provider for XML. My mapper can use it to persist and retrieve data from an XML file now, and you could similarly build other ADO.NET providers to add support for other stores. The cool thing about this approach is that the ADO.NET provider is still something you can continue to use even if you change your opinion of O/R mappers, so its a minimal amount of work that is highly reusable. You can also easily have an instance of the mapper to retrieve from one data store and another instance to persist to another data store (at least with most mappers), so I don't think that scenario is all that difficult either. 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Pierre Greborio
+Posted @ 10/13/2004 6:28 AM
+Did you considers also the iBatisNet (http://ibatisnet.sourceforge.net/) solution ? 
+# re: Solving the Data Access problem: to O/R map or not To O/R map 
+Thomas Wagner
+Posted @ 10/19/2004 4:59 AM
+Just some trivia about the origin of Microsofts Table driven approach. 
+
+During the days of MS Access 1.0 there was no such thing as table based data access. No datasets and no recordsets. The JET (Joint Engine Technology) group was the first team at MS (and in the world) to have anything like that. 
+
+The leader of this team was an Indian gentleman named Nrinda Vrama. Hope I spelled it right. One day his team was brain storming about the name for this new technology that returns result sets - but not static ones - these result sets were dynamic. That was a big thing in those days. In walks Tod Nielsen. He heard the discussion and said "hmmm dynamic result sets... dynamic sets ... hey I've got it - its a DYNASET ". 
+
+That was the beginning of a long long history of table based data access at MS. 
+
+My personal belief is that MS could not get its 6 million VB developers to retrain in entity or domain model approaches so it found a very clever way to drag all of them into .NET by providing a rather similar paradigm to what had been done for the past 10-15 years. 
+
+So there you have it. The reason for datasets and datatables in ADO.NET is a straight forward BUSINESS decision. Is it a good software engineering choice? I suppose for small or mid-sized quick apps it is. But anything appreciably large can benefit from the entity or domain approach discussed in this entry. 
+
+
+# Data Mapping 
+Amar Galla's Weblog
+Posted @ 10/19/2004 7:27 AM
+Data Mapping 
+# Mapping objet/relationnel pour .NET 
+The Mit's Blog
+Posted @ 11/21/2004 5:32 AM
+
+# Mapping objet/relationnel pour .NET 
+The Mit's Blog
+Posted @ 11/21/2004 10:06 AM
+
+# re: 
+Darien's Dialog..
+Posted @ 11/23/2004 1:00 AM
+
+# How do you see data? table, entity or domain model? 
+Fabrice's weblog
+Posted @ 12/8/2004 10:02 AM
+
+# Discussion Of Different Development Methods 
+JOEL'S BLOG
+Posted @ 12/12/2004 3:39 PM
+
+# Discussion Of Different Development Methods 
+Joel's Virtual Desktop
+Posted @ 12/12/2004 3:41 PM
+
+# Discussion Of Different Development Methods 
+Joel Ross
+Posted @ 12/12/2004 3:41 PM

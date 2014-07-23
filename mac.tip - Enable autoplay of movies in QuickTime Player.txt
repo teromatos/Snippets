@@ -1,0 +1,4 @@
+Enable autoplay of movies in QuickTime Player  
+
+Well I'm happy to say you can re-enable that behavior with the following Terminal command:
+defaults write com.apple.QuickTimePlayerX MGPlayMovieOnOpen 1

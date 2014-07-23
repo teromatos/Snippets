@@ -1,0 +1,39 @@
+Converting from a String Representation of a Unicode Character back into a char
+
+Hopefully Michael Kaplan will step in here and explain some edge case or just a general comment like "that's totally wrong, Scott" - but until he does:
+
+A fellow emailed me this question:
+
+    I want to convert a string representation of a Unicode character back into a 'char' in .NET C#.  Can you help?
+     
+    i.e."U+0041" which is Hexidecimal for 65 which is ASCII for "A"
+     
+    There's got to be a built in function(s) for this, and I just can't seem to find them?
+     
+    To give you an idea, the pseudocode would be something like:
+     
+    string s = "U+0041";
+    char c = new ?Unicode.Decoder.Decode?(s);
+    textBox1.Text = c.ToString();
+
+Now, I have no idea why this gentleman would want to do this, but it's interesting enough. Here's what I came up with. I'm sure there's a better way.
+
+//Just a reminder that you can use \u to escape Unicode in C#
+char c = '\u0063';
+Console.WriteLine(c.ToString());
+
+//Here's how you'd go from a string to stuff like
+// U+0053 U+0063 U+006f
+string scott = "Scott and the letter c";
+foreach(char s in scott)
+{
+	Console.Write("U+{0:x4} ",(int)s);
+}
+		
+//Here's how converted a string (assuming it starts with U+)
+// containing the representation of a char
+// back to a char
+// Is there a built in, or cleaner way? Would this work in Chinese?
+string maybeC = "U+0063";
+int p = int.Parse(maybeC.Substring(2), System.Globalization.NumberStyles.HexNumber);
+Console.WriteLine((char)p);

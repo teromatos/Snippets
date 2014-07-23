@@ -1,0 +1,11 @@
+Setting environment variables in C#?
+In Visual Studio 2005 Whidbey :
+
+Environment.SetEnvironmentVarilable.
+
+In Visual Studio 2002-3 :
+
+P/Invoke to SetEnvironmentVariable 
+
+[DllImport("Kernel32.dll")]
+public static extern int SetEnvironmentVariable( string name , string value ) ; 

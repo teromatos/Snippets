@@ -1,0 +1,655 @@
+
+
+Imports System
+Imports System.Diagnostics
+Imports System.IO
+Imports System.Reflection
+Imports System.Text
+Imports System.Text.RegularExpressions
+
+Public Class CyclicLogTraceListener
+    Inherits TraceListener
+
+    Private Const _StackFrameSkipCount As Integer = 5
+    Private Const _IndentCharacter As Char = " "c
+
+    Private _FileIndex As Long = 0
+    Private _FirstLogFound As Boolean = False
+    Private _FileNameTemplateHasFormatting As Boolean = False
+    Private _FileLength As Long = 0
+    Private _FileCreationDate As DateTime = DateTime.MinValue
+
+    Private _sw As StreamWriter
+
+#Region "  Properties"
+
+    Private _FolderName As String
+    Private _FieldSeparator As String
+    Private _FileSizeThreshold As Long
+    Private _FileSizeUnit As SizeUnit
+    Private _FileCountThreshold As Long
+    Private _FileName As String
+    Private _FileNameTemplate As String
+    Private _TimeStampFormat As String
+    Private _AddMethod As Boolean
+    Private _AddPidTid As Boolean
+    Private _AutoFlush As Boolean
+    Private _FileAgeThreshold As Long
+    Private _FileAgeUnit As AgeUnit
+
+    ''' <summary>
+    ''' Indicates what unit of time FileAgeThreshold represents
+    ''' </summary>
+    Public Enum AgeUnit
+        Minutes
+        Hours
+        Days
+        Weeks
+        Months
+    End Enum
+
+    ''' <summary>
+    ''' Indicates what unit of size FileBytesThreshold represents
+    ''' </summary>
+    Public Enum SizeUnit
+        Gigabytes
+        Megabytes
+        Kilobytes
+        Bytes
+    End Enum
+
+
+    ''' <summary>
+    ''' If true, log file is flushed after every write.
+    ''' Can also be set via trace="autoflush" in the 
+    ''' system.diagnostics .config file section
+    ''' </summary>
+    Public Property AutoFlush() As Boolean
+        Get
+            Return _AutoFlush
+        End Get
+        Set(ByVal Value As Boolean)
+            _AutoFlush = Value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Folder that log files will be written to.
+    ''' Defaults to current folder.
+    ''' </summary>
+    Public Property FolderName() As String
+        Set(ByVal Value As String)
+            _FolderName = Value
+            If Not _FolderName.EndsWith(Path.DirectorySeparatorChar) Then
+                _FolderName = _FolderName & Path.DirectorySeparatorChar
+            End If
+            If Not Directory.Exists(_FolderName) Then
+                Throw New DirectoryNotFoundException("Requested trace logging directory '" & _FolderName & "' does not exist")
+            End If
+        End Set
+        Get
+            Return _FolderName
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Seperator used between log field entries.
+    ''' Defaults to comma.
+    ''' </summary>
+    Public Property FieldSeparator() As String
+        Set(ByVal Value As String)
+            _FieldSeparator = Value
+        End Set
+        Get
+            Return _FieldSeparator
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Template used to generate log filenames
+    ''' supports standard String.Format for two values: file index {0:} and current date {1:}
+    ''' using the standard String.Format conventions
+    ''' Defaults to "{0:0000}.log"
+    ''' </summary>
+    Public Property FileNameTemplate() As String
+        Set(ByVal Value As String)
+            _FileNameTemplate = Value
+            _FileNameTemplateHasFormatting = Regex.IsMatch(_FileNameTemplate, "{(0|1):.*}")
+        End Set
+        Get
+            Return _FileNameTemplate
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Add the method name of the calling function to the log.
+    ''' Defaults to True.
+    ''' </summary>
+    Public Property AddMethod() As Boolean
+        Set(ByVal Value As Boolean)
+            _AddMethod = Value
+        End Set
+        Get
+            Return _AddMethod
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Add the process and thread ID to the log.
+    ''' Defaults to False.
+    ''' </summary>
+    Public Property AddPidTid() As Boolean
+        Set(ByVal Value As Boolean)
+            _AddPidTid = Value
+        End Set
+        Get
+            Return _AddPidTid
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' If a format string is provided, the time will be added to each log entry.
+    ''' Defaults to "yyyy-MM-dd hh:mm:ss". Set to empty string to disable.
+    ''' </summary>
+    Public Property TimeStampFormat() As String
+        Set(ByVal Value As String)
+            _TimeStampFormat = Value
+        End Set
+        Get
+            Return _TimeStampFormat
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Maximum number of log files to create.
+    ''' Defaults to 10000.
+    ''' </summary>
+    Public Property FileCountThreshold() As Long
+        Set(ByVal Value As Long)
+            _FileCountThreshold = Value
+        End Set
+        Get
+            Return _FileCountThreshold
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Maximum age, in FileAgeUnits, of log files before a new log file will be created
+    ''' Defaults to 0, infinite
+    ''' </summary>
+    Public Property FileAgeThreshold() As Long
+        Get
+            Return _FileAgeThreshold
+        End Get
+        Set(ByVal Value As Long)
+            _FileAgeThreshold = Value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Determines what time unit is represented in FileAgeThreshold. 
+    ''' Defaults to AgeUnit.Days
+    ''' </summary>
+    Public Property FileAgeUnit() As AgeUnit
+        Get
+            Return _FileAgeUnit
+        End Get
+        Set(ByVal Value As AgeUnit)
+            _FileAgeUnit = Value
+        End Set
+    End Property
+
+    ''' <summary>
+    ''' Maximum file size each log is allowed to grow to before a new log is created. 
+    ''' Defaults to 512kb.
+    ''' </summary>
+    Public Property FileSizeThreshold() As Long
+        Set(ByVal Value As Long)
+            _FileSizeThreshold = Value
+        End Set
+        Get
+            Return (_FileSizeThreshold)
+        End Get
+    End Property
+
+    ''' <summary>
+    ''' Determines what size unit is represented in FileSizeThreshold. 
+    ''' Defaults to Bytes.
+    ''' </summary>
+    Public Property FileSizeUnit() As SizeUnit
+        Get
+            Return _FileSizeUnit
+        End Get
+        Set(ByVal Value As SizeUnit)
+            _FileSizeUnit = Value
+        End Set
+    End Property
+
+#End Region
+
+#Region "  Public Methods"
+
+    ''' <summary>
+    ''' constructor contains defaults if values aren't specified
+    ''' </summary>
+    Public Sub New()
+        Me.FileNameTemplate = "{0:0000}.log"
+        _FolderName = ".\"
+        _FileSizeThreshold = 1
+        _FileSizeUnit = SizeUnit.Megabytes
+        _FileCountThreshold = 10000
+        _TimeStampFormat = "yyyy-dd-MM hh:mm:ss"
+        _AddMethod = False
+        _AddPidTid = False
+        _FieldSeparator = ", "
+        _FileAgeUnit = AgeUnit.Days
+        _FileAgeThreshold = 0
+        _AutoFlush = True
+    End Sub
+
+    ''' <summary>
+    ''' this method is used when trace configured via the system.diagnostics section of the .config file
+    ''' all the parameters are set via a single initializeData string in this format:
+    '''   "booleanValue=true, stringValue='string', longValue=567"
+    ''' </summary>
+    Public Sub New(ByVal initializeData As String)
+        Me.New()
+        FolderName = ParseString(initializeData, "folderName", _FolderName)
+
+        _FileSizeThreshold = ParseLong(initializeData, "fileSizeThreshold", _FileSizeThreshold)
+        _FileSizeUnit = DirectCast(ParseEnum(initializeData, "fileSizeUnit", _FileSizeUnit, GetType(SizeUnit)), SizeUnit)
+        _FileCountThreshold = ParseLong(initializeData, "fileCountThreshold", _FileCountThreshold)
+        _FileAgeThreshold = ParseLong(initializeData, "fileAgeThreshold", _FileAgeThreshold)
+        _FileAgeUnit = DirectCast(ParseEnum(initializeData, "fileAgeUnit", _FileAgeUnit, GetType(AgeUnit)), AgeUnit)
+        _FileNameTemplate = ParseString(initializeData, "fileNameTemplate", _FileNameTemplate)
+        _TimeStampFormat = ParseString(initializeData, "timeStampFormat", _TimeStampFormat)
+        _AddPidTid = ParseBoolean(initializeData, "addPidTid", _AddPidTid)
+        _AddMethod = ParseBoolean(initializeData, "addMethod", _AddMethod)
+        _FieldSeparator = ParseString(initializeData, "fieldSeparator", _FieldSeparator)
+    End Sub
+
+#Region "  Initialization Parsing"
+
+    Private Function ParseEnum(ByVal initializeData As String, ByVal name As String, _
+        ByVal defaultValue As Object, ByVal t As Type) As Object
+        Dim s As String = ParseString(initializeData, name, defaultValue.ToString)
+        If s = "" Then
+            Return defaultValue
+        End If
+        Dim o As Object
+        Try
+            o = System.Enum.Parse(t, s, True)
+        Catch ex As System.ArgumentException
+            '-- if the string representation provided doesn't match 
+            '-- any known enum (case, we'll get this exception
+        End Try
+        If o Is Nothing Then
+            Return defaultValue
+        Else
+            Return o
+        End If
+    End Function
+
+    ''' <summary>
+    ''' parses values of the form
+    ''' name=true, name=false
+    ''' </summary>
+    Private Function ParseBoolean(ByVal initializeData As String, ByVal name As String, ByVal defaultValue As Boolean) As Boolean
+        Dim m As Match = Regex.Match(initializeData, "(?<=" & name & "=)false|true", RegexOptions.IgnoreCase)
+        If m.Success Then
+            Return Boolean.Parse(m.Value)
+        Else
+            Return defaultValue
+        End If
+    End Function
+
+    ''' <summary>
+    ''' parses values of the form
+    ''' name=3, name=28932
+    ''' </summary>
+    Private Function ParseLong(ByVal initializeData As String, ByVal name As String, ByVal defaultValue As Long) As Long
+        Dim m As Match = Regex.Match(initializeData, "(?<=" & name & "=)\d+", RegexOptions.IgnoreCase)
+        If m.Success Then
+            Return Long.Parse(m.Value)
+        Else
+            Return defaultValue
+        End If
+    End Function
+
+    ''' <summary>
+    ''' parses values of the form 
+    ''' name='data', name="data", name=data
+    ''' </summary>
+    Private Function ParseString(ByVal initializeData As String, ByVal name As String, ByVal defaultValue As String) As String
+        Dim m As Match = Regex.Match(initializeData, "(?<=" & name & "=('|"")*)[^'"",]+", RegexOptions.IgnoreCase)
+        If m.Success Then
+            Return m.Value
+        Else
+            '-- check for the ='' ="" =, case (empty string)
+            If Regex.IsMatch(initializeData, name & "=['"",]['""]*", RegexOptions.IgnoreCase) Then
+                Return ""
+            Else
+                Return defaultValue
+            End If
+        End If
+    End Function
+
+#End Region
+
+    Public Overloads Overrides Sub Write(ByVal o As Object)
+        WriteMessage(FormatMessage(o.ToString, "", False))
+    End Sub
+
+    Public Overloads Overrides Sub Write(ByVal message As String)
+        WriteMessage(FormatMessage(message, "", False))
+    End Sub
+
+    Public Overloads Overrides Sub Write(ByVal message As String, ByVal category As String)
+        WriteMessage(FormatMessage(message, category, False))
+    End Sub
+
+    Public Overloads Overrides Sub Write(ByVal o As Object, ByVal category As String)
+        WriteMessage(FormatMessage(o.ToString, category, False))
+    End Sub
+
+    Public Overloads Overrides Sub WriteLine(ByVal o As Object)
+        WriteMessage(FormatMessage(o.ToString, "", True))
+    End Sub
+
+    Public Overloads Overrides Sub WriteLine(ByVal message As String)
+        WriteMessage(FormatMessage(message, "", True))
+    End Sub
+
+    Public Overloads Overrides Sub WriteLine(ByVal message As String, ByVal category As String)
+        WriteMessage(FormatMessage(message, category, True))
+    End Sub
+
+    Public Overloads Overrides Sub WriteLine(ByVal o As Object, ByVal category As String)
+        WriteMessage(FormatMessage(o.ToString, category, True))
+    End Sub
+
+    Public Overrides Sub Close()
+        SyncLock Me
+            CloseLogFile()
+        End SyncLock
+    End Sub
+
+    Public Overrides Sub Flush()
+        SyncLock Me
+            If Not _sw Is Nothing Then
+                _sw.Flush()
+            End If
+        End SyncLock
+    End Sub
+
+#End Region
+
+#Region "  Private Methods"
+
+    Private Function FormatMessage(ByVal message As String, ByVal category As String, ByVal includeNewLine As Boolean) As String()
+        Return New String() {GetIndent(), GetTimeStamp(), GetPidTid(), GetMethodName(), GetCategory(category), message, GetNewLine(includeNewLine)}
+    End Function
+
+    ''' <summary>
+    ''' creates a new log filename in this format
+    '''   "Directory \ FileNameTemplate"
+    ''' </summary>
+    Private Function CreateLogFileName(ByVal fileIndex As Long) As String
+        Dim sb As New StringBuilder
+        sb.Append(_FolderName)
+        sb.Append(String.Format(_FileNameTemplate, fileIndex, DateTime.Now))
+        Return sb.ToString
+    End Function
+
+    ''' <summary>
+    ''' Check that no more than (n) log files will exist at any given time;
+    ''' if more than (n) do exist, the oldest one is deleted
+    ''' </summary>
+    Private Sub EnforceFileThreshold()
+        If _FileCountThreshold = 0 Then Return
+
+        '-- get all the files in the current folder..
+        Dim FileNames() As String
+        If Path.GetExtension(_FileNameTemplate) = "" Then
+            FileNames = Directory.GetFiles(_FolderName)
+        Else
+            '-- ..that end with whatever log extension was specified
+            FileNames = Directory.GetFiles(_FolderName, "*" & Path.GetExtension(_FileNameTemplate))
+        End If
+
+        If FileNames.Length = 0 Then Return
+
+        Dim FilesMatched As Integer = 0
+        Dim OldestFileDate As DateTime = DateTime.MinValue
+        Dim OldestFileName As String = ""
+
+        '-- find all the files that match our specific log pattern 
+        '-- (extension isn't specific enough
+        Dim FilePattern As String = Regex.Replace(_FileNameTemplate, "{[^}]+?}", ".*?") & "$"
+        Dim r As New Regex(FilePattern)
+        Dim fi As FileInfo
+        For Each FileName As String In FileNames
+            If r.IsMatch(FileName) Then
+                FilesMatched += 1
+                fi = New FileInfo(FileName)
+                If fi.CreationTimeUtc > OldestFileDate Then
+                    OldestFileDate = fi.CreationTimeUtc
+                    OldestFileName = FileName
+                End If
+            End If
+        Next
+
+        If FilesMatched > _FileCountThreshold Then
+            File.Delete(OldestFileName)
+        End If
+    End Sub
+
+    ''' <summary>
+    ''' Opens the "current" log file; this can be either an
+    ''' existing incomplete log file or a brand new log file
+    ''' </summary>
+    Private Sub OpenLogFile(ByVal messageLength As Long)
+        '-- close any currently open log file, if any
+        CloseLogFile()
+
+        Dim FileName As String
+        Dim LoopCount As Integer = 0
+
+        Do While True
+
+            LoopCount += 1
+
+            '-- generate next log name in sequence (by date, index, etc)
+            If _FileCountThreshold = 0 Then
+                _FileIndex = 1
+            Else
+                _FileIndex += 1
+                If _FileIndex > _FileCountThreshold Then
+                    _FileIndex = 1
+                End If
+            End If
+            FileName = CreateLogFileName(_FileIndex - 1)
+
+            '-- see if next log file already exists
+            If Not File.Exists(FileName) Then
+                '-- this will be a new log file
+                _FileLength = 0
+                _FileCreationDate = DateTime.MinValue
+                '-- if creating a new file, we need to make ABSOLUTELY
+                '-- sure we haven't exceeded total allowed file count
+                EnforceFileThreshold()
+                Exit Do
+            Else
+                '-- existing log file; retrieve length and creation time
+                Dim fi As New FileInfo(FileName)
+                _FileLength = fi.Length
+                _FileCreationDate = fi.CreationTimeUtc
+
+                '-- has this log file exceeded valid length or age?
+                If LogFileSizeMaxReached(messageLength) Or LogFileAgeMaxReached() Then
+                    If _FirstLogFound Or (LoopCount > _FileCountThreshold) Then
+                        File.Delete(FileName)
+                        _FileLength = 0
+                        Exit Do
+                    End If
+                Else
+                    Exit Do
+                End If
+            End If
+        Loop
+
+        '-- this is an optimization for subsequent passes through the loop
+        _FirstLogFound = True
+
+        '-- at this point we're either.. 
+        '-- A) opening a brand new logfile
+        '-- B) appending to an existing logfile
+        _sw = File.AppendText(FileName)
+        _sw.AutoFlush = _AutoFlush
+    End Sub
+
+    Private Sub CloseLogFile()
+        SyncLock Me
+            If (Not _sw Is Nothing) Then
+                _sw.Close()
+                _sw = Nothing
+            End If
+        End SyncLock
+    End Sub
+
+    Private Function StringArrayLength(ByVal message As String()) As Long
+        Dim ml As Long = 0
+        For i As Integer = 0 To message.Length - 1
+            ml += message(i).Length
+        Next
+        Return ml
+    End Function
+
+    Private Sub WriteMessage(ByVal message As String())
+        Dim ml As Long = StringArrayLength(message)
+        SyncLock Me
+            If _sw Is Nothing Then
+                OpenLogFile(ml)
+            Else
+                If LogFileSizeMaxReached(ml) Or LogFileAgeMaxReached() Then
+                    OpenLogFile(ml)
+                End If
+            End If
+            For i As Integer = 0 To message.Length - 1
+                _sw.Write(message(i))
+            Next
+            _FileLength += ml
+        End SyncLock
+    End Sub
+
+    Private Function GetMethodName() As String
+        If _AddMethod Then
+            Dim sf As New StackFrame(_StackFrameSkipCount)
+            Dim mb As MethodBase = sf.GetMethod
+            Dim sb As New StringBuilder
+            sb.Append(mb.ReflectedType.FullName)
+            sb.Append(".")
+            sb.Append(mb.Name)
+            sb.Append(_FieldSeparator)
+            Return sb.ToString
+        Else
+            Return ""
+        End If
+    End Function
+
+    Private Function GetIndent() As String
+        Return New String(_IndentCharacter, (Me.IndentLevel * Me.IndentSize))
+    End Function
+
+    Private Function GetCategory(ByVal category As String) As String
+        If category = "" Then
+            Return ""
+        Else
+            Dim sb As New StringBuilder
+            sb.Append(category)
+            sb.Append(_FieldSeparator)
+            Return sb.ToString
+        End If
+    End Function
+
+    Private Function GetNewLine(ByVal includeNewLine As Boolean) As String
+        If includeNewLine Then
+            Return Environment.NewLine
+        Else
+            Return ""
+        End If
+    End Function
+
+    Private Function GetPidTid() As String
+        If _AddPidTid Then
+            Dim sb As New StringBuilder
+            sb.Append(Process.GetCurrentProcess.Id)
+            sb.Append("/")
+            sb.Append(AppDomain.GetCurrentThreadId)
+            sb.Append(_FieldSeparator)
+            Return sb.ToString
+        Else
+            Return ""
+        End If
+    End Function
+
+    Private Function GetTimeStamp() As String
+        If _TimeStampFormat = "" Then
+            Return ""
+        Else
+            Dim sb As New StringBuilder
+            sb.Append(DateTime.Now.ToString(_TimeStampFormat))
+            sb.Append(_FieldSeparator)
+            Return sb.ToString
+        End If
+    End Function
+
+    Private Function LogFileAgeMaxReached() As Boolean
+        If _FileAgeThreshold = 0 Then
+            Return False
+        Else
+            If _FileCreationDate = DateTime.MinValue Then
+                Return False
+            End If
+            Select Case _FileAgeUnit
+                Case AgeUnit.Hours
+                    Return _FileCreationDate < DateTime.UtcNow.AddHours(-_FileAgeThreshold)
+                Case AgeUnit.Minutes
+                    Return _FileCreationDate < DateTime.UtcNow.AddMinutes(-_FileAgeThreshold)
+                Case AgeUnit.Months
+                    Return _FileCreationDate < DateTime.UtcNow.AddMonths(-Convert.ToInt32(_FileAgeThreshold))
+                Case AgeUnit.Weeks
+                    Return _FileCreationDate < DateTime.UtcNow.AddDays(-(_FileAgeThreshold * 7))
+                Case Else
+                    '-- default to days
+                    Return _FileCreationDate < DateTime.UtcNow.AddDays(-_FileAgeThreshold)
+            End Select
+        End If
+    End Function
+
+    Private Function LogFileSizeMaxReached(ByVal messageLength As Long) As Boolean
+        If _FileSizeThreshold = 0 Then
+            Return False
+        Else
+            Dim l As Long = messageLength + _FileLength
+            Select Case _FileSizeUnit
+                Case SizeUnit.Kilobytes
+                    Return l > (_FileSizeThreshold * 1024)
+                Case SizeUnit.Megabytes
+                    Return l > (_FileSizeThreshold * 1048576)
+                Case SizeUnit.Gigabytes
+                    Return l > (_FileSizeThreshold * 1073741824)
+                Case Else
+                    '-- default to bytes
+                    Return l >= _FileSizeThreshold
+            End Select
+
+        End If
+    End Function
+
+#End Region
+
+    Protected Overrides Sub Finalize()
+        Me.Close()
+        MyBase.Finalize()
+    End Sub

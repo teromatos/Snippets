@@ -1,0 +1,94 @@
+URL=http://blogs.microsoft.co.il/blogs/bursteg/archive/2007/10/06/linq-to-sql-deferred-loading-lazy-load.aspx
+
+Linq to SQL Deferred Loading - Lazy Load
+
+Consider the Blog Site database I used in previous posts about Linq to SQL:
+
+
+
+Linq to SQL Deferred Loading
+
+If we query for the available blogs in the site using Linq to SQL, the query should look like this:
+
+BlogDataContext ctx = new BlogDataContext(...);
+ 
+var query = from b in ctx.Blogs
+            select b;
+ 
+foreach (Blog b in query)
+{
+    Console.WriteLine("{0}", b.BlogName);
+}
+This Linq query will result in the following SQL statement being sent to the DB:
+
+SELECT [t0].[BlogID], [t0].[BlogName], [t0].[Owner]
+FROM    [dbo].[Blogs] AS [t0]
+
+and the output will be:
+
+
+
+Now, if we change the statement that outputs the name of the blog, and let it also print the number of posts in the blog:
+
+foreach (Blog b in query)
+{
+    Console.WriteLine("{0} has {1} posts", b.BlogName, b.Posts.Count);
+}
+This time, the output will be:
+
+ 
+
+What Linq to SQL does is whenever it runs into the expression b.Posts.Count, it knows that the Posts collection of the blog was not yet retrieved, so it automatically generates the appropriate select statement and gets the posts. For example:
+
+SELECT [t0].[PostID], [t0].[BlogID], [t0].[Title], [t0].[Body], [t0].[PublishDate] 
+FROM    [dbo].[Posts] AS [t0] 
+WHERE  [t0].[BlogID] = 'bursteg'
+
+The problem is that a similar query is executed for each blog instance. So if we have a long list of blogs, than this simple loop can be a performance hit.
+
+This behavior is called Linq to SQL Deferred Loading, and it is turned on by default. In order to turn it of, you can set the DeferredLoadingEnabled property to false.
+
+BlogDataContext ctx = new BlogDataContext(...);
+ 
+ctx.DeferredLoadingEnabled = false;
+ 
+var query = from b in ctx.Blogs
+            select b;
+ 
+foreach (Blog b in query)
+{
+    Console.WriteLine("{0} has {1} posts", b.BlogName, b.Posts.Count);
+}
+Now, this query returns 0 as the number of posts of each blog.
+
+
+
+Using DataLoadOptions to Control Deferred Loading
+
+If you still want to query the posts list for every blog that is queried, no matter if it is queries by primary key or as a result of a query, you can use DataLoadOptions.
+
+BlogDataContext ctx = new BlogDataContext(...);
+ctx.DeferredLoadingEnabled = false;
+ 
+DataLoadOptions dlo = new DataLoadOptions();
+dlo.LoadWith<Blog>(b => b.Posts);
+ctx.LoadOptions = dlo;
+ 
+var query = from b in ctx.Blogs
+            select b;
+ 
+foreach (Blog b in query)
+{
+    Console.WriteLine("{0} has {1} posts", b.BlogName, b.Posts.Count);
+}
+Using DataLoadOptions, Linq to SQL will execute only a single SQL Statement to the database, getting both the list of blogs, and the list of posts for each blog:
+
+SELECT t0.BlogID, t0.BlogName, t0.Owner, 
+           t1.PostID, t1.BlogID AS BlogID2, t1.Title, t1.Body, t1.PublishDate, 
+           ( SELECT COUNT(*) FROM Posts AS t2 
+             WHERE t2.BlogID = t0.BlogID ) AS count 
+FROM   Blogs AS t0 
+LEFT OUTER JOIN Posts AS t1 ON t1.BlogID = t0.BlogID 
+ORDER BY t0.BlogID, t1.PostID
+
+Enjoy!

@@ -1,0 +1,82 @@
+	
+Hi,
+
+There is only one truely correct way to synchronise instances of an application and that is to use a kernel object, specifically a mutex.
+
+All other means may work in practice, but are timing dependant and really only work by "chance". It is actually possible, depending what your machine is doing at the time, specifically what load it is under, for the previous code to fail.
+
+Microsoft introduced the notion of a Global and Local mutex to solve this exact sort of problem where multi-user sessions (terminal services, etc.) are also an issue. Also what about things like Citrix. That will fail under such environments. The code below ALWAYS works.
+
+Regards,
+Mark.
+
+// Use this global version to ensure a single instance even across
+// terminal services, Citrix or XP multi-user sessions.
+// I often use a GUID string in place of "MyApp".
+//Mutex instanceLock = new Mutex(false, "Global\MyApp");
+
+// Use this local version to ensure a single instance per user session.
+Mutex instanceLock = new Mutex(false, "Local\MyApp");
+if (instanceLock.Wait(0, false))
+{
+try
+{
+Application.Run(new MainForm());
+}
+finally
+{
+instanceLock.ReleaseMutex();
+}
+}
+else
+{
+Application.Exit();
+}
+
+
+
+======================
+
+
+ 	
+// a member of some Form (or class etc.)
+private static Mutex _AppMutex = new Mutex(false, "MYAPP");
+
+if (MyForm._AppMutex.WaitOne(0, false))
+{
+Application.Run(new MyForm());
+}
+else
+{
+// whatever
+}
+
+
+======================
+
+
+[STAThread]
+static void Main()
+{
+    bool grantedOwnership; 
+    using (System.Threading.Mutex mtxSingleInstance = new System.Threading.Mutex(true, "A2907A9C-63D7-474e-ADA6-EA910EF1493D", out grantedOwnership))
+   {
+        if (grantedOwnership)
+      {
+          Application.EnableVisualStyles();
+          Application.SetCompatibleTextRenderingDefault(false);
+          Application.Run(new Form1());
+      }
+        else
+          ShowWindow(FindWindow(null, "Form1"), SW_RESTORE);       
+    }
+}
+
+private const int SW_RESTORE = 9;
+
+[DllImport("user32.dll")]
+private static extern IntPtr FindWindow(string lpClassName, string lpWindowName);
+
+
+[DllImport("user32.dll")]
+private static extern int ShowWindow(IntPtr hwnd, int cmndShow);

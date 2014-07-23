@@ -1,0 +1,22 @@
+URL=http://weblogs.asp.net/timothykhouri/archive/2007/09/08/downloading-and-uploading-to-an-ftp-the-easy-way.aspx
+
+One of my biggest passions when it comes to programming has always been communication between computers (and networks), whether it be with raw communication with Sockets, Web Services, remoting or whatever. Just the thought of all that's going on behind the scenes to "connect" everyone together really blows my mind.
+
+Along that line of thought is one of my favorite classes in the .NET framework, the WebClient class (in the System.Net namespace). I've always known of this class to upload and download files from a web server, but you can also use it for FTP servers too.
+
+So without boring with too much talking, I'll show you how easy it is with some code:
+
+// Make an instance of the WebClient class.
+ WebClient myLilWebClient = new WebClient();
+
+// Since my FTP requires authentication, I'll have to supply my
+// UserName and Password.
+myLilWebClient.Credentials = new NetworkCredential("userName", "p@ssw0rd");
+
+// Now I'll download a file from my FTP right to my desktop.
+myLilWebClient.DownloadFile("ftp://myFtpAddress.com/somefile.txt", @"c:\documents and settings\tkhouri\desktop\somefile.txt");
+
+I don't think it could get any easier than that! Oh, and if you wanted to Upload a file to an FTP... you'd simply call mYLilWebClient.UploadFile.
+
+Gotta love .NET!
+

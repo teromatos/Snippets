@@ -1,0 +1,32 @@
+Split a string with a "string" as the delimeter.
+
+The CLR string.split() method lets you split string with one or more single characters.  However, what if you wanted to use another string as the delimiter.  You can't do it with string.split().  Here is a simple way to do it using Regex.  In the following example, the delimiter is in the form {flag:xxx} where "xxx" is zero or more characters we don't know before hand, we just know the delim will start with "{flag:" end with a "}". 
+
+string s = @"this goes to element one {flag:x} this goes to element 2
+{flag:pxedqr} this goes to element 3 {flag:pzf} this goes to element 4.";
+string[] sa = Split(s);
+foreach(string ts in sa)
+{
+ Console.WriteLine(ts);
+}
+
+public static string[] Split(string inString)
+{
+ Regex r = new Regex("({flag:.+?})"); // Split on hyphens.
+ string[] sa = r.Split(inString);
+ for(int i=0; i< sa.Length; i++)
+ {
+  sa[i] = sa[i].Trim();
+ }
+ return sa;
+}
+
+If you don't want the "{flag:xxx}" delimiter in the result array, remove the
+group "( )" parens in the Regex string.
+So Regex("({flag:.+?})") would become Regex("{flag:.+?}") to give you this
+output for above code:
+
+this goes to element one
+this goes to element 2
+this goes to element 3
+this goes to element 4.

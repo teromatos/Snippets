@@ -1,0 +1,38 @@
+URL=http://codebetter.com/blogs/ben.reichelt/archive/2005/08/25/dynamically_map_data_custom_entity.aspx
+
+Dynamically Mapping a Custom Entity
+This post from Chris Wallace got me thinking about dynamically mapping data results to custom entities.  In his post Chris outlines a way to dynamically fill a custom entity using a switch statement on the columns that are present in the datareader.  Towards the end, he mentions dynamically creating a method (using the CodeDom presumably) and compiling and executing the method on the fly.
+
+I thought of a different way to accomplish the same goal, one that requires no knowledge of the custom entity, by using some simple reflection.  Basically, you have a datareader (or datatable, dataset, whatever), you loop through the columns of the datareader and get the name of the current column.  Using reflection, check to see if the custom entity has a property with the same name, if it does then fill the value, if not, continue looping.
+
+I’m going to show a small sample below which is very simplistic, but it gets the point across.  There are a few caveats that I’m not addressing:
+
+Null values (i.e. trying to set an int property to null) 
+I’m assuming that a default parameterless constructor exists for the custom entity 
+I’m not doing anything for indexed properties (like DataReader[int ordinal])
+You can download a little sample winforms application here.  Just change the “DB” value in the app.config to point to the sample access db and you should be all set.
+
+So, heres the code.  The method below takes in a datareader and the Type of the custom entity that we want to fill and returns a custom entity with its properties filled in with the data from the datareader.
+
+        public static object MapEntity(IDataRecord record, Type customType)
+        {
+            object customEntity = Activator.CreateInstance(customType);
+            PropertyInfo[] properties = customType.GetProperties();
+ 
+            for(int i=0;i < record.FieldCount;i++)
+            {
+                string columnName = record.GetName(i);
+                foreach(PropertyInfo prop in properties)
+                {
+                    if (string.Compare(prop.Name, columnName) == 0)
+                    {
+                        prop.SetValue(customEntity, record.GetValue(i), null);
+                        break;
+                    }
+                }
+            }
+ 
+            return customEntity;
+        }
+This works pretty slick for most cases, but there are situations that you would run into where this break down.  If you wanted to have property names that didn’t match the database schema for instance, but it could certainly handle a large amount of the data access, so long as you address the issues that I mentioned above.
+

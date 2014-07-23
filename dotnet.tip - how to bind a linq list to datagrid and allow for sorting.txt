@@ -1,0 +1,75 @@
+        private IBindingList Groups;
+        string SortColumn = "";
+        ListSortDirection SortOrder;
+
+		private void AppInit()
+		{
+			FillGroups("TEST");
+		}
+		
+        private void FillGroups(string clientName)
+        {
+            IList<Group> iGroups= GroupController.FindAllForClient(clientName);
+            Groups = new BindingList<Group>(iGroups);
+            groupsSource.DataSource = Groups;
+
+            FormatGrid();
+            lblStatus.Text = "Records found: " + dgvGroups.Rows.Count.ToString();
+        }
+
+        private void FormatGrid()
+        {
+            dgvGroups.AutoGenerateColumns = true;
+
+            dgvGroups.RowHeadersWidth = 25;            
+            dgvGroups.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
+
+            if (dgvGroups.Rows.Count > 0)
+            {
+                //Hide Columns
+                dgvGroups.Columns["GroupKey"].Visible = false;
+
+                //Header Text
+                dgvGroups.Columns["ClientName"].HeaderText = "Client Name";
+                dgvGroups.Columns["GroupNo"].HeaderText = "Group Number";
+                dgvGroups.Columns["ModifiedOn"].HeaderText = "Modified On";
+                dgvGroups.Columns["ModifiedBy"].HeaderText = "Modified By";
+
+                //Column order
+                dgvGroups.Columns["ClientName"].DisplayIndex = 0;
+                dgvGroups.Columns["GroupNo"].DisplayIndex = 1;
+                dgvGroups.Columns["Include"].DisplayIndex = 2;
+                dgvGroups.Columns["ModifiedOn"].DisplayIndex = 3;
+                dgvGroups.Columns["ModifiedBy"].DisplayIndex = 4;
+
+                //Read only
+                dgvGroups.Columns["ClientName"].ReadOnly = true;
+                dgvGroups.Columns["GroupNo"].ReadOnly = true;
+                dgvGroups.Columns["ModifiedOn"].ReadOnly = true;
+                dgvGroups.Columns["ModifiedBy"].ReadOnly = true;
+            }
+        }
+		
+        private void dgvClients_ColumnHeaderMouseClick(object sender, DataGridViewCellMouseEventArgs e)
+        {
+            //get the current column details
+            DataGridViewColumn dgvc = dgvClients.Columns[e.ColumnIndex];
+            string columnName = dgvc.Name;
+
+            if (SortColumn != columnName)
+            {
+                SortColumn = columnName;
+                SortOrder = ListSortDirection.Ascending;
+            }
+            else
+            {
+                if (SortOrder == ListSortDirection.Ascending)
+                    SortOrder = ListSortDirection.Descending;
+                else
+                    SortOrder = ListSortDirection.Ascending;
+            }
+
+            dgvClients.Sort(dgvc, SortOrder);
+        }
+
+		

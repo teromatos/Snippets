@@ -1,0 +1,16 @@
+How to enable attachments in Outlook
+====================================
+
+ 
+I get asked this by at least one person about once a week as I seem to have an uncanny knack for remembering long registry strings ;)
+
+To stop outlook from blocking attachments, open up Regedit.
+
+In Regedit, navigate to HKCU\Software\Microsoft\Office\x\Outlook\Security
+
+for X put the numeric version number of your version of outlook - for outlook XP use 10.0, for outlook 2003 use 11.0
+
+Create a new string called Level1Remove (Case Sensitive)
+
+For the string value, add whatever file extensions you want to allow (including the dot) seperated by colons e.g. .exe;.lnk
+ 

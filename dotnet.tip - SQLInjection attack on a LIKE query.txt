@@ -1,0 +1,21 @@
+SQLInjection attack on a LIKE query
+
+If SQL had known attributes I should have decorated my Like query with [AirCode]. Several comments questioned wheter and how it was vulnerable to a sql-injection attack. Well, the aircode version is. The original is harder to break.
+
+The vulnerable one :
+
+orgSql = "SELECT id, Info FROM Table1";
+sqlDataAdapterBuildSql.SelectCommand.CommandText = orgSql + (" WHERE Info LIKE '" + textBoxInput.Text + "%'");
+
+Guess what happens when the user types this in the textbox
+
+e'  drop table table2 --
+
+Yes, table2 is gone. Provided your app has adminstrator rights on the database. A lot off apps do.
+
+The other one, as seen in "Writing Secure Code":
+
+sqlDataAdapterUseParameter.SelectCommand = "SELECT id, Info FROM Table1 WHERE (Info LIKE @param1)"
+sqlDataAdapterUseParameter.SelectCommand.Parameters["@Param1"].Value = string.Format("{0}%", textBoxInput.Text);
+
+When the malicious user now tries to inject sql via the textbox the only result will be that the database is queried for e'  drop table table2 -- A large resultset is not that likely .

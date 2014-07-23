@@ -1,0 +1,64 @@
+URL=http://west-wind.com/weblog/posts/810709.aspx
+
+Changing Configuration Settings in a Desktop Client Application 
+
+--------------------------------------------------------------------------------
+
+5 commentsJune 28, 2009 @ 10:28 pm-  from Hood River, Oregon
+
+
+
+Got a question in response to a Localization article today that asked how to store requested culture settings. In the article I recommend that easiest and most reliable way to switch cultures is to assign the culture when the application runs and allow the user to change cultures somewhere in the UI. When the culture is changed it’s up to the application to decide how to handle the actual culture change. One of the easiest things to do is write the change to a configuration setting and then exit and immediately restart the application.
+
+.NET 2.0 gained the ability to write configuration settings in addition to easily reading them. Although this isn’t something you need frequently it’s quite handy to be able to update values easily and then write the changes back out into the configuration store. Here’s an example of a sample application that allows changing the active culture writing a new culture selection into a configuration file (in WPF):
+
+private void lstLanguageSelections_SelectionChanged(object sender, SelectionChangedEventArgs e)
+{
+    string origCulture = CultureInfo.CurrentUICulture.IetfLanguageTag;
+    string culture = ((ComboBoxItem)this.lstLanguageSelections.SelectedValue).Tag as string;
+
+    // static app method that acutally sets the culture
+    App.SetCulture(culture, true);  // force windows to close 
+
+    if (this.IsInitialized && culture != origCulture)
+    {
+        System.Configuration.Configuration config =
+               ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None);
+
+        // Add an Application Setting.            
+        config.AppSettings.Settings.Remove("Culture");
+        config.AppSettings.Settings.Add("Culture", culture);
+
+        // Save the configuration file.
+        config.Save(ConfigurationSaveMode.Modified);
+
+        // Force a reload of a changed section.
+        ConfigurationManager.RefreshSection("appSettings");
+
+        Process.Start(
+            new ProcessStartInfo(Environment.CommandLine)
+            {
+                UseShellExecute = false,
+                WindowStyle = ProcessWindowStyle.Normal
+            });
+
+        Application.Current.Shutdown();
+    }
+}Notice that you have to remove the setting before adding it back in when updating the value. The code checks to see if the culture has indeed changed (a little odd since this IS a SelectionChanged event handler after all but this has to do with how WPF initially assigns values) and removes the key and adds it back in. Finally the whole file is written back out and the configuration values are refreshed so the next time you read the changed configuration key(s) they will reflect the new values.
+
+All of this assumes the that you have appropriate permissions – you need to have read/write access in the folder where your .config file is located – most likely the applications’s startup folder, which by no means is guaranteed. Under restricted profiles (or with UAC enabled in Vista) writing into the installation folder is not allowed. So use this approach with some awareness of the security environment it runs in.
+
+
+Comments:
+
+This approach is wrong.
+
+Since .NET 2.0 this can be done via Properties.Settings class in desktop app and .NET is able to handle everyhting without changing default permissions or application restart.
+
+hope this helps #  re: Changing Configuration Settings in a Desktop Client Application 
+by Rick Strahl July 14, 2009 @ 10:58 am 
+@Anatoly - Interesting, I didn't realize the Settings class actually has a Default.Save() method to write settings back to the config file.Thanks for pointing that out.
+
+Those default app settings follow an unfortunate naming convention though for the section written out. I never actually use them and they don't work in Web apps. 
+
+The above code is more generic as you have a little more control over what gets written. 

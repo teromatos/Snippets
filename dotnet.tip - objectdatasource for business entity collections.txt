@@ -1,0 +1,116 @@
+URL = http://codebetter.com/blogs/brendan.tompkins/archive/2006/05/11/144539.aspx
+
+
+
+using System; 
+using System.ComponentModel;
+
+using System.Data;
+
+using System.Reflection;
+
+ 
+
+public abstract class EntityDataTable : DataTable
+
+{
+
+ 
+
+    [DataObjectMethod(DataObjectMethodType.Select, true)]
+
+    public abstract DataTable Fill(object parameter);
+
+ 
+
+    /// <summary>
+
+    /// Gets the data table.
+
+    /// </summary>
+
+    /// <param name="list">The list.</param>
+
+    /// <returns></returns>
+
+    protected DataTable GetDataTable(System.Collections.IList list, Type typ)
+
+    {
+
+        DataTable dt = new DataTable();
+
+ 
+
+        PropertyInfo[] pi = typ.GetProperties();
+
+        foreach (PropertyInfo p in pi)
+
+        {
+
+            dt.Columns.Add(new DataColumn(p.Name, p.PropertyType));
+
+        }
+
+ 
+
+        foreach (object obj in list)
+
+        {
+
+            object[] row = new object[pi.Length];
+
+            int i = 0;
+
+ 
+
+            foreach (PropertyInfo p in pi)
+
+            {
+
+                row[i++] = p.GetValue(obj, null);
+
+            }
+
+ 
+
+            dt.Rows.Add(row);
+
+        }
+
+ 
+
+        return dt;
+
+    }
+
+}
+
+
+
+
+
+ public class BindableSomethingCollection : EntityDataTable
+
+    {
+
+        public override DataTable Fill(object parameter)
+
+        {
+
+            SomeService somesrv = new SomeService();
+
+            return GetDataTable(somesrv.GetSomeCollection(parameter as SomeType), typeof(SomeContainedType));
+
+        }        
+
+    }
+
+
+
+<asp:GridView ID ="GridView1" runat="server" AutoGenerateColumns="True" EmptyDataText="No Records" ShowFooter ="True" AllowPaging ="True"  AllowSorting="True" DataSourceID="ObjectDataSource1" ></asp:GridView>
+
+<asp:ObjectDataSource ID="ObjectDataSource1" runat="server" SelectMethod="Fill" TypeName="BindableSomethingCollection">
+  <SelectParameters>
+    <asp:SessionParameter DefaultValue="null" Name="parameter" SessionField="PARAMETER" Type="Object" />
+  </SelectParameters>
+</asp:ObjectDataSource>

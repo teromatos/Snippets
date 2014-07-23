@@ -1,0 +1,129 @@
+Source: http://www.microsoft.com/technet/scriptcenter/resources/qanda/jun08/hey0610.mspx
+
+How Can I Get a Script to Pick Up Where It Left Off After a Reboot?
+
+Hey, Scripting Guy! I would like to write a script, with a number of sequential actions, that can continue where it left off after a reboot. How can I do that?
+-- GS
+
+
+Hey, GS. By the way, what are you doing at 10:00 AM Eastern Daylight Time today? Nothing? Great; then we’ll see you at the Orange County Convention Center for our 10:00 instructor-led lab Windows PowerShell for VBScripters. Should be fun, huh?
+
+Note. OK, we understand that you might not be able to make it for the 10:00 lab; after all, this is kind of short notice. But hey, no problem; after all, we’ll be repeating the lab at 1:00 PM this afternoon. And yes, that means that you have two chances to see the Scripting Guys in person, which is two more chances than most people ever get.
+
+Or ever want.
+ 
+
+At the moment the Scripting Guys are gathering up their things and preparing to head down to the Orange County Convention Center. (Well, if you want to get technical, Scripting Guy Jean Ross is gathering up her things and preparing to head down to the Orange County Convention Center. Meanwhile, Scripting Guy Greg Stemp has snuck back down to the hotel’s breakfast buffet for more chocolate-filled croissants.) Will this instructor-led lab stand as the most exciting thing to ever happen to the city of Orlando? Well, that’s a bit hard to say; after all, Orlando is the home to everything from Disney World to Universal Studios to Sea World. But yes, yes it will.
+
+Of course, we realize that some of you aren’t going to be able to make it to our instructor-led lab. If you’re one of those people, well, the heck with you. You don’t want to come to our instructor-led lab? Fine; then we’re not going to your instructor-led lab. Take that, wise guy!
+
+Could we put you on hold for a second here? OK, Scripting Guy Jean Ross has pointed out a minor typo in the preceding paragraph. As it turns out, that paragraph should read, “Of course, we realize that some of you aren’t going to be able to make it to our instructor-led lab. If you’re one of those people, well, that’s fine; we understand. And, as it turns out, you won’t be missing all that much anyway; after all, we’ve updated our VBScript to Windows PowerShell Conversion Guide as part of the TechEd festivities, and those updates (new sections on the FileSystemObject and Windows Script Host) are available online. In addition, we’re also planning to show you a script that can continue – from the proper spot in the code – following a required reboot of the computer.”
+
+That’s what we meant to say.
+
+Note. Is that really what we meant to say? Hey, who cares? As long as they keep these chocolate-filled croissants coming we’re willing to say pretty much anything. For example, “Jean Ross is a far better and far more valuable Scripting Guy than Greg Stemp.”
+
+See? Like we said, pretty much anything.
+ 
+
+So what about a script that can continue, from the proper spot in the code, following a reboot of the computer? Well, try this one on for size:
+
+Const HKEY_CURRENT_USER = &H80000001
+ 
+strComputer = "."
+ 
+Set objRegistry = GetObject("winmgmts:\\" & strComputer & "\root\default:StdRegProv")
+
+strKeyPath = "Software\My Scripts"
+strValue = "Test Script"
+ 
+objRegistry.GetStringValue HKEY_CURRENT_USER,strKeyPath,strValue,strScriptStatus
+
+If IsNull(strScriptStatus) Then
+    strScriptStatus = "Run"
+    objRegistry.CreateKey HKEY_CURRENT_USER,strKeyPath
+    objRegistry.SetStringValue HKEY_CURRENT_USER,strKeyPath,strValue,strScriptStatus
+    Wscript.Echo "The script is running for the first time."
+    strNewKeyPath = "Software\Microsoft\Windows\CurrentVersion\RunOnce"
+    strNewValue = "Test Script"
+    strScriptPath = "cmd.exe /k cscript.exe C:\Scripts\Test.vbs"
+    objRegistry.SetStringValue HKEY_CURRENT_USER,strNewKeyPath,strNewValue,strScriptPath
+    Wscript.Quit
+End If
+
+Wscript.Echo "The script is running for the second time."
+objRegistry.DeleteKey HKEY_CURRENT_USER,strKeyPath
+
+Yes, this is sort of an odd-looking little script, isn’t it? Does any of it make sense, and, more important, does it actually work? Let’s find out.
+
+As you can see, we kick things off by defining a constant named HKEY_CURRENT_USER and setting the value to &H80000001; we’ll need this constant to tell the script which registry hive we want to work with.
+
+Note. Does that mean this script is going to work with the registry? Hold on a second and we’ll check on that … yes, as a matter of fact this script is going to work with the registry.
+ 
+
+After defining the constant we connect to the WMI service on the local computer; in particular we connect to the default namespace and the StdRegProv class:
+
+Set objRegistry = GetObject("winmgmts:\\" & strComputer & "\root\default:StdRegProv")
+
+Once that’s done we go ahead and assign values to a pair of variables. The variable strKeyPath is assigned a path within the HKEY_CURRENT_USER portion of the registry; to be more specific, it gets assigned the path Software\My Scripts. Meanwhile, the variable strValue is assigned the name of a registry value (Test Script) within that registry path.
+
+Why do we bother with all that? Because we can then use the GetStringValue method to read the value of Test Script from the registry:
+
+objRegistry.GetStringValue HKEY_CURRENT_USER,strKeyPath,strValue,strScriptStatus
+
+As you can see, we simply call GetStringValue, passing along the constant HKEY_CURRENT_USER; the variable strKeyPath; the variable strValue; and an “out parameter” named strScriptStatus. What’s an out parameter? Well, when you call a method you usually supply information to that method; any information you supply to a method is known as an “in parameter.” Every now and then, however, a method will actually return information back to you; in that case, you’re dealing with an out parameter. When working with the GetStringValue method, we supply a variable name (strScriptStatus) and GetStringValue responds by assigning the value of the registry item in question (Software\My Scripts\Test Script) to that variable.
+
+That’s what an out parameter is.
+
+Of course, some of you might be panicking a bit by now. “Wait a second, Scripting Guy who writes that column,” you’re thinking. “I don’t even have a registry value named Software\My Scripts\Test Script!” That’s fine; in fact, we don’t want you to have a registry value named Software\My Scripts\Test Script.
+
+Don’t worry; we’re going to explain what we mean by that. The first time this script runs it uses the GetStringValue method to retrieve the value of Software\My Scripts\Test Script. If this registry value doesn’t exist, well, no problem; in that case our out parameter – strScriptStatus – will simply be assigned a Null value. More importantly, our script will know that this is the first time it has run on this computer. This is how we keep track of where we are; that is, is this script running before the required reboot or after the required reboot? If the registry value Software\My Scripts\Test Script doesn’t exist then that means we must be running before the reboot. Otherwise that value would exist.
+
+Let’s assume that strScriptStatus is Null, something we verify using this line of code:
+
+If IsNull(strScriptStatus) Then
+
+What do we do now?
+
+Well, for one thing, we execute these three lines of code:
+
+strScriptStatus = "Run"
+objRegistry.CreateKey HKEY_CURRENT_USER,strKeyPath
+objRegistry.SetStringValue HKEY_CURRENT_USER,strKeyPath,strValue,strScriptStatus
+
+In the first line we’re simply assigning a new value (Run) to the variable strScriptStatus. After making that assignment we use the CreateKey method to create the registry key Software\My Scripts. Once that’s done we use the SetStringValue method to both create the registry value Test Script and to assign it the value of the variable strScriptStatus.
+
+You’re right: we did manage to accomplish quite a bit in just three lines of code, didn’t we? Cool.
+
+As it turns out, our next line of code is just filler material:
+
+Wscript.Echo "The script is running for the first time."
+
+All we’re doing here is echoing back the fact that the script is running for the first time. Like we said, this is just filler material; in a real script you’d use this space to carry out all the tasks that need to be carried out before the computer reboots. We didn’t want to distract anyone from the main purpose of this sample script, so we didn’t include any tasks other than echoing back a simple little message.
+
+As soon as all our tasks are complete we then run this block of code:
+
+strNewKeyPath = "Software\Microsoft\Windows\CurrentVersion\RunOnce"
+strNewValue = "Test Script"
+strScriptPath = "cmd.exe /k cscript.exe C:\Scripts\Test.vbs"
+objRegistry.SetStringValue HKEY_CURRENT_USER,strNewKeyPath,strNewValue,strScriptPath
+
+Here we’re adding a new value to the Software\Microsoft\Windows\CurrentVersion\RunOnce registry key; by design, anything that appears in this key will automatically run the next time the user logs on. (However, it will run only one time, then be deleted from the key.) We’re simply creating a new value named Test Script, and assigning it a command that induces our script (Test.vbs) to run the next time the user logs on:
+
+strScriptPath = "cmd.exe /k cscript.exe C:\Scripts\Test.vbs"
+
+Note. If you’re wondering about the syntax, we’re calling Cmd.exe with the /k parameter; that causes a command window to open up and remain open even after the script finishes running. We then call Cscript.exe (to ensure that the script runs under the CScript script host) followed by the path to the script itself.
+ 
+
+From there we simply exit the script; in a real script, however, this is the spot where you would put in the code that causes the computer to reboot.
+
+So what happens when the computer does reboot? (Or, in our test scenario, what happens the second time you run the script?) Well, as it did the first time around, the script checks the value of Software\My Scripts\Test Script. This time, of course, Test Script will actually have a value. Therefore, we skip the If Then statement and instead run these two lines of code:
+
+Wscript.Echo "The script is running for the second time."
+objRegistry.DeleteKey HKEY_CURRENT_USER,strKeyPath
+
+Again, line 1 is just filler; this is the spot where you’d put the commands you want to execute after the reboot. And then, just to clean things up, we delete the registry key Software\My Scripts. Doing that enables us to rerun the entire script if need be. If you want the script to run once – and only once – on a computer then you might leave the registry key in place and, instead, change the value of Test Script to Don’t run. You can then modify the script so that it simply terminates if the variable strScriptStatus is equal to Don’t run.
+
+But we’ll let you deal with that one yourself. Right now it’s time for the Scripting Guys to head down to the Convention Center. See you all tomorrow!
+
+You know what? We’ll just grab a couple more chocolate-filled croissants. Then we’ll head down to the Convention Center.

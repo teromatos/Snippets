@@ -1,0 +1,3 @@
+Going from memory, you need to try the following :
+
+Look for a file in the folder where you have the SourceSafe client installed called ssint.exe. Copy this to where SourceSafe 2005 is installed, then run it. This should make Visual Studio load SourceSafe 2005 now. 2005 does not integrate with Visual Studio 6 as part of its installation. Update : http://social.msdn.microsoft.com/Forums/en-US/vbinterop/thread/86496254-2b17-4b7b-9134-00275fc4df77

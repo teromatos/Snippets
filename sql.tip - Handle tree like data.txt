@@ -1,0 +1,64 @@
+General way to handle trees. Fails when the sequence varchar length is exceeded - in this case 100 levels.
+Author Nigel Rivett
+
+-- create test data
+create table #z (id int, name varchar(20), Parent int null)
+insert #z select   1,  'foo', null
+insert #z select     2,  'foo2',   null
+insert #z select     3,  'foo2a',      2
+insert #z select    11,  'foo2aa',     3
+insert #z select    12,  'foo2aaa',   11
+insert #z select    13,  'foo2ab',     3
+insert #z select    14,  'foo2ac',     3
+insert #z select     4,  'foo2b',      2
+insert #z select     5,  'foo3',   null
+insert #z select     6,  'foo3b',      5
+insert #z select     7,  'foo3ba',     6
+insert #z select     8,  'foo4',   null
+insert #z select     9,  'fooa',       1
+insert #z select    10,  'foo2ba',     4
+
+-- Get the hierarchy
+create table #tree (id int, sequence varchar(1000), levelNo int)
+-- insert top level (to get sub tree just insert relevent id here)
+insert #tree select id, right(space(10) + convert(varchar(10),id),10), 1 from #z where Parent is null
+declare @i int
+select @i = 0
+-- keep going until no more rows added
+while @@rowcount > 0
+begin
+     select @i = @i + 1
+     insert #tree
+     -- Get all children of previous level
+     select #z.id, sequence + right(space(10) + convert(varchar(10),#z.id),10), @i + 1
+     from #z, #tree 
+     where #tree.levelNo = @i
+     and #z.Parent = #tree.id
+end
+
+-- output with hierarchy formatted
+select space((levelNo-1)*4) + #z.name 
+from #tree, #z 
+where #tree.id = #z.id
+order by sequence
+
+drop table #tree
+drop table #z
+
+/*  OUTPUT
+foo
+    fooa
+foo2
+    foo2a
+        foo2aa
+            foo2aaa
+        foo2ab
+        foo2ac
+    foo2b
+        foo2ba
+foo3
+    foo3b
+        foo3ba
+foo4
+*/
+

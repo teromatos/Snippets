@@ -1,0 +1,65 @@
+ASP.Net has some new features that allow a developer to easily secure certain areas of a web site. Securing files and folders has always been an option for web applications, but in the past it was necessary to use either a third-party tool like Authentix or to use NTFS and Windows user accounts. 
+
+Security with ASP.Net is configured from within the web.config file. This is a standard ASCII file, with an XML format, that is located in the root of your web application. Here is a sample web.config file: 
+
+<configuration> 
+  <system.web> 
+    <authentication mode="Forms"> 
+      <forms name="TestAuthCookie" loginUrl="login.aspx" timeout="30">
+        <credentials passwordFormat="Clear"> 
+          <user name="user1" password="pass1"/> 
+          <user name="user2" password="pass2"/> 
+        </credentials> 
+      </forms> 
+    </authentication> 
+  </system.web> 
+  <location path="admin"> 
+    <system.web> 
+      <authorization> 
+        <deny users="?" /> 
+      </authorization> 
+    </system.web> 
+  </location> 
+</configuration> 
+The very first line is standard for a web.config file and has no bearing on the security. 
+
+The next section specifies that you are configuring the security for this web application. First we set the authentication mode to use a cookie in this specific example. You can specify a unique name for your cookie. In ASP.Net Beta 1 you could also set a decryption key but this is now controlled at the server-level in the machine.config file. This section also specifies the page or URL that will contain the authentication code (login.aspx in this case) and how long the authentication cookie should be persisted. 
+
+The next two lines specify valid usernames and passwords for this web application. As far as I know there is no limit to the number of user accounts you can place in the web.config, but if there were a large number - or if they change frequently - it might be better to place this information in an external file like a database or an XML file instead (I'll show this in a future article). 
+
+Now that we have specified some valid logon accounts, we need to actually specify that we want to password protect. For this example I have decided to password protect a folder under the web root named "admin". The "location path" attribute specifies this folder as the one we will manage. Once we have specified the path to manage, we can work with specific settings - we are interested in the "authorization" setting for this folder. We set the authorization to deny all non-authenticated users (deny users="?"). 
+
+For the config.web, that is all that is needed. If someone tries to access the /admin/ folder and the user has not already authenticated, they will be redirected to the /login.aspx page. 
+
+Now of course this is only half the battle. We now need to create the login.aspx page to actually allow the user to authenticate to our application. 
+
+Here is the complete source of the sample login.aspx page: 
+
+
+<%@ Page Language="VB" Trace="false"%> 
+<%@ Import Namespace="System.Web.Security" %> 
+
+<script language="VB" runat=server>   'This sub validates the user against a list in the web.config file 
+  Sub Login(Src as Object, E as EventArgs) 
+    if (FormsAuthentication.Authenticate(txtUser.Value, txtPwd.Value)) then 
+      FormsAuthentication.RedirectFromLoginPage(txtUser.Value, false) 
+    else 
+      lblStatus.InnerHtml = "Invalid login" 
+    end if 
+  end sub </script> 
+
+<form method=post runat=server> 
+  Username: <INPUT type=text name=txtUser id=txtUser runat=server/><BR> 
+  Password: <INPUT type=password name=txtPwd id=txtPwd runat=server/><BR> 
+  <INPUT type=submit OnServerClick="Login" runat=server/> 
+</form> 
+
+<SPAN id="lblStatus" runat=server/> 
+Let's look at the bottom half of the page first. This is fairly straight-forward HTML format. These aren't actually "true" HTML tags, but rather ASP.Net HTML controls that will render HTML page to the client browser (you can tell the difference because the runat="server" tag at on the control). This is a form that accepts a username and password. When the submit button is clicked, this page executes the code located in the subroutine named "Login". 
+
+Inside of the Login method we use the FormsAuthentication object. The first line of the sub actually passes the entered username and password over to the object, which in turn compares this information to the values in the web.config file. If the values match, then the next line writes a cookie to the browser and redirects the user back to the original URL which was requested. The second value listed (false) tells the browser not to persist the cookie. So if this user authenticates, closes their browser, opens it again, and tries the secure URL - they will need to authenticate again. 
+
+If the username and password entered did not match, an error message is displayed to the screen and the visitor is allowed to enter a new username and password to try again. 
+
+This is a simple example and I don't cover any of the advanced configurations or options, but with this sample code, you should have a basis to work with if you want to implement security in ASP.Net 
+

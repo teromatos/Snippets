@@ -1,0 +1,11 @@
+Setting the Title of the "DOS" Command Prompt from a Batch File 
+
+Just a small reminder for myself and others that you can set the title of the Command Prompt Window with the "TITLE" Batch Command.
+
+Since I'm building three different branches of our SDK during dev, it's nice to differentiate all these windows on all these monitors.
+
+For example here's "mybuild.bat"
+
+TITLE Building VoyagerFramework 2.0
+set BUILDDIR=C:\dev\VoyagerFramework\build
+call BUILD.BAT %1 %2 %3 %4 %5

@@ -1,0 +1,517 @@
+--===============================================
+AddFolderToAddReferencesDialog.reg
+
+
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\.NETFramework\AssemblyFolders\Tero]
+@="C:\\WORK\\VB.NET\\Dll\\ReleaseVersions"
+
+--===============================================
+
+STACK - LIFO  (PUSH, POP,PEEK)
+QUEUE - FIFO  (ENQUEUE, DEQUEUE, PEEK)
+HASHTABLE - KEY, VALUE
+--===============================================
+MEMBER NAME ACRONYMS OF THREE OR MORE CHARACTERS ARE PASCAL-CASED
+
+Acronyms of three or more letters should be Pascal-cased. For example, use XmlSpace rather than XMLSpace.
+
+A violation of this rule might be required for compatibility with existing, unmanaged symbols. In general, however, these symbols should not be visible outside the assembly that uses them.
+
+--===============================================
+PARAMETER NAMES ARE CAMEL-CASED
+
+Use camel casing for all parameters, local variables, and protected and private field names.
+
+This convention formats the first letter of the first word in lowercase and capitalizes the first letter of all subsequent words, as in backgroundColor.
+
+
+--===============================================
+
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <appSettings>
+      <add key="myKey" value="myvalue" />
+  </appSettings>
+</configuration>
+
+
+Dim settings As System.Configuration.ConfigurationSettings
+strMyKey = settings.AppSettings("mykey")
+
+--===============================================
+
+SINGLE INSTANCE
+
+Imports System.Threading
+
+
+Dim objMutex As Mutex
+
+Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+
+   objMutex = New Mutex(False, "SINGLE_INSTANCE_APP_MUTEX")
+   If objMutex.WaitOne(0, False) = False Then
+       objMutex.Close()
+       objMutex = Nothing
+       MessageBox.Show("Instance already running")
+       End
+   End If
+
+   'if you get to this point, continue with app (single instance)
+
+End Sub
+
+--===============================================
+
+START A PROCESS, MONITOR FOR THE EXIT STATE
+
+Imports System.Diagnostics
+
+Module Module1
+    Private p As Process
+
+    Sub Main()
+        p = New Process()
+        AddHandler p.Exited, AddressOf Exited
+        p.EnableRaisingEvents = True
+        p.StartInfo.FileName = "notepad.exe"
+        p.Start()
+
+        Console.ReadLine() ' pause until you close notepad
+
+        ' Write the process information
+        Console.WriteLine(p.ExitCode)
+        Console.WriteLine(p.ExitTime)
+        Console.WriteLine(p.Id)
+        Console.ReadLine()
+    End Sub
+
+    Private Sub Exited(ByVal sender As Object, ByVal e As EventArgs)
+        Console.WriteLine("Exited")
+    End Sub
+End Module
+
+--===============================================
+
+I had to figure this out a couple days ago and the answer isn't what you'd expect:
+It's not FileVersionInfo.IsDebug or IsRelease, as neither compiler flips the
+required bit.  As far as I can tell, the only way is to look for a
+DebuggableAttribute on the assembly.
+
+static void Main(string[] args)
+{
+    Assembly assm = Assembly.LoadFrom(args[0]);
+    bool found = assm.GetCustomAttributes(typeof(DebuggableAttribute), false).Length > 0;
+    Console.WriteLine("Assembly is {0}.", found ? "debug" : "release");
+}
+
+--===============================================
+
+PATH STUFF
+
+Windows Forms
+Application.ExecutablePath - Gets the path for the executable file that started the application, including the executable name.
+Application.StartupPath    - Gets the path for the executable file that started the application, not including the executable name.
+
+Console/Web
+AppDomain.AppDomainSetup.ApplicationBase - Gets or sets the name of the directory containing the application. 
+
+
+--===============================================
+CONDITIONAL DEBUG
+
+<
+
+Conditional("DEBUG")> _
+Private Sub MyMethod()
+End Sub
+
+
+[Conditional("DEBUG")]
+Private void MyMethod()
+{}
+
+--===============================================
+
+TEMPORARY FILE
+
+Path.GetTempFileName
+Returns a unique temporary file name and creates a zero-byte file by that name on disk.
+
+Path.GetTempPath Method
+Returns the path of the current system's temporary folder.
+
+GetTempFileName API
+Returns a unique temporary file name.
+
+Private Const MAX_PATH  As Long = 260
+Private Declare Function GetTempPath Lib "kernel32" Alias "GetTempPathA" (ByVal nBufferLength As Long, ByVal lpBuffer As String) As Long
+Private Declare Function GetTempFileName Lib "kernel32" Alias "GetTempFileNameA" (ByVal lpszPath As String, ByVal lpPrefixString As String, _
+                        ByVal wUnique As Long, ByVal lpTempFileName As String) As Long
+
+Public Function GetTempFile() As String
+On Error GoTo ErrorH
+
+   Dim lngRet As Long
+   Dim strWinTempFolder As String
+   Dim strTempFile As String
+
+   strWinTempFolder = Space$(MAX_PATH)
+   lngRet = GetTempPath(MAX_PATH, strWinTempFolder)
+   strWinTempFolder = Left$(strWinTempFolder, lngRet)
+
+
+   strTempFile = Space$(MAX_PATH)
+   lngRet = GetTempFileName(strWinTempFolder, "VB", 0, strTempFile)
+   If lngRet <> 0 Then
+      GetTempFile = Left$(strTempFile, InStr(strTempFile, Chr$(0)) - 1)
+    Else
+        Err.Raise 9999, "GetTempFile", "Unable to obtain temporary file name."
+   End If
+
+ExitH:
+    Exit Function
+
+ErrorH:
+    Err.Raise Err.Number, Err.Source, Err.Description
+    Resume ExitH
+
+End Function
+
+--===============================================
+
+Class DataFile2
+    Implements IDisposable
+
+    ' The file handle
+    Private handle As Integer
+
+    ' Open a file, store its handle.
+    Sub Open(ByVal inputFile As String)
+        ' Throw an exception if the object has been already disposed.
+        If disposed Then Throw New ObjectDisposedException("DataFile2")
+        ' Continue with regular operations.
+        handle = FreeFile()
+        FileOpen(handle, inputFile, OpenMode.Input)
+    End Sub
+
+    ' Close the file, don't throw an exception if already closed.
+    Sub Close()
+        ' Throw an exception if the object has been already disposed.
+        If disposed Then Throw New ObjectDisposedException("DataFile2")
+        ' Continue with regular operations.
+        If handle <> 0 Then
+            FileClose(handle)
+            handle = 0
+        End If
+    End Sub
+
+    ' This private variable is True if the object has been disposed.
+    Dim disposed As Boolean
+
+    Sub Dispose() Implements IDisposable.Dispose
+        Debug.WriteLine("Dispose method")
+        ' Execute the code that does the clean up.
+        Dispose(True)
+        ' Let the CLR know that Finalize doesn't have to be called.
+        GC.SuppressFinalize(Me)
+    End Sub
+
+    Protected Overrides Sub Finalize()
+        Debug.WriteLine("Finalize method")
+        ' Execute the code that does the clean up.
+        Dispose(False)
+    End Sub
+
+    ' This procedure is where the actual cleanup occurs.
+    Protected Overridable Sub Dispose(ByVal disposing As Boolean)
+        ' Exit now if the object has been already disposed.
+        If disposed Then Exit Sub
+
+        If disposing Then
+            ' The object is being disposed, not finalized.
+            ' It is safe to access other objects (other than the base
+            ' object) only from inside this block.
+        End If
+
+        ' Perform clean up chores that have to be executed in either case.
+        Close()
+
+        ' Remember that the object has been disposed.
+        disposed = True
+    End Sub
+End Class
+
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+    Dim Disposed As Boolean
+    Public Sub Dispose() Implements System.IDisposable.Dispose
+        Dispose(True)
+        GC.SuppressFinalize(Me)
+    End Sub
+
+    Protected Overrides Sub Finalize()
+        Dispose(False)
+    End Sub
+
+    Protected Overridable Sub Dispose(ByVal disposing As Boolean)
+        If Disposed = True Then Return
+
+        If disposing = True Then
+            ' Perform clean up chores that have to manipulated this class variables.
+            StopWatching()
+        End If
+
+        ' Perform clean up code that have to be executed in either case.
+
+        ' Remember that the object has been disposed.
+        Disposed = True
+    End Sub
+
+
+$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$
+
+
+    Dim Disposed As Boolean
+    Public Sub Dispose() Implements System.IDisposable.Dispose
+        Dispose(True)
+        GC.SuppressFinalize(Me)
+    End Sub
+
+    Protected Overrides Sub Finalize()
+        Dispose(False)
+    End Sub
+
+    Protected Overridable Sub Dispose(ByVal disposing As Boolean)
+        If Disposed = True Then Return
+
+        If disposing = True Then
+            ' The object is being disposed, not finalized.
+            ' It is safe to access other objects (other than the base
+            ' object) only from inside this block.
+        End If
+
+        ' Perform clean up code that have to be executed in either case.
+        StopMonitoring()
+
+        ' Remember that the object has been disposed.
+        Disposed = True
+    End Sub
+
+--===============================================
+
+Dim mo As New ManagementObject("Win32_NetworkAdapterConfiguration.Index=1")
+
+--===============================================
+
+1 - Custom Task List tokens
+2 - Back and forward nagivation (CTRL+ Hyphen)
+3 - Incremental Search (CTRL + I)
+4 - Bookmarks (CTRL K, CTRL K , CTRL N) and (CTRL K, CTRL K , CTRL P)
+5 - Right click add Task List shortcut
+6 - Clipboard ring (CTRL SHIFT V, loop through ring's entries)
+7 - Outlining Regions ??
+8 - Word Wrap (CTRL R - CTRL R)
+9 - Block Selection (ALT - Click)
+10- Multi Monitor and Full Screen (SHIFT ALT Enter)
+
+--===============================================
+WRITE TO FILE
+
+Imports System
+Imports System.IO
+Public Module modmain
+    Sub Main()
+        Dim swFile As StreamWriter = File.CreateText("C:\test.txt")
+        swFile.WriteLine("Hello World ;)")
+        swFile.Flush()
+        swFile.Close()
+    End Sub
+End Module
+
+--===============================================
+
+imports System.Security.Cryptography
+imports System.Text
+
+Public Function Encrypt(ByVal cleanString As String) As String
+Dim clearBytes As [Byte]()
+clearBytes = New UnicodeEncoding().GetBytes(cleanString)
+Dim hashedBytes As [Byte]() = CType(CryptoConfig.CreateFromName("MD5"), HashAlgorithm).ComputeHash(clearBytes)
+Dim hashedText As String = BitConverter.ToString(hashedBytes)
+Return hashedText
+End Function
+
+--===============================================
+
+Page ??? - DateTime.DaysOfMonth
+
+Page  77 - Sub Main Startup
+
+Page  93 - True = -1	False = 0
+
+Page ??? - Byte, Short, Integer, Long
+
+Page 105 - =+, -=, *=, /=, &=
+
+Page 108 - Ctype and DirectCast Operators
+
+Page 126 - AndAlso, OrElse
+
+Page 133 - System.Math.Min, System.Math.Max
+	   Math.Min(1.5, 0.7) => 0.7
+	   Math.Max( 99,  87) => 99
+
+Page 133 - System.Math.Floor, System.Math.Ceiling
+	   Math.Floor(-1.5)  => -2
+	   Math.Ceiling(2.5) =>  3
+
+Page 164 Debug & Trace Classes
+
+Page ??? - Try...Catch should only be used when there is a belief that an error might occur. Ex: file, database transactions
+
+Page ??? - Use Overload Functions, instead of Optional paramaters. Better for future versions.
+
+Page ??? - Naming Conventions
+
+	Function, Class Names = FirstName
+        Arguments = firstName
+
+
+Page 194 - Multiple Constructors
+
+Class Person
+	Public FirstName as string
+	Public LastName as string
+
+	Sub New(byval fName as string, byval lName as string)
+		me.new (fName  & " " & lName)
+        End Sub
+
+	Sub New(byval completeName as string)
+		dim i as integer
+		i = Instr(completename, " ")
+		if i = 0 then Throw New ArgumentException("Invalid name.")
+		me.FirstName = RTrim(Left(completeName, i - 1))
+		me.LastName = LTrim(Mid(completeName, i + 1))
+        End Sub
+End Class
+
+Page 195 - Read Only Fields (properties) should be Public and not Private. Their values can only be assigned :
+	
+	during initialization
+	Public ReadOnly StartTime as DateTime = #08:00:00 AM#
+
+	or during the constructors method.
+	Public ReadOnly StartTime as DateTime
+	Sub New()
+        	StartTime = #08:00:00 AM#
+	End Sub
+	
+
+Page 197 - How Garbage Collection works.
+
+Page 200 - Call garbage collection
+
+           GC.Collect()
+           GC.WaitForPendingFinalizers()  (stops current thread until all objects are correctly finalized)
+
+Page 204 - Use Overloaded Dispose(disposing as boolean) method which allows to determine if being call from Dispose() or Finalize()
+
+Page 204 - Constructor method might use a Try...Catch block to trap errors, release any allocated resource, and then call GC.SupressFinalize(me) to prevent the standard finalization from running on uninitialzed members.
+
+
+Pages 206 - 209 Code Example of Object(s) Pool (object resurrection)
+
+Pages 214 - 216 Weak references (System.WeakReference)
+
+Pages 216 - 227 Events (Declaring, withing Modules, Arrays, Guidelines)
+
+Pages 227 - 236 Shared Fields, Methods, Constructors Events
+Code inside a shared method must abide by special scoping rules : it can access shared members but can't access instance fields, properties, and methods.
+
+	It's not a must, but a class with shared members should be noncreatable
+
+	Class LibFuncs()
+		Private Sub New()
+		'It's private instead of public
+		End Sub
+
+		shared Function Test()
+		...
+		End Function
+	EndClass
+
+Page 240 - The derived Class inherits all the Public and Frind fields, properties, and methods dof the base class. Note that inheriting a field coudl be a problem because a derived class becomes dependent on that field and and the author of the base class can't change the implementation of that field without breaking the derived class.  It's best that classes menat to work as base classes should include only Private fields. You should always use a property instead of a field to make a piece of data visible outside the vlass because you can always change the internal implementation of a property without any impact on derived classes.
+
+
+Page 242 - Object assignments
+
+Class employee inherits from class person
+
+Dim p as person
+dim e as employee
+
+	p = e				True
+	e = p				False
+	e = cType(p, employee)		True
+	e = DirectCast(p, employee)	True
+
+Page 246 - Overridding members in Base Classes
+Note that you can't override fields, constants or shared members defined in the base class.
+
+For a member in the base class to be overrided, it must include the Overrideable keyword.
+
+For a member in the inherited class to override a member in the base class, it must include the Overrides keywork.
+
+
+Page 247 -
+
+SAME MEMBER NAME, SAME MEMBER SIGNATURE
+	Base Class			1 - Derived Class		2 - Derived Class
+	Overridable			Overrides (no need for		Overrides
+						   overridable)	
+
+	Overridable			NotOverridable Overrides	Unable to override
+
+
+SAME MEMBER NAME, DIFFERENT MEMBER SIGNATURE
+	Base Class			1 - Derived Class
+	Test(x as integer)		Overloads Test(x as long)
+	(no need for overridable)	(no need for overrides)
+
+
+Page 248 - Me.membername & MyBase.membername are the same if the membername in the derived class is not overriden.  If overriden in derived class, you need to use the MyBase keyword to access the base class.
+
+Page 250 - Constructors in derived classes may have the same attributes or different attributes, but in any of these 2 cases, the first statement withing the Sub New constructor must be a call to the bases's constructor, MyBase.New(attribute1, attribute2,...)
+
+Page 251 - Finalizers within a derived class. Please check.
+
+Page 260 - NonInheritable Classes, mostly used for utility class which expose functions as shared members.
+
+Page 261 - MushInherit Classes, mostly used for abstract classes, Animal, Document.  Must use Overridable keyword withing MustInherit class and must use Overrides keyword in derived classes.
+
+Page 262 - If any property, method is marked MustOverride, then the class must be marked MustInherit.
+MustOverride properties, methods should have the property, method declaration only, with no end property or end sub/end function keywords.
+
+Page 325 - Attributes, use the DLLImport attribute instead of declare statement, faster since it may not have to set an error value. Check pages.
+
+Page 327 - The conditional Attribute, The procedure marked with the Conditional attributes is always included in the compiled application, however, calls to it are included only if the specified compilation constant has been defined and has a nonzero value. Otherwise, these calls are discarded.  Use the Project Properties page to add additional compilation constants.  The procedure(s) marked with the Conditional attributes must not return a value, if you want them to return a value use variable with the ByRef keyword.  Conditional attribute allows multiple definitions
+<Conditional("LOG"), Conditional("TRACE")> _
+Sub LogMsg(Byval MsgText as string)
+	Console.WriteLine(MsgText)
+End Sub
+
+Page 328 - The Obsolete Attribute, marking a procedure with this attribute will result in the compiler issues either an error or a warning (depending on iserror) and prints out message.
+
+Page 328 - The DebuggerStepThrough Attribute, marking a procedure with this attribute, the Visual Studio .NET debugger does not stop in a method marked with this attribute but does allow a breakpoint to be set in the method.
+
+Page 329 - Defining Custom Attributes
+
+Page 331 - Discovering Custome Attributes at Runtime (Attribute.GetCustomAttributes, Attribute.GetCustomAttribute, Attribute.IsDefined functions). To discover .Net Attributes (non-custom), we may need to use different methods using reflection (IsSerializable, IsLayoutSequential).
+
+--===============================================

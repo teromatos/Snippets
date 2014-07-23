@@ -1,0 +1,14 @@
+Where Should I Put This Information Then?
+The user's profile directory is the appropriate place for user settings. Since there is a profile directory for each user, this keeps the settings separate. Moreover, if the profile is configured as a roaming profile, the user's settings will then follow them around the network as they log into various machines. And if they back up their Documents and Settings directory, your application's settings will be backed up as a part of that operation. What's not to like?
+
+So how do you locate this directory? .NET makes that very easy, thanks to the System.Environment class:
+
+Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData)
+That will return a string, containing the path of the Application Data subdirectory of the user's profile. (If you want to store data that does not become part of the roaming profile, use LocalApplicationData instead.) You should create a subdirectory named after your company, and inside that a subdirectory named after your program. (If you look inside your profile's Application Data directory, you'll see that this is the structure applications usually use.) You may also choose to put a version-specific subdirectory underneath the application name directory.
+
+(If your code might need to run with partial trust, look at the Isolated Storage APIs. These are a bit more cumbersome than just creating files in the right directory, and create some funny-looking paths. But they have the considerable advantage of working in partial trust scenarios.)
+
+Note that even if you want to store application-wide settings, you still don't have to write into the application installation directory. Just do this:
+
+Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData)
+That returns a path for machine-wide settings. Not all users will have write access to this by the way, so be careful.

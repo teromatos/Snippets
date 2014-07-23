@@ -1,0 +1,29 @@
+   1.
+      using MbUnit.Core;
+   2.
+       
+   3.
+      class Startup
+   4.
+      {
+   5.
+          public static void Main(string[] args)
+   6.
+          {
+   7.
+              using (AutoRunner runner = new AutoRunner())
+   8.
+              {
+   9.
+                  runner.Load();
+  10.
+                  runner.Run();
+  11.
+                  runner.ReportToHtml();
+  12.
+              }
+  13.
+          }
+  14.
+      }
+

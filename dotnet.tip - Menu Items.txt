@@ -1,0 +1,47 @@
+I believe you'll have to do this the old way, using GetSystemMenu and
+AppendMenu or InsertMenuItem API Calls, then overide WndProc for the
+messages. The following is a very basic VB.Net example:
+
+<DllImport("user32", CallingConvention:=CallingConvention.Cdecl)> _
+Private Shared Function GetSystemMenu( _
+        ByVal hwnd As IntPtr, _
+        ByVal bRevert As Boolean) As IntPtr
+End Function
+
+<DllImport("user32", CallingConvention:=CallingConvention.Cdecl)> _
+Private Shared Function AppendMenu( _
+        ByVal hMenu As IntPtr, _
+        ByVal uFlags As Integer, _
+        ByVal uIDNewItem As Integer, _
+        ByVal lpNewItem As String) As Boolean
+End Function
+
+Private Const WM_SYSCOMMAND As Integer = &H112
+Private Const MF_SEPARATOR As Integer = &H800&
+Private Const MyMenuItemID As Integer = 1001
+
+Protected Overrides Sub WndProc(ByRef m As System.Windows.Forms.Message)
+  MyBase.WndProc(m)
+  If m.Msg = WM_SYSCOMMAND Then
+      If m.WParam.ToInt32 = MyMenuItemID Then
+        MessageBox.Show("MyMenuItem Clicked", "System Menu")
+      End If
+  End If
+End Sub
+
+Private Sub Form1_Load(ByVal sender As Object, ByVal e As System.EventArgs)
+_
+                                                        Handles MyBase.Load
+  Dim SysMenu As IntPtr = GetSystemMenu(Me.Handle, False)
+  AppendMenu(SysMenu, MF_SEPARATOR, 0, Nothing)
+  AppendMenu(SysMenu, 0, MyMenuItemID, "MyNewItem")
+End Sub
+
+
+
+"Tim Greenwood" <tim_greenwood@yahoo.com> wrote in message
+news:uZjxcQTUDHA.1664@TK2MSFTNGP11.phx.gbl...
+> Title says it.  Seems there should be an easy way to get a menu object
+> reference to the System menu in the upper left corner of a form so I can add
+> items to it.
+>

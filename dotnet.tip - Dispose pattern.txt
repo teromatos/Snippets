@@ -1,0 +1,24 @@
+Component (base class of Control) has the following pattern:
+
+~Component() {
+  // I am in the finalizer
+  Dispose(/*currently disposing=*/false);
+}             
+
+Dispose() {
+  // I’ve been told to clean up outside the finalizer
+  Dispose(/*currently disposing=*/true);
+  
+ }
+
+protected virtual void Dispose(bool disposing) {
+    if (disposing) {
+        // do stuff that can only be done from the main thread.
+    }
+    else {
+       // this is the finalizer thread.  Be wary of touching other
+       // objects as they may have already finalized. 
+    }
+   // do cleanup actions that can be done either from the finalizer 
+   // thread or the main thread.
+}

@@ -1,0 +1,35 @@
+You can use Registry Editor to add your log on information. To do this, follow these steps: 1. Click Start, click Run, type regedit, and then click OK. 
+2. Locate the following registry key:
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Winlogon 
+3. Using your account name and password, double-click the DefaultUserName entry, type your user name, and then click OK. 
+4. Double-click the DefaultPassword entry, type your password under the value data box, and then click OK.
+
+If there is no DefaultPassword value, create the value. To do this, follow these steps: a.  In Registry Editor, click Edit, click New, and then click String Value. 
+b.  Type DefaultPassword as the value name, and then press ENTER. 
+c.  Double-click the newly created key, and then type your password in the Value Data box. 
+If no DefaultPassword string is specified, Windows XP automatically changes the value of the AutoAdminLogon registry key from 1 (true) to 0 (false) to turn off the AutoAdminLogon feature. 
+5. Double-click the AutoAdminLogon entry, type 1 in the Value Data box, and then click OK.
+
+If there is no AutoAdminLogon entry, create the entry. To do this, follow these steps: a.  In Registry Editor, click Edit, click New, and then click String Value. 
+b.  Type AutoAdminLogon as the value name, and then press ENTER. 
+c.  Double-click the newly created key, and then type 1 in the Value Data box. 
+ 
+6. Quit Registry Editor. 
+7. Click Start, click Restart, and then click OK. 
+After your computer restarts and Windows XP starts, you can log on automatically. 
+
+If you want to bypass the automatic logon to log on as a different user, hold down the SHIFT key after you log off or after Windows XP restarts. Note that this procedure applies only to the first logon. To enforce this setting for future logoffs, the administrator must set the following registry key: 
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\WindowsNT\CurrentVersion\Winlogon
+
+Value:ForceAutoLogon
+Type: REG_SZ
+Data: 1
+You can also use turn on automatic logon without editing the registry in Microsoft Windows XP Home Edition and in Microsoft Windows XP Professional on a computer that is not joined to a domain. To do this, follow these steps: 1. Click Start, and then click Run. 
+2. In the Open box, type control userpasswords2, and then click OK.
+
+Note When users try to display help information in the User Accounts window in Windows XP Home Edition, the help information is not displayed. Additionally, users receive the following error message:
+Cannot find the Drive:\Windows\System32\users.hlp Help file. Check to see that the file exists on your hard disk drive. If it does not exist, you must reinstall it. 
+3. Clear the "Users must enter a user name and password to use this computer" check box, and then click Apply. 
+4. In the Automatically Log On window, type the password in the Password box, and then retype the password in the Confirm Password box. 
+5. Click OK to close the Automatically Log On window, and then click OK to close the User Accounts window. 
+

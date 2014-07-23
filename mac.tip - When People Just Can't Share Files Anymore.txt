@@ -1,0 +1,23 @@
+url=http://the.taoofmac.com/space/blog/2010/01/04/1605
+
+When People Just Can't Share Files Anymore
+
+    Update: improved thanks to comments from Pedro Melo, who suggested using pbcopy to directly copy the URL to the clipboard. Emanuel Carnevale pointed out woof, which is a lot more sophisticated but worth keeping a local copy here since it can serve entire folders zipped, thereby saving a bit more work.
+
+What do you do when you can’t e-mail files larger than a ridiculously small number of megabytes, your IT folk take days to set up a separate file share for a project, you can’t grant permissions on an existing share or you simply just want to give the bloody file to someone and be done with it?
+
+Why, you dig out Python and bash, of course, and come up with a hack such as this.
+
+#!/bin/sh
+IP=`ifconfig | grep netmask | cut -d\  -f 2 | tail -1`
+echo "http://$IP:8000/$1" | pbcopy
+echo "http://$IP:8000/$1 is now in your clipboard (serving from `pwd`)"
+python -c "import SimpleHTTPServer;SimpleHTTPServer.test()"
+
+Then you IM them the direct URL to the file.
+
+Line 2 is, of course, a rather naïve way to get your Mac’s active IP address because it will take the IP address of your last active IPv4 interface, but when you need to transfer .zip files in the many hundreds of megabytes (or low gigs) you’d be mad not to use wired Ethernet, and I couldn’t care less right now.
+
+The Python one-liner is an old chestnut I love to have around for basic testing, and I leave as an exercise to the reader to add some basic security.
+
+Yeah, I’m back at work. How many Marketing guys do you think would pull off this sort of stunt on their first working day of 2010?

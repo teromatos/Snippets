@@ -1,0 +1,15 @@
+Using WMIC, it is possible to list out all the running processes and their parameters. Here is an example which finds the argument of a running process Rundll32.exe:
+
+Click Start, Run and type CMD
+
+Type the command given below exactly:
+
+WMIC /OUTPUT:C:\ProcessList.txt PROCESS get Caption,Commandline,Processid
+ 
+
+-or-
+
+WMIC /OUTPUT:C:\ProcessList.txt path win32_process get Caption,Processid,Commandline
+ 
+
+Now, open the file C:\ProcessList.txt. You can see the details of all the processes in that file

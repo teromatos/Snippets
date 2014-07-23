@@ -1,0 +1,15 @@
+url=http://bertk.mvps.org/html/diskspacev.html
+
+To view lists existing volume shadow copies type or paste the following command then press enter:
+vssadmin list shadows 
+
+
+Displays all shadow copy storage associations on the system and their size:
+vssadmin list shadowstorage
+
+ 
+
+The “vssadmin resize shadowstorage” command can be used to resize the storage area.
+
+Here’s a example of the command used to resize the shadow storage area on the C:\ partition to a maximum size of 6 GB’s.
+vssadmin resize shadowstorage /For=C: /On=C: /MaxSize=6GB 

@@ -1,0 +1,15 @@
+Duncan MacKenzie writes about a reader's comment that URLScan causes 404 errors when attempting to browse the .aspx pages installed by the VB.NET Resource Kit, because by default URLScan does not allow paths that contain dots (the resource kit has such a path). To solve this problem, follow these steps:
+
+Open urlscan.ini (located in the %WINDIR%\System32\Inetsrv\URLscan folder) in notepad. 
+Look for the AllowDotInPath item under the [options] section, and change it from 0 (the default) to 1. 
+Save urlscan.ini. 
+Restart IIS using IISReset (run iisreset /restart at a command prompt).
+NOTE: This technique requires administrative permissions to successfully edit urlscan.ini and to restart IIS. Since this fix potentially leaves you open to security exploits that use malformed URLs with extra dots, you should probably avoid using this technique on production machines or machines directly exposed to the internet (i.e. - not behind a firewall). But then, you wouldn't be installing a resource kit or other sample code on a production machine, now would you? ;-)
+
+
+
+[AllowVerbs]
+DEBUG
+
+
+AllowDotInPath=1               ; If 1, allow dots that are not file extensions.

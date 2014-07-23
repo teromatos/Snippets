@@ -1,0 +1,31 @@
+It's often useful to be able to list all the tables or columns in your DataContext. One example is if you want to write a report generation system that works for any DataContext class. LINQ to SQL has an API called the MetaModel which allows you to get at this information and a lot more. Here's the simplest example, it lists all the table names in the context:
+
+        var model = new AttributeMappingSource().GetModel(typeof(Northwind));
+
+        foreach (var mt in model.GetTables())
+
+            Console.WriteLine(mt.TableName);
+
+The MetaModel holds all of the information the LINQ to SQL uses to map between the CLR type system and the SQL database. The above code doesn't require an instance of the DataContext. If you happen to have an instance then you could also,
+
+        Northwind db = ...from somewhere
+
+        var model = db.Mapping;
+
+        foreach (var mt in model.GetTables())
+
+            Console.WriteLine(mt.TableName);
+
+In a comment below, Max asks how you get the column names for a table. Here it is:
+
+        var model = new AttributeMappingSource().GetModel(typeof(Northwind));
+        foreach (var mt in model.GetTables()) {
+            Console.WriteLine(mt.TableName);
+            foreach (var dm in mt.RowType.DataMembers) 
+                Console.WriteLine(" "+dm.MappedName);
+
+The metamodel represents everything that LINQ to SQL knows about the .NET type system and its mapping into the database. So you can find columns, associations, SQL types, inheritance information, and others.
+
+If you're ambitious you could even replace the MetaModel with your own implementation--for example, maybe you want to generate your mapping or the fly, or read it from a web service.
+
+This posting is provided "AS IS" with no warranties, and confers no rights.

@@ -1,0 +1,28 @@
+    Private Sub CreateNewFile()
+        Dim Counter As Integer
+        Dim CurrentFile As String
+        Dim NewFile As String
+
+        CurrentFile = mLogFile
+        If File.Exists(CurrentFile) = False Then Exit Sub
+
+        If New FileInfo(CurrentFile).Length > 100000 Then
+            For Counter = 1 To 999
+                'retrive new filename
+                NewFile = CurrentFile & "." & Format(Counter, "000")
+                'verify if new filename exists
+                If File.Exists(NewFile) = False Then
+                    Try
+                        'move file to new filename
+                        File.Move(CurrentFile, NewFile)
+                        Exit For
+                    Catch ex As Exception
+                        'catch a general exception and pass back to caller
+                        Throw ex
+                    End Try
+                End If
+            Next
+        End If
+
+    End Sub
+f

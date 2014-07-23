@@ -1,0 +1,38 @@
+URL=http://weblogs.asp.net/jnadal/archive/2006/02/24/438960.aspx
+
+Check for the existence of a sql temp table 
+Here's an easy way to check if a temp table exists, before trying to create it (ie. for reusable scripts) from Simon Sabin's post :
+
+IF object_id('tempdb..#MyTempTable') IS NOT NULL
+BEGIN
+   DROP TABLE #MyTempTable
+END
+
+CREATE TABLE #MyTempTable
+(
+   ID int IDENTITY(1,1),
+   SomeValue varchar(100)
+)
+GO
+
+
+That way, if you have to change databases in the query window, you don't have to drop the tables before you run it again.
+
+posted on Friday, February 24, 2006 8:10 AM 
+
+Feedback
+# re: Check for the existence of a sql temp table 2/24/2006 8:24 AM Bilal Haidar [MVP] 
+Hello Jason: 
+Although Temp tables might come handy sometimes. However, I knew recently that using a table declared as a TABLE Type is much better, especially that you don't need to make sure the temp table is deleted or not, since it will be automatically deleted, here is an example: 
+
+DECLARE @TempTable TABLE 
+( 
+Id INT, 
+Name VARCHAR(50) 
+) 
+
+Then you can deal with the table @TempTable similar to any other table, with some limitations, but at least it does what is required from a temp table. 
+
+Hope that helps, 
+Regards 
+

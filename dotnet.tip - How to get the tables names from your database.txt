@@ -1,0 +1,10 @@
+Here is an example of how to create a DataTable that is populated with the tables contained in a database:
+
+Public Function GetTables(ByVal conn As OleDbConnection) As DataTable
+   conn.Open()
+   Dim schemaTable As DataTable = conn.GetOleDbSchemaTable( _
+      OleDbSchemaGuid.Tables, New Object() {Nothing, Nothing, Nothing, "TABLE"})
+   conn.Close()
+   Return schemaTable
+End Function
+

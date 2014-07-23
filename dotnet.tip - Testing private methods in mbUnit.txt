@@ -1,0 +1,95 @@
+   1. public class TestSample
+   2. {
+   3. private int counter = 0;
+   4. private bool accessed = false;
+   5.
+   6. private void IncCounter()
+   7. {
+   8. counter++;
+   9. }
+  10.
+  11. private void SetAsAccessed()
+  12. {
+  13. accessed = true;
+  14. }
+  15. }
+
+We could run a test as follows
+
+   1. using MbUnit.Framework.Reflection;
+   2.
+   3. [TestFixture]
+   4. public class ReflectorStaticTests
+   5. {
+   6. TestSample sampleObject;
+   7.
+   8. [SetUp]
+   9. public void Setup()
+  10. {
+  11. sampleObject = new TestSample();
+  12. }
+  13.
+  14. [Test]
+  15. public void RunPrivateMethodOnObjectUsingStatic()
+  16. {
+  17. Reflector.RunNonPublicMethod(sampleObject, "IncCounter");
+  18. }
+  19.
+  20. [Test]
+  21. public void CheckPrivateValueOnObjectUsingStatic()
+  22. {
+  23. object result = Reflector.GetNonPublicVariable(sampleObject, "counter");
+  24. Assert.AreEqual(0, (int)result);
+  25. }
+  26.
+  27. [Test]
+  28. public void RunPrivateMethodAndCheckPrivateValueUsingStatic()
+  29. {
+  30. int execute = 3;
+  31. for (int i = 0; i < execute; i++)
+  32. Reflector.RunNonPublicMethod(sampleObject, "IncCounter");
+  33.
+  34. object result = Reflector.GetNonPublicVariable(sampleObject, "counter");
+  35. Assert.AreEqual(execute, (int)result);
+  36. }
+  37. }
+
+This example calls the methods by passing the instance you wish to reflect (in a static fasion) but the code also allows you do the following.
+
+   1. [TestFixture]
+   2. public class InstanceTests
+   3. {
+   4. TestSample sampleObject;
+   5. Reflector reflect;
+   6.
+   7. [SetUp]
+   8. public void Setup()
+   9. {
+  10. sampleObject = new TestSample();
+  11. reflect = new Reflector(sampleObject);
+  12. }
+  13.
+  14. [Test]
+  15. public void RunPrivateMethodOnObjectUsingInstance()
+  16. {
+  17. reflect.RunPrivateMethod("IncCounter");
+  18. }
+  19.
+  20. [Test]
+  21. public void CheckPrivateValueOnObjectUsingInstance()
+  22. {
+  23. object result = reflect.GetPrivateVariable("counter");
+  24. Assert.AreEqual(0, (int)result);
+  25. }
+  26.
+  27. [Test]
+  28. public void RunPrivateMethodAndCheckPrivateValueUsingInstance()
+  29. {
+  30. int execute = 3;
+  31. for (int i = 0; i < execute; i++)
+  32. reflect.RunPrivateMethod("IncCounter");
+  33.
+  34. object result = reflect.GetPrivateVariable("counter");
+  35. Assert.AreEqual(execute, (int)result);
+  36. }
+  37. }

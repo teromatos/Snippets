@@ -1,0 +1,16 @@
+Source: http://coolthingoftheday.blogspot.com/2007/10/using-tasklist-command-line-utility-to.html
+
+How to find out what all processes have loaded particular DLL
+
+"I was searching for a way to find all the processes running right now, who has loaded particular DLL.. And found a really good command that shows really useful output.. 
+
+ 
+
+You dont have to install anything on your windows, just go to command prompt and fire command.
+PS: Replace wbemsvc.dll with DLL in question. 
+
+..."
+
+This is one of those tasks that I don't do often enough to remember how to do it when I need it... 
+
+Also the "tasklist /svc" tip will come in handy too. I had "svchost.exe" eating up CPU cycles the other day and wanted to see what service(s) was being hosted in that process. "Tasklist /svc" would have fit the bill nicely...

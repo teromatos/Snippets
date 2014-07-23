@@ -1,0 +1,29 @@
+Geoff wrote a whole bunch of code for dealing with Enums. Enums are annoying because you can cast any integer to an Enum type and you will not get an exception message (at least in version 1.0 and 1.1). Geoff's solution uses the IsDefined static method on Enum, but using the IsDefined method really sucks.
+
+If I had a Flags enum, I'd write something like this (the one assumption I make is that the Flags enum is written with values in ascending order):
+
+.cf { font-family: Lucida Console; font-size: 10pt; color: black; background: white; border-top: windowtext 1pt solid; padding-top: 0pt; border-left: windowtext 1pt solid; padding-left: 0pt; border-right: windowtext 1pt solid; padding-right: 0pt; border-bottom: windowtext 1pt solid; padding-bottom: 0pt; } .cln { color: teal; } .cb1 { color: blue; } .cb2 { color: maroon; } 
+ 1 Module Module1
+ 2  
+ 3   Sub Main()
+ 4     For i As Integer = 1 To 20
+ 5       Console.WriteLine("Number: " + i.ToString() + "  " + IsValid(i).ToString())
+ 6     Next
+ 7   End Sub
+ 8  
+ 9   <Flags()> _
+10   Public Enum MyEnum
+11     Val0 = 0
+12     Val1 = 1
+13     Val2 = 2
+14     Val3 = 4
+15     Val4 = 8
+16   End Enum
+17  
+18   Public Function IsValid(ByVal val As Integer) As Boolean
+19     Dim values As Integer() = System.Enum.GetValues(GetType(MyEnum))
+20     Return val < (values(values.GetLength(0) - 1) * 2)
+21   End Function
+22  
+23 End Module
+

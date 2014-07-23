@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<!-- 
+    Note: As an alternative to hand editing this file you can use the 
+    web admin tool to configure settings for your application. Use
+    the Website->Asp.Net Configuration option in Visual Studio.
+    A full list of settings and comments can be found in 
+    machine.config.comments usually located in 
+    \Windows\Microsoft.Net\Framework\v2.x\Config 
+-->
+<configuration xmlns="http://schemas.microsoft.com/.NetConfiguration/v2.0">
+	<appSettings/>
+	<connectionStrings>
+		<add name="SqlServices" connectionString="Data Source=Morpheus\sql2005;Integrated Security=SSPI;Initial Catalog=testaspnet;"/>
+	</connectionStrings>
+	<system.web>
+		<!-- 
+            Set compilation debug="true" to insert debugging 
+            symbols into the compiled page. Because this 
+            affects performance, set this value to true only 
+            during development.
+        -->
+		<membership defaultProvider="SQLProvider" userIsOnlineTimeWindow="20">
+			<providers>
+				<clear/>
+				<add name="SQLProvider" type="System.Web.Security.SqlMembershipProvider, System.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" connectionStringName="SqlServices" enablePasswordRetrieval="false" enablePasswordReset="true" requiresQuestionAndAnswer="true" applicationName="/" requiresUniqueEmail="false" passwordFormat="Hashed" maxInvalidPasswordAttempts="5" minRequiredPasswordLength="7" minRequiredNonalphanumericCharacters="1" passwordAttemptWindow="10" passwordStrengthRegularExpression=""/>
+			</providers>
+		</membership>
+		<roleManager enabled="true" cacheRolesInCookie="true" cookieName=".ASPXROLES" cookieTimeout="30" cookiePath="/" cookieRequireSSL="false" cookieSlidingExpiration="true" cookieProtection="All" defaultProvider="SQLProvider" createPersistentCookie="false" maxCachedResults="25">
+			<providers>
+				<clear/>
+				<add name="SQLProvider" type="System.Web.Security.SqlRoleProvider, System.Web, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" connectionStringName="SQLServices" applicationName="/"/>
+			</providers>
+		</roleManager>
+		<authorization>
+			<allow roles="Admin" />
+			<deny users="?" />
+		</authorization>
+		<compilation debug="true"/>
+		<!--
+            The <authentication> section enables configuration 
+            of the security authentication mode used by 
+            ASP.NET to identify an incoming user. 
+        -->
+		<authentication mode="Forms"/>
+		<!--
+            The <customErrors> section enables configuration 
+            of what to do if/when an unhandled error occurs 
+            during the execution of a request. Specifically, 
+            it enables developers to configure html error pages 
+            to be displayed in place of a error stack trace.
+
+        <customErrors mode="RemoteOnly" defaultRedirect="GenericErrorPage.htm">
+            <error statusCode="403" redirect="NoAccess.htm" />
+            <error statusCode="404" redirect="FileNotFound.htm" />
+        </customErrors>
+        -->
+	</system.web>
+</configuration>

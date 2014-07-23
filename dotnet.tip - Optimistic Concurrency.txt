@@ -1,0 +1,24 @@
+
+
+I've solved it this way (but it's probably not appropriate for
+you, as you use the non-intrusive way)
+I've defined an interface, IConcurrencyPredicateFactory. This
+interface has a method which is defined to produce filters
+based on the entity passed in and the type it is required for
+(delete, save).
+An instance of this interface can be inserted into the entity
+object, for example at construction or whenever you want.
+The advantage is that you can produce whatever concurrency
+scheme you want! Timestamp and some value? just a value?
+just a set of values? just a timestamp? no problem. Just
+produce the filter object.
+When you have constructed an object hierarchy at runtime
+(like customer with some new orders, orders have new order
+detail objects, perhaps some other referenced objects), you
+can simply save the Customer and all objects get persisted
+recursively, AND the concurrency predicate factories inside
+these objects are used at the moment they're required. Set
+and forget :)
+This approach has also the advantage that you can set
+concurrency on a per-object basis or on a per-entity type
+basis.

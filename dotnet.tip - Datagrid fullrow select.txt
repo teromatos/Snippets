@@ -1,0 +1,16 @@
+Datagrid fullrow select:
+
+Private Sub DataGrid1_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles DataGrid1.MouseUp
+        Dim pt = New Point(e.X, e.Y)
+        Dim hti As DataGrid.HitTestInfo = DataGrid1.HitTest(pt)
+        If hti.Type = Windows.Forms.DataGrid.HitTestType.Cell Then
+            DataGrid1.CurrentCell = New DataGridCell(hti.Row, hti.Column)
+            DataGrid1.Select(hti.Row)
+        End If
+    End Sub
+
+Disable the edit mode in the cell of the datagrid
+
+Dim cm As CurrencyManager = Me.BindingContext(DataGrid1.DataSource, DataGrid1.DataMember)
+        Dim dv As DataView = cm.List
+        dv.AllowNew = False 

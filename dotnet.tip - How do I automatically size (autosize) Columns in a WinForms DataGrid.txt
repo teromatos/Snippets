@@ -1,0 +1,30 @@
+How do I automatically size (autosize) Columns in a WinForms DataGrid?
+
+Apparently this is, like, the problem for the ages or something, but noone on this planet has come up with a way to automatically size the columns in a DataGrid.  Sure, there's all sorts of pyscho ways that involve measuring the length of strings in DataSets with the Graphics context, yada yada.  But, since I'm binding strongly-typed Object Collections to DataGrids in WinForm apps, that doesn't work for me (and it's a little over the top, IMHO).
+
+So, I thought about it like this:
+
+If you double click on the little splitter between columns they will autosize. 
+Therefore, the code to autosize has been written for me; no need to measure strings, etc. 
+How do I force a double click? No, wait, wrongheadedness, how do I call whatever THEY call when a double click happens? 
+So, I reflectored into DataGrid.OnMouseDown and saw their custom HitTest calls a private ColAutoResize.  Ah, bingo.
+If you're going to 'sin' do it with style - do it with Reflection. 
+
+private void dgLogging_DataSourceChanged(object sender, System.EventArgs e)
+        {
+            try
+            {
+                Type t = dgLogging.GetType();
+                MethodInfo m = t.GetMethod("ColAutoResize",BindingFlags.NonPublic);
+
+                for (int i = dgLogging.FirstVisibleColumn; (i < dgLogging.VisibleColumnCount); i++)
+                {
+                    m.Invoke(dgLogging, new object[]{i});
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Trace.Write("Failed Resizing Columns: " + ex.ToString());
+            }
+        }
+ 

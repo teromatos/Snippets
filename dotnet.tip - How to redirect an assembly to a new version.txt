@@ -1,0 +1,10 @@
+<configuration>
+	<runtime>
+		<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+			<dependentAssembly>
+				<assemblyIdentity name="TERO.Common" publicKeyToken="4D790187BB5434F3" culture="neutral"/>
+				<bindingRedirect oldVersion="0.0.0.0-2.7.0.0" newVersion="2.7.0.0"/>
+			</dependentAssembly>
+		</assemblyBinding>
+	</runtime>
+</configuration>

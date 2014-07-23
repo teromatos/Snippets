@@ -1,0 +1,23 @@
+fuslogvw.exe
+
+For FileNotFoundException: 
+At the bottom of the log will be the paths that Fusion tried probing for this assembly. If this was a load by path (as in Assembly.LoadFrom()), there will be just one path, and your assembly will need to be there to be found. Otherwise, your assembly will need to be on one of the probing paths listed, or in the GAC, if it s to be found. 
+
+You may also get this exception if an unmanaged dependency or internal module of the assembly failed to load. Try running depends.exe on the file to verify that unmanaged dependencies can be loaded. Note that if you re using ASP.NET, the PATH environment variable it s using may differ from the one the command line uses. If all of them could be loaded, try ildasm.exe on the file, double-click on "MANIFEST", and look for ".file" entries. Each of those files will need to be in the same directory as the manifest-containing file. 
+
+For BadImageFormatException: 
+Try running peverify.exe on the file. That will give a more specific description about why it s considered a bad image. 
+
+For SecurityException: 
+You need Execute permission for loading any assembly. Also, if a codebase was used to load this file, you would need FileIOPermission.Read and FileIOPermission.PathDiscovery, or WebPermission to the location (depending on whether this is a local file or a URL). Try caspol.exe to check your managed security settings. 
+
+For FileLoadException: 
+
+For an "Access is denied" message (for hresult E_ACCESSDENIED, 0x80070005): 
+Run tlist -m on the file, to see if another process has the file locked and without share-read access. If not, check the ACLs for the file and its dependencies (especially if you're using impersonation). 
+
+For a "The located assembly's manifest definition with name [yourAssembly] does not match the assembly reference" message (for hresult FUSION_E_REF_DEF_MISMATCH, 0x80131040): 
+The Fusion log will say which part of the assembly reference failed to match what was found. It will be the assembly name, culture, public key (or token), or version (if the found assembly was strongly-named). 
+
+For "Unverifiable image [yourAssembly] can not be run" or "Can not run executable [yourAssembly] because it contains relocations" messages (for hresult COR_E_FIXUPSINEXE, 0x80131019): 
+That image must be run as the process exe, or else be compiled as a dll. This is because MC++ has made optimizations for you in your image, based on the assumption that it will be the process exe. If it's not the process exe, it won t be loaded at the expected location, so the assumed offsets will be incorrect. When the CLR sees such a file loaded as a non-process exe, it will reject the load. 

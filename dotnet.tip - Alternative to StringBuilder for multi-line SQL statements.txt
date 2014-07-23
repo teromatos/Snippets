@@ -1,0 +1,8 @@
+A nice alternative to StringBuilder for multi-line SQL statements is the literal string symbol: @. It makes it easy to copy and paste back and forth between your code and a tool like Query Analyzer.
+
+string sqlOrderDetails = @"
+SELECT od.OrderID, p.ProductID, p.ProductName, od.UnitPrice, od.Quantity
+FROM [Order Details] od INNER JOIN Products p ON od.ProductID = p.ProductID
+WHERE OrderID IN (
+SELECT OrderID FROM Orders WHERE CustomerID = 'ALFKI')
+";

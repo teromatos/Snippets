@@ -1,0 +1,107 @@
+// Array of DataTables from a Typed DataSet
+DataTable[] updateTables = new DataTable[] {
+                          dataSet.Customers, 
+                          dataSet.Orders, 
+                          dataSet.OrderDetails, 
+                          dataSet.Products 
+                                           };
+
+// Array of DataAdapters
+DataAdapter[] updateAdapters = new DataAdapter[] {
+                          customerAdapter,
+                          orderAdapter,
+                          orderDetailAdapter,
+                          productAdapter
+                                                 };
+
+// Call the Update Method
+UpdateDataSet(updateTables, updateAdapters);
+
+This implies the order so that the helper function can do the right thing which is to delete bottom up, and insert/update top down:
+
+// Enforces that updates will be written in the right order.
+internal static void UpdateDataSet(DataTable[] tables, SqlDataAdapter[] adapters)
+{
+  // Validate the input
+  if (tables.Length == 0 || adapters.Length == 0)
+  {
+    throw new ArgumentException("You must send at least one table and adapter");
+  }
+  if (tables.Length != adapters.Length)
+  {
+    throw new ArgumentException("The number of tables and adapters must be identical");
+  }
+
+  // Disable Constraints until end of process
+  tables[0].DataSet.EnforceConstraints = false;
+
+  using (SqlConnection conn = DataFactory.GetConnection() as SqlConnection)
+  {
+    SqlTransaction tx = null;
+
+    // Try and update the datasets with a transaction
+    try
+    {
+      // Open the connection
+      conn.Open();
+
+      // Start a transaction
+      tx = conn.BeginTransaction();
+
+      // Set the Upper and Lower Bounds
+      int min = tables.GetLowerBound(0);
+      int max = tables.GetUpperBound(0);
+
+      // Go through all the tables, and delete the deleted items (in reverse order)
+      for (int x = max; x >= min; --x)
+      {
+        DataRow[] updatingRows = tables[x].Select("", "", DataViewRowState.Deleted);
+        if (updatingRows != null && updatingRows.Length > 0) 
+        {
+          adapters[x].DeleteCommand.Connection = conn;
+          adapters[x].DeleteCommand.Transaction = tx;
+          adapters[x].Update(updatingRows);
+        }
+      }
+
+      // Go through all tables and update/insert the items (in forward order)
+      for (int x = min; x <= max; ++x)
+      {
+        DataRow[] updatingRows = tables[x].Select("", "", DataViewRowState.Added | DataViewRowState.ModifiedCurrent);
+        if (updatingRows != null && updatingRows.Length > 0) 
+        {
+          adapters[x].InsertCommand.Connection = conn;
+          adapters[x].InsertCommand.Transaction = tx;
+          adapters[x].UpdateCommand.Connection = conn;
+          adapters[x].UpdateCommand.Transaction = tx;
+          adapters[x].Update(updatingRows);        
+        }
+      }
+
+      // Commit the transaction
+      tx.Commit();
+
+      // Mark all the items as accepted
+      for (int x = min; x <= max; ++x)
+      {
+        tables[x].AcceptChanges();
+      }
+
+    }
+    catch (Exception ex)
+    {
+      if (tx != null) tx.Rollback();
+      throw new ApplicationException("Failed to Update the database", ex);
+    }
+    finally
+    {
+      if (conn.State == ConnectionState.Open) conn.Close();
+
+      if (tx != null) tx.Dispose();
+
+      // Enable Constraints until end of process
+      tables[0].DataSet.EnforceConstraints = true;
+
+    }
+  }
+}

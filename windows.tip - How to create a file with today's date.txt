@@ -1,0 +1,71 @@
+URL= http://groups.google.com/group/microsoft.public.win2000.cmdprompt.admin/browse_frm/thread/5f3236846ab55c21/a6bff99257569b59?lnk=st&q=&rnum=2&hl=en#a6bff99257569b59
+URL = http://www.microsoft.com/technet/prodtechnol/Windows2000serv/support/FAQW2KCP.mspx
+
+SAMPLES BELOW
+
+
+To parse the date into its' YYYY, MM, and DD components, we would use the FOR command. When you type Date /T, a typical North American installation would display Day MM/DD/YYYY, like Mon 07/15/2002. 
+To parse this into the YYYY, MM, and DD components, type: 
+
+for /f "Tokens=2-4 Delims=/ " %a in ('date /t') do set mm=%a&set dd=%b&set yy=%c 
+
+Note When using the FOR command in a batch file, replace % with %%. 
+
+To create a folder named 20020715, type MD %yy%%mm%%dd%. 
+To create a universal date parser, that works on all Windows NT-based systems (Windows NT 4.0, Windows NT 5.0 (Windows 2000), and Windows NT 5.1 (Windows XP, which doesn't display the Day when using date /t), regardless of date format, we can make use of the fact that when you type Date, a display similar to: 
+The current date is: Mon 07/15/2002
+Enter the new date: (mm-dd-yy) 
+exhibits the format (mm-dd-yy). Create a batch file, named univdate.bat, in your path, which contains:
+
+=================================================================================================
+
+
+
+@echo off 
+rem setlocal enableextensions 
+rem c:
+rem for /f "tokens=1-2" %%a in ("%DATE%") do for /f "tokens=1-3 delims=-/.," %%d in ("%%b") do echo c:\%%f%%d%%e 
+
+for /f "Tokens=2-4 Delims=/ " %%a in ('date /t') do set mm=%%a&set dd=%%b&set yy=%%c
+
+echo YEAR : %yy%
+echo MONTH: %mm%
+echo DAY  : %dd%
+echo.
+
+H:
+cd H:\ROOT\OPER\UNIONS\TAPES\ACTWU
+
+if not exist .\nul echo Unable to locate H:\ROOT\OPER\UNIONS\TAPES\ACTWU directory
+if not exist .\nul goto end
+
+if exist %yy%%mm%%dd%.zip del %yy%%mm%%dd%.zip
+
+if not exist ALIC18WK.XLS echo Unable to locate ALIC18WK.XLS
+if not exist ALIC18Wx.XLS echo Unable to locate ALIC18WX.XLS
+if not exist PAYFBANK.TXT echo Unable to locate PAYFBANK.TXT
+if not exist PAYFBANx.TXT echo Unable to locate PAYFBANX.TXT
+
+if not exist ALIC18WK.XLS GOTO END
+if not exist ALIC18Wx.XLS GOTO END
+if not exist PAYFBANK.TXT GOTO END
+if not exist PAYFBANx.TXT GOTO END
+
+
+y:\root\programs\pkzip.exe %yy%%mm%%dd%.zip .\ALIC18WK.XLS .\ALIC18WX.XLS .\PAYFBANK.TXT .\PAYFBANX.TXT
+echo.
+
+if not exist %yy%%mm%%dd%.zip echo %yy%%mm%%dd%.zip WAS NOT CREATED
+if not exist %yy%%mm%%dd%.zip goto end
+
+if exist %yy%%mm%%dd%.zip echo The file %yy%%mm%%dd%.zip created.
+
+:end
+
+
+=================================================================================================
+
+
+@echo off 
+setlocal enableextensions 
+for /f "tokens=1-2" %%a in ("%DATE%") do for /f "tokens=1-3 delims=-/.," %%d in ("%%b") do echo c:\%%f%%d%%e 

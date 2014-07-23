@@ -1,0 +1,19 @@
+    Dim sr As New StreamReader("C:\WORK\VB.NET\project archiver\nant-085\examples\Solution\vb\WinForms\vbdebug.build")
+
+    Dim line As String
+    Dim newLine As String
+    Dim i As Integer
+
+    Do While sr.Peek <> -1
+        line = sr.ReadLine
+        If line Is Nothing Then
+            newLine = "sb.Append(Environment.NewLine)"
+            Debug.WriteLine(newLine)
+        Else
+            newLine = "sb.Append(" & Chr(34)
+            newLine = newLine + line.Replace(Chr(34), Chr(34) & " & chr(34) & " & Chr(34))
+            newLine = newLine & Chr(34) & ")"
+
+            Debug.WriteLine(newLine)
+        End If
+    Loop

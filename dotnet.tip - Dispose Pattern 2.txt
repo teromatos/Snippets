@@ -1,0 +1,51 @@
+URL= http://haacked.com/archive/2005/11/18/ACloserLookAtDisposePattern.aspx
+
+public class DisposableObject : IDisposable
+
+{
+
+    public void Dispose()
+
+    {
+
+        Dispose(true);
+
+        GC.SuppressFinalize(this);
+
+    }
+
+ 
+
+    void Dispose(bool disposing)
+
+    {
+
+        ReleaseUnmanagedResources();
+
+        if(disposing)
+
+        {
+
+            ReleaseManagedResources();
+
+        }
+
+    }
+
+ 
+
+    //Template method
+
+    protected virtual void ReleaseUnmanagedResources()
+
+    {}
+
+ 
+
+    //Template method
+
+    protected virtual void ReleaseManagedResources()
+
+    {}
+
+}

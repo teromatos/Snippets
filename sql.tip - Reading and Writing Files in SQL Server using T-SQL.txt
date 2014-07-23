@@ -1,0 +1,388 @@
+url = http://www.simple-talk.com/sql/t-sql-programming/reading-and-writing-files-in-sql-server-using-t-sql/
+
+Reading lines from a file
+
+I have often pined for a simple function that will read information a line at a time, and to present to me a 'fake table' where each line of text is a row, with a primary key based on the line number. With such a function, one can then do one's own parsing and checking of data.
+
+Well, here it is. Create the uftReadFileAsTable stored procedure in your test database, and try it out with something like:
+
+Select line from
+ Dbo.uftReadfileAsTable('MyPath','MyFileName')
+where line not like '#%'
+--where line doesnt begin with a hash
+
+Just fill in an existing file name and path to the file you wish to read, instead of 'MyPath' and 'MyFileName', and away you go.
+
+This is a method I use for reading web logs and gathering usage statistics. It is also useful where the data feed has to be validated before one can parse it into the final SQL data format.
+Reading a file into a SQL Server data type
+
+This is all very well, but how about something that reads a file in one gulp into a varchar or XML datatype? Perhaps you need to extract data from HTML, XHTML or some other format. Create the ufsReadfileAsString procedure and try something like…
+
+Select dbo.ufsReadfileAsString ('MyPath','MyFileName')
+
+Writing out a file
+
+No problem – just create spWriteStringToFile and try:
+
+execute spWriteStringToFile 'This article describes how to fully access the
+local filesystem from SQL Server. It shows a
+way of reading and writing data to file, and
+accessing the details of the server's
+filesystem using OLE Automation to access
+the filesystem object'
+, 'MyPath','MyFileName'
+
+The path you use instead of 'MyPath' will have to exist, in this example.
+Getting file details
+
+If you need to find out the attributes of a particular file, then try out spFileDetails:
+
+Execute spFileDetails 'c:\autoexec.bat'
+
+More on the FSO and OLE Automation
+
+There are all sorts of things you can do with the FSO. You can copy files, move files, create folders, delete files, get the names of special directories, and so on. This may sound esoteric, but sometimes the simplest backup procedures require such operations. I pause here just to give some minimum necessary background details on FSO, and on OLE Automation.
+
+The Filesystem Object, on which all the stored procedures in this article rely, is a component of the scripting runtime library. As it is a COM object, it is readily accessible from the set or stored procedures built-in to SQL Server called the OLE Automation Stored Procedures, These allow a connection, through T-SQL commands, to create and use COM-based objects.
+OLE Automation
+
+Each OLE Automation stored procedure returns an integer code that is the HRESULT returned by the underlying OLE Automation operation. When an error happens, the HRESULT returns an error code rather than the 0 which signals success, which then has to be turned into a meaningful error message with the sp_OAGetErrorInfo procedure.
+
+The full set of OLE automation procedures are:
+
+    * sp_OACreate
+    * sp_OADestroy
+    * sp_OAGetProperty
+    * sp_OASetProperty
+    * sp_OAMethod
+    * sp_OAGetErrorInfo
+    * sp_OAStop
+
+The attached files have many examples on how to use these procedures and they are well covered on Books on Line, so I won't bother to repeat the details here.
+The FileSystem Object
+
+The FileSystem Object is a COM object that is provided primarily for scripting languages such as Jscript, ASP, and VBscript. It provides everything that is necessary for file or folder operations. It also allows for most simple file reading and writing operations, and to gather information about drives, directories and files.
+
+The FSO allows you to manipulate and shred path names, to copy, move, delete or create files or folders. You can check for their existence or get a number of objects and collections. These are…
+
+    * Drive Object
+
+    This provides information about a logical drive (physical, or network) attached to the system, such as its share name, type, total space, and how much room is available
+
+    * Drives Collection
+
+    This will give a list of the physical or logical drives attached to the system and includes all drives, regardless of type. (Removable-media drives need not have media inserted for them to appear in this collection).
+
+    * File Object
+
+    This will allow you to create, delete, or move a file, and to find out the file name, path, and other properties. It has a method to open a file as a text stream.
+
+    * Files Collection
+
+    This provides a list of all files contained within a folder.
+
+    * Folder Object
+
+    The Folder object has methods that allow you to create, delete, or move folders. Also there are several properties that return folder names, creation date, paths and so on.
+
+    * Folders Collection
+
+    This provides a list of all the folders within a Folder.
+
+    * TextStream Object
+
+    This object is extraordinarily useful as it provides the means to read and write to text files.
+
+All of these methods, properties and collections are readily available from Books on Line and W3Schools. I also find Dino Esposito's book 'Windows Script Host' (Wrox 1999) very useful.
+
+
+
+--------------------------------------------------------------------------------
+Stored Procedures
+--------------------------------------------------------------------------------
+
+Create FUNCTION [dbo].[uftReadfileAsTable]
+(
+@Path VARCHAR(255),
+@Filename VARCHAR(100)
+)
+RETURNS 
+@File TABLE
+(
+[LineNo] int identity(1,1), 
+line varchar(8000)) 
+
+AS
+BEGIN
+
+DECLARE  @objFileSystem int
+        ,@objTextStream int,
+		@objErrorObject int,
+		@strErrorMessage Varchar(1000),
+	    @Command varchar(1000),
+	    @hr int,
+		@String VARCHAR(8000),
+		@YesOrNo INT
+
+select @strErrorMessage='opening the File System Object'
+EXECUTE @hr = sp_OACreate  'Scripting.FileSystemObject' , @objFileSystem OUT
+
+
+if @HR=0 Select @objErrorObject=@objFileSystem, @strErrorMessage='Opening file "'+@path+'\'+@filename+'"',@command=@path+'\'+@filename
+
+if @HR=0 execute @hr = sp_OAMethod   @objFileSystem  , 'OpenTextFile'
+	, @objTextStream OUT, @command,1,false,0--for reading, FormatASCII
+
+WHILE @hr=0
+	BEGIN
+	if @HR=0 Select @objErrorObject=@objTextStream, 
+		@strErrorMessage='finding out if there is more to read in "'+@filename+'"'
+	if @HR=0 execute @hr = sp_OAGetProperty @objTextStream, 'AtEndOfStream', @YesOrNo OUTPUT
+
+	IF @YesOrNo<>0  break
+	if @HR=0 Select @objErrorObject=@objTextStream, 
+		@strErrorMessage='reading from the output file "'+@filename+'"'
+	if @HR=0 execute @hr = sp_OAMethod  @objTextStream, 'Readline', @String OUTPUT
+	INSERT INTO @file(line) SELECT @String
+	END
+
+if @HR=0 Select @objErrorObject=@objTextStream, 
+	@strErrorMessage='closing the output file "'+@filename+'"'
+if @HR=0 execute @hr = sp_OAMethod  @objTextStream, 'Close'
+
+
+if @hr<>0
+	begin
+	Declare 
+		@Source varchar(255),
+		@Description Varchar(255),
+		@Helpfile Varchar(255),
+		@HelpID int
+	
+	EXECUTE sp_OAGetErrorInfo  @objErrorObject, 
+		@source output,@Description output,@Helpfile output,@HelpID output
+	Select @strErrorMessage='Error whilst '
+			+coalesce(@strErrorMessage,'doing something')
+			+', '+coalesce(@Description,'')
+	insert into @File(line) select @strErrorMessage
+	end
+EXECUTE  sp_OADestroy @objTextStream
+	-- Fill the table variable with the rows for your result set
+	
+	RETURN 
+END
+
+--------------------------------------------------------------------------------
+
+ALTER FUNCTION [dbo].[ufsReadfileAsString]
+(
+@Path VARCHAR(255),
+@Filename VARCHAR(100)
+)
+RETURNS 
+ Varchar(max)
+AS
+BEGIN
+
+DECLARE  @objFileSystem int
+        ,@objTextStream int,
+		@objErrorObject int,
+		@strErrorMessage Varchar(1000),
+	    @Command varchar(1000),
+		@Chunk Varchar(8000),
+		@String varchar(max),
+	    @hr int,
+		@YesOrNo int
+
+Select @String=''
+select @strErrorMessage='opening the File System Object'
+EXECUTE @hr = sp_OACreate  'Scripting.FileSystemObject' , @objFileSystem OUT
+
+
+if @HR=0 Select @objErrorObject=@objFileSystem, @strErrorMessage='Opening file "'+@path+'\'+@filename+'"',@command=@path+'\'+@filename
+
+if @HR=0 execute @hr = sp_OAMethod   @objFileSystem  , 'OpenTextFile'
+	, @objTextStream OUT, @command,1,false,0--for reading, FormatASCII
+
+WHILE @hr=0
+	BEGIN
+	if @HR=0 Select @objErrorObject=@objTextStream, 
+		@strErrorMessage='finding out if there is more to read in "'+@filename+'"'
+	if @HR=0 execute @hr = sp_OAGetProperty @objTextStream, 'AtEndOfStream', @YesOrNo OUTPUT
+
+	IF @YesOrNo<>0  break
+	if @HR=0 Select @objErrorObject=@objTextStream, 
+		@strErrorMessage='reading from the output file "'+@filename+'"'
+	if @HR=0 execute @hr = sp_OAMethod  @objTextStream, 'Read', @chunk OUTPUT,4000
+	SELECT @String=@string+@chunk
+	end
+if @HR=0 Select @objErrorObject=@objTextStream, 
+	@strErrorMessage='closing the output file "'+@filename+'"'
+if @HR=0 execute @hr = sp_OAMethod  @objTextStream, 'Close'
+
+
+if @hr<>0
+	begin
+	Declare 
+		@Source varchar(255),
+		@Description Varchar(255),
+		@Helpfile Varchar(255),
+		@HelpID int
+	
+	EXECUTE sp_OAGetErrorInfo  @objErrorObject, 
+		@source output,@Description output,@Helpfile output,@HelpID output
+	Select @strErrorMessage='Error whilst '
+			+coalesce(@strErrorMessage,'doing something')
+			+', '+coalesce(@Description,'')
+	select @String=@strErrorMessage
+	end
+EXECUTE  sp_OADestroy @objTextStream
+	-- Fill the table variable with the rows for your result set
+	
+	RETURN @string
+END
+
+--------------------------------------------------------------------------------
+alter PROCEDURE spWriteStringToFile
+ (
+@String Varchar(max), --8000 in SQL Server 2000
+@Path VARCHAR(255),
+@Filename VARCHAR(100)
+
+--
+)
+AS
+DECLARE  @objFileSystem int
+        ,@objTextStream int,
+		@objErrorObject int,
+		@strErrorMessage Varchar(1000),
+	    @Command varchar(1000),
+	    @hr int,
+		@fileAndPath varchar(80)
+
+set nocount on
+
+select @strErrorMessage='opening the File System Object'
+EXECUTE @hr = sp_OACreate  'Scripting.FileSystemObject' , @objFileSystem OUT
+
+Select @FileAndPath=@path+'\'+@filename
+if @HR=0 Select @objErrorObject=@objFileSystem , @strErrorMessage='Creating file "'+@FileAndPath+'"'
+if @HR=0 execute @hr = sp_OAMethod   @objFileSystem   , 'CreateTextFile'
+	, @objTextStream OUT, @FileAndPath,2,True
+
+if @HR=0 Select @objErrorObject=@objTextStream, 
+	@strErrorMessage='writing to the file "'+@FileAndPath+'"'
+if @HR=0 execute @hr = sp_OAMethod  @objTextStream, 'Write', Null, @String
+
+if @HR=0 Select @objErrorObject=@objTextStream, @strErrorMessage='closing the file "'+@FileAndPath+'"'
+if @HR=0 execute @hr = sp_OAMethod  @objTextStream, 'Close'
+
+if @hr<>0
+	begin
+	Declare 
+		@Source varchar(255),
+		@Description Varchar(255),
+		@Helpfile Varchar(255),
+		@HelpID int
+	
+	EXECUTE sp_OAGetErrorInfo  @objErrorObject, 
+		@source output,@Description output,@Helpfile output,@HelpID output
+	Select @strErrorMessage='Error whilst '
+			+coalesce(@strErrorMessage,'doing something')
+			+', '+coalesce(@Description,'')
+	raiserror (@strErrorMessage,16,1)
+	end
+EXECUTE  sp_OADestroy @objTextStream
+EXECUTE sp_OADestroy @objTextStream
+
+--------------------------------------------------------------------------------
+/****** Object:  StoredProcedure [dbo].[spFileDetails]    Script Date: 03/28/2007 15:28:15 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+ALTER PROCEDURE [dbo].[spFileDetails]
+@Filename VARCHAR(100)
+
+/*
+spFileDetails 'c:\autoexec.bat'
+*/
+AS
+DECLARE @hr INT,         --the HRESULT returned from 
+       @objFileSystem INT,              --the FileSystem object
+       @objFile INT,            --the File object
+       @ErrorObject INT,        --the error object
+       @ErrorMessage VARCHAR(255),--the potential error message
+       @Path VARCHAR(100),--
+       @ShortPath VARCHAR(100),
+       @Type VARCHAR(100),
+       @DateCreated datetime,
+       @DateLastAccessed datetime,
+       @DateLastModified datetime,
+       @Attributes INT,
+       @size INT
+
+
+
+SET nocount ON
+
+SELECT @hr=0,@errorMessage='opening the file system object '
+EXEC @hr = sp_OACreate 'Scripting.FileSystemObject',
+                                       @objFileSystem OUT
+IF @hr=0 SELECT @errorMessage='accessing the file '''
+                                       +@Filename+'''',
+       @ErrorObject=@objFileSystem
+IF @hr=0 EXEC @hr = sp_OAMethod @objFileSystem,
+         'GetFile',  @objFile out,@Filename
+IF @hr=0 
+       SELECT @errorMessage='getting the attributes of '''
+                                       +@Filename+'''',
+       @ErrorObject=@objFile
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'Path', @path OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'ShortPath', @ShortPath OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'Type', @Type OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'DateCreated', @DateCreated OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'DateLastAccessed', @DateLastAccessed OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'DateLastModified', @DateLastModified OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'Attributes', @Attributes OUT
+IF @hr=0 EXEC @hr = sp_OAGetProperty 
+             @objFile, 'size', @size OUT
+
+
+IF @hr<>0
+       BEGIN
+       DECLARE 
+               @Source VARCHAR(255),
+               @Description VARCHAR(255),
+               @Helpfile VARCHAR(255),
+               @HelpID INT
+       
+       EXECUTE sp_OAGetErrorInfo  @errorObject, 
+               @source output,@Description output,
+                               @Helpfile output,@HelpID output
+
+       SELECT @ErrorMessage='Error whilst '
+                               +@Errormessage+', '
+                               +@Description
+       RAISERROR (@ErrorMessage,16,1)
+       END
+EXEC sp_OADestroy @objFileSystem
+EXEC sp_OADestroy @objFile
+SELECT [Path]=  @Path,
+       [ShortPath]=    @ShortPath,
+       [Type]= @Type,
+       [DateCreated]=  @DateCreated ,
+       [DateLastAccessed]=     @DateLastAccessed,
+       [DateLastModified]=     @DateLastModified,
+       [Attributes]=   @Attributes,
+       [size]= @size
+RETURN @hr
+
+--------------------------------------------------------------------------------

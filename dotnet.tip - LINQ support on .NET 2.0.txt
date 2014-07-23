@@ -1,0 +1,40 @@
+url=http://weblogs.asp.net/fmarguerie/archive/2007/09/05/linq-support-on-net-2-0.aspx
+
+LINQ support on .NET 2.0
+We have a forum for LINQ in Action, where current and future readers can post questions related to the book or to LINQ in general. Here is one question we received recently:
+
+The first chapter states "This means that the applications you’ll build using LINQ can run in a “bare” .NET 2.0 runtime!" ....
+Is this true? Or will it require our runtimes to install .NET 3.0 ... or .NET 3.5?
+
+That's right, that's what I wrote in the book. But I hadn't really tried to see what can be achieved. So, here is a small test I did with Visual Studio 2008 Beta 2 and that you can reproduce: 
+
+Create a new console application 
+Keep only System and System.Core as referenced assemblies 
+Set Copy Local to true for System.Core, because it does not exist in .NET 2.0 
+Use a LINQ query in the Main method. For example the one below. 
+Build 
+Copy all the bin output to a machine where only .NET 2.0 is installed 
+Run 
+It should run without any problem. At least it did for me. The sample .NET 3.5 LINQ application I created did run on a machine where neither .NET 3.0 nor .NET 3.5 have been installed ever.
+
+Warning: This may not work in all cases. I know that .NET 2.0 SP1 is installed with .NET 3.5. It may be required under certain circumstances, but I don't know which. In my case, I didn't use .NET 2.0 SP1, and to the best of my knowledge there is not separate installation for it yet anyway.
+
+
+Update: As Bobby Diaz points out in a comment. .NET 2.0 SP1 is actually required if you want to use LINQ to SQL on .NET 2.0 because it contains an updated version of System.dll! See this forum post for more information.
+
+The sample code I used:
+
+
+class Program
+{
+  static void Main(string[] args)
+  {
+    var processes =
+      from process in System.Diagnostics.Process.GetProcesses()
+      where process.ProcessName.StartsWith("s")
+      select new {process.Id, Name = process.ProcessName};
+
+    foreach (var process in processes)
+      Console.WriteLine(process);
+  }
+}

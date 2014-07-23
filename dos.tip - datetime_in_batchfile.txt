@@ -1,0 +1,18 @@
+SET currdt=%DATE:~4,2%_%DATE:~7,2%_%DATE:~-4%_%time:~0,2%_%time:~3,2%_%time:~6,2%
+
+SET month=%DATE:~4,2%
+SET day=%DATE:~7,2%
+SET year=%DATE:~-4%
+SET hour=%time:~0,2%
+SET sec=%time:~3,2%
+SET millis=%time:~6,2%
+
+echo %currdt%
+echo %day%
+echo %month%
+echo %year%
+echo %hour%
+echo %sec%
+echo %millis%
+
+echo %year%_%month%_%day%_%hour%_%sec%_%millis%

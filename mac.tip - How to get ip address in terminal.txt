@@ -1,0 +1,5 @@
+ ipconfig getifaddr en0 
+
+or 
+
+ ipconfig getifaddr en1

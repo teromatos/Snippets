@@ -1,0 +1,171 @@
+Visual Studio .NET 2003 and 2005 Keyboard Shortcuts
+I've been trying to improve my use of keyboard shortcuts in Visual Studio .NET. Here are the ones I use most often, what I consider my "core" keyboard shortcuts: 
+
+
+F12, ctrl+shift+F12 
+F10, ctrl+F10 
+F11, shift+F11 
+F9 
+F8, shift+F8 
+F7, shift+F7 
+F5, shift+F5, ctrl+F5 
+ctrl+- 
+ctrl+alt+K 
+ctrl+alt+I 
+ctrl+alt+O 
+ctrl+F, ctrl+shift+F 
+ctrl+H 
+ctrl+I 
+I'm still struggling to find a keyboard shortcut that sets the input focus back to the code window after doing a ctrl+alt+O or ctrl+alt+K. Which keyboard shortcuts do you use most often? 
+
+The best reference for keyboard shortcuts in VS.NET 2003 is Mastering Visual Studio .NET; Appendix C contains an excellent reference table of all the keyboard shortcuts in .NET. 
+
+As good as that reference table is, you can generate the same table programmatically using an IDE macro. I have an improved version of this macro which groups the results by scope and sorts by primary keyboard key so related key accelerators are all together (eg, F5, ctrl+F5, shift+F5, etc). I used a generic DataTable to store the intermediate results, so you can modify this to sort and group the output by whatever column(s) you want: 
+
+
+Here's how to run this macro: 
+
+
+go to Tools - Macros - IDE 
+create a new Module named "KeyboardShortcuts" under "MyMacros" 
+paste the above code into the module 
+add a reference to the System.Data namespace*; make sure it builds with no errors 
+close the macro IDE window 
+go to Tools - Macros - Macro Explorer 
+A new macro named "List" will be under "KeyboardShortcuts." Double-click it to run the macro 
+the macro will take a minute or so and write the keyboard shortcuts into the "output" window. 
+This works in VS.NET 2003 and VS.NET 2005, and unless you are a total Visual Studio Ninja(tm) I guarantee you'll find at least a few keyboard shortcuts in there that you didn't know about. I also did a diff on the resulting files to see what keyboard shortcuts have changed in Whidbey. Here's what I got: 
+
+VS.NET 2003 Keyboard Shortcuts 
+VS.NET 2005 beta 2 Keyboard Shortcuts 
+Keyboard shortcuts that are new to VS.NET 2005 
+* in VS.NET 2005, there are a few minor extra dependencies: you'll have to add a reference to System.Xml and also import EnvDTE80. 
+
+
+
+
+
+
+
+Imports EnvDTE
+Imports System
+Imports System.Diagnostics
+Imports System.Text
+Imports System.Text.RegularExpressions
+Imports System.Data
+Imports System.Environment
+
+Public Module KeyboardShortcuts
+
+    Private Const _defaultSortOrder As String = "Scope, PrimaryKey, Key"
+    Private Const _groupColumnName As String = "Scope"
+    Private Const _pageTitle As String = "Visual Studio .NET Keyboard Shortcuts"
+    Private _p As OutputWindowPane
+
+    Sub List()
+        Dim dv As New DataView(KeyboardCommandTable())
+        dv.Sort = _defaultSortOrder
+
+        WriteLine("<html>")
+        WriteLine("<head>")
+        WriteLine("<title>" & _pageTitle & "</title>")
+        WriteLine("</head>")
+        WriteLine("<body>")
+        WriteLine("<h1>" & _pageTitle & "</hr></h1>")
+        WriteLine(ViewToHtmlTable(dv, _groupColumnName))
+        WriteLine("</body>")
+        WriteLine("</html>")
+    End Sub
+
+    Private Sub WriteLine(ByVal s As String)
+        Write(s)
+        Write(NewLine)
+    End Sub
+
+    Private Sub Write(ByVal s As String)
+        If _p Is Nothing Then _p = GetOutputWindowPane("Commands")
+        _p.OutputString(s)
+    End Sub
+
+    Private Function GetOutputWindowPane(ByVal name As String) As OutputWindowPane
+        Dim w As Window = DTE.Windows.Item(EnvDTE.Constants.vsWindowKindOutput)
+        w.Visible = True
+        Dim ow As OutputWindow = w.Object
+        Dim owp As OutputWindowPane
+        Try
+            owp = ow.OutputWindowPanes.Item(name)
+        Catch ex As System.Exception
+            owp = ow.OutputWindowPanes.Add(name)
+        End Try
+        owp.Activate()
+        Return owp
+    End Function
+
+    Private Function KeyboardCommandTable() As DataTable
+        Dim dt As New DataTable
+        dt.Columns.Add("Category")
+        dt.Columns.Add("Command")
+        dt.Columns.Add("Scope")
+        dt.Columns.Add("PrimaryKey")
+        dt.Columns.Add("Key")
+        For Each cmd As EnvDTE.Command In DTE.Commands
+            If cmd.Bindings.Length > 0 Then
+                ParseBindings(cmd, dt)
+            End If
+        Next
+        Return dt
+    End Function
+
+    Private Sub ParseBindings(ByVal cmd As EnvDTE.Command, ByVal dt As DataTable)
+        If cmd.Name Is Nothing Then Return
+        If cmd.Name.Length = 0 Then Return
+
+        Dim dr As DataRow = dt.NewRow
+        Dim sa() As String = Regex.Split(cmd.Name, "\.")
+        dr.Item("Category") = sa(0)
+        dr.Item("Command") = sa(1)
+        For Each s As String In cmd.Bindings
+            ParseBinding(s, dr)
+        Next
+        dt.Rows.Add(dr)
+    End Sub
+
+    Private Sub ParseBinding(ByVal s As String, ByVal dr As DataRow)
+        Dim sa() As String = Regex.Split(s, "::")
+        dr.Item("Scope") = sa(0)
+        dr.Item("Key") = sa(1)
+        Dim primarykey As String = Regex.Match(sa(1), _ 
+            "(?<key>[^+]+),|(?<key>[^+]+$)").Groups("key").ToString
+        dr.Item("PrimaryKey") = primarykey
+    End Sub
+
+    Private Function ViewToHtmlTable(ByVal dv As DataView, _
+        ByVal groupColumnName As String) As String
+        Dim sb As New StringBuilder
+        Dim prevGroupName As String
+        Dim groupName As String
+
+        sb.Append("<table>")
+        sb.Append(NewLine)
+        For Each drv As DataRowView In dv
+            groupName = Convert.ToString(drv.Item(groupColumnName))
+            If groupName <> prevGroupName Then
+                sb.Append("<tr><td colspan=3><br/><h2>")
+                sb.Append(groupName)
+                sb.Append("<hr></h2>")
+            End If
+            sb.Append("<tr><td><code>")
+            sb.Append(drv.Item("Key"))
+            sb.Append("</code><td>")
+            sb.Append(drv.Item("Category"))
+            sb.Append("<td>")
+            sb.Append(drv.Item("Command"))
+            sb.Append(NewLine)
+            prevGroupName = groupName
+        Next
+        sb.Append("</table>")
+        sb.Append(NewLine)
+        Return sb.ToString
+    End Function
+
+End Module

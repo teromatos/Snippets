@@ -1,0 +1,29 @@
+Dispose should contain code to release any unmanaged resources associated with the object's instance. 
+For example, any handles should be released, database connections closed, etc. This simulates deterministic finalization by 
+letting the developer do the resource cleanup when he/she is done with the object. You may want to use an IsDisposed bool and check it inside Dispose.
+
+Dispose should be safely callable multiple times. In my example above, if some user of your class called 
+Dispose twice, we would crash with an unhandled InvalidOperationException trying to “double free” the GCHandle.
+
+If you inherit from an IDisposable object, call the base class' Dispose method. Unlike finalizers, which the GC calls, 
+Dispose is only called by user code (sometimes automatically in C#, as I covered previously). This means any unmanaged 
+resources held by your object's parent, must also be disposed of.
+
+Suppress finalization in Dispose. There has been some debate about whether GC.SuppressFinalization(this) should go before 
+or after the cleanup code. Some argue after, in case something goes wrong before you've finished cleaning up. Others 
+argue before, otherwise you may open up a race condition between your finalizer and your Dispose method. 
+You should consider both strategies depending on your object's implementation.
+
+Don't throw exceptions in Dispose. Nothing should go wrong with your object calling Dispose. Mainly for reasons stated above.
+
+Throw ObjectDisposedException if a caller tries to use a released resource. You may be in a situation where you've disposed 
+of your object because you no longer need the unmanaged resource, but you still need to have the object hanging around. 
+If this is the case, any methods that would normally access the resource should throw an ObjectDisposedException, 
+while other (possibly useful) methods should not.
+
+
+Don't call Dispose from one thread, while still using the object on another. Try to make the thread that created the object 
+be the one that disposes of it. This is more general good multithreaded programming advice, then Dispose specific.
+
+Whenever possible, follow the Dispose Pattern. That link, one more time: 
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/cpgenref/html/cpconfinalizedispose.asp.

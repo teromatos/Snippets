@@ -1,0 +1,10 @@
+Creating a Web Project somewhere other than wwwroot 
+You may not want to store your web projects in the inetpub\wwwroot directory to which Visual Studio .NET defaults.
+Here are the steps to create a project in another directory:
+
+Create a physical directory manually. 
+Map the newly created directory to a virtual directory. 
+When you create the project using Visual Studio .NET, the wizard asks you to type the path of the virtual 
+directory on your machine (the default is http://www.localhost/WebApplication1). To rename the application 
+and to have the application source files stored in the new virtual directory, simply 
+type http://www.localhost/<MyVirtualDirectory> into the project's Location box.

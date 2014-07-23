@@ -1,0 +1,17 @@
+Get a subset of a dataset - as a dataset
+
+Okay so I was asked this question this morning by a co-worker.
+
+"I have a dataset with two (or more) tables, and based upon a certain parent child relationship, I'd like to extract a subset of the dataset - as a dataset !! How?"
+
+So the answer is a bit hacky, but funny it works.
+
+1. You have the parent row, right? Change one of the columns in it, to any value - but remember the last value.
+
+2. Run GetChanges to extract a dataset. The extracted dataset will have child rows in it to satisfy the relationship.
+
+3. Revert the value from #1, and run AcceptChanges.
+
+4. The dataset extracted in step #2 is what you need.
+
+... Yup it's a bit hacky :-). BTW, I must add, the performance of GetChanges drops exponentially as the complexity in the dataset increases, so use this techique, but don't abuse it.

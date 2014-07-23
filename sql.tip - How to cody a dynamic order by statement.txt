@@ -1,0 +1,487 @@
+URL=http://groups.google.com/group/microsoft.public.sqlserver.programming/msg/45c3357b7ae33b3a?
+
+Q. How can I code a dynamic varying ORDER BY statement in SQL Server? 
+A. First let's illustrate the concept ... 
+
+
+Using the "pubs" database that ships with SQL Server, let's say that we want to 
+create a stored procedure that will allow the user to select the entire 
+"authors" table sorted by "au_id", the author name, or ZIP code. To make it a 
+bit more interesting, let's also support the option of sorting the author's 
+name either first name first, or last name first. 
+
+
+So, in essence, we want to program a stored procedure that via, the value of a 
+single input parameter, will enable any of the following four result sets to be 
+generated. In short, we want to be able to execute... 
+
+
+   EXEC spAuthors 1 
+       or 
+   EXEC spAuthors 2 
+       or 
+   EXEC spAuthors 3 
+       or 
+   EXEC spAuthors 4 
+
+
+and get ... 
+
+
+Result set #1 - sorted by author identification code ("au_id"): 
+The code we will want to be executed is: 
+   SELECT au_id, 
+   au_fname, 
+   au_lname 
+   FROM authors 
+   ORDER BY au_id 
+
+
+and this will create the following output: 
+
+
+au_id       au_fname    au_lname 
+----------- --------    -------- 
+172-32-1176 Johnson     White 
+213-46-8915 Marjorie    Green 
+238-95-7766 Cheryl      Carson 
+
+
+       . . . 
+
+
+893-72-1158 Heather     McBadden 
+899-46-2035 Anne        Ringer 
+998-72-3567 Albert      Ringer 
+
+
+Result set #2 - sorted by author's name, first name first: 
+The code should be: 
+   SELECT au_id, 
+   au_fname, 
+   au_lname 
+   FROM authors 
+   ORDER BY au_fname, au_lname 
+
+
+which will produce: 
+
+
+au_id       au_fname    au_lname 
+----------- --------    -------- 
+409-56-7008 Abraham     Bennet 
+672-71-3249 Akiko       Yokomoto 
+998-72-3567 Albert      Ringer 
+
+
+. . . 
+
+
+846-92-7186 Sheryl      Hunter 
+724-80-9391 Stearns     MacFeather 
+807-91-6654 Sylvia      Panteley 
+
+
+Result set #3 - sorted by author's name, last name first: 
+The code will be: 
+   SELECT au_id, 
+ au_fname, 
+ au_lname 
+   FROM authors 
+   ORDER BY au_lname, au_fname 
+
+
+This code generates: 
+
+
+au_id       au_fname    au_lname 
+----------- --------    -------- 
+409-56-7008 Abraham     Bennet 
+648-92-1872 Reginald    Blotchet-Halls 
+238-95-7766 Cheryl      Carson 
+
+
+. . . 
+
+
+724-08-9931 Dirk        Stringer 
+172-32-1176 Johnson     White 
+672-71-3249 Akiko       Yokomoto 
+
+
+And finally, result set #4 - sorted by ZIP code: 
+The code will be: 
+   SELECT au_id, 
+ au_fname, 
+ au_lname 
+   FROM authors 
+   ORDER BY zip 
+
+
+With a result set of: 
+
+
+au_id       au_fname    au_lname 
+----------- --------    -------- 
+807-91-6654 Sylvia      Panteley 
+527-72-3246 Morningstar Greene 
+722-51-5454 Michel      DeFrance 
+
+
+. . . 
+
+
+472-27-2349 Burt        Gringlesby 
+893-72-1158 Heather     McBadden 
+648-92-1872 Reginald    Blotchet-Halls 
+
+
+Okay, now that we have a firm idea of what we're looking for, let's see how we 
+can go about creating a stored procedure with the flexibility we want. 
+
+
+Our coding options include: 
+
+
+I. Using IF ... THEN ... ELSE to execute one of four pre-programmed queries, 
+II.    Constructing the SQL statements dynamically, and using either the 
+EXECUTE() function or sp_ExecuteSQL system stored procedure to execute it, 
+III.   Using a CASE statement to choose the sequencing, 
+IV.    Using ANSI SQL-92 standard code suggested by reknowned SQL Guru Joe 
+Celko, and 
+V. Using ANSI SQL-99 (SQL-3) code originated by the very gifted Richard Romley. 
+
+
+Option I is what probably first comes to mind to most individuals. The stored 
+procedure would probably look something like: 
+
+
+   USE pubs 
+   GO 
+
+
+   CREATE PROCEDURE dbo.spAuthors 
+       @OrdSeq tinyint 
+   AS 
+
+
+   If @OrdSeq = 1 
+      Begin 
+SELECT au_id, 
+ au_fname, 
+ au_lname 
+   FROM authors 
+       ORDER BY au_id 
+      End 
+
+
+   Else If @OrdSeq = 2 
+      Begin 
+       SELECT au_id, 
+ au_fname, 
+    au_lname 
+       FROM authors 
+       ORDER BY au_fname, au_lname 
+      End 
+
+
+   Else If @OrdSeq = 3 
+      Begin 
+       SELECT au_id, 
+ au_fname, 
+    au_lname 
+       FROM authors 
+       ORDER BY au_lname, au_fname 
+      End 
+
+
+   Else If @OrdSeq = 4 
+      Begin 
+       SELECT au_id, 
+ au_fname, 
+    au_lname 
+       FROM authors 
+       ORDER BY zip 
+      End 
+
+
+GO 
+
+
+Each option has its advantages and disadvantages, so let's begin by critiquing 
+this one. 
+
+
+The advantages include: 
+a) the code is straightforward, and easy to understand, and 
+b) the SQL Server query optimizer is able to create an optimized query plan for 
+each SELECT query, thus ensuring maximal performance. 
+
+
+The primary disadvantage is that there are four separate SELECT queries that 
+have to be maintained should the reporting requirements change. 
+
+
+Option II is an alternative that will also be frequently suggested, 
+particularly by those with experience with using dynamic queries in SQL Server. 
+
+
+   USE pubs 
+   GO 
+
+
+   CREATE PROCEDURE dbo.spAuthors 
+       @OrdSeq tinyint 
+
+
+   AS 
+   DECLARE @SQLstmt varchar (255) 
+
+
+   SELECT @SQLstmt = 'SELECT au_id, ' 
+   SELECT @SQLstmt = @SQLstmt + 'au_fname, ' 
+   SELECT @SQLstmt = @SQLstmt + 'au_lname ' 
+   SELECT @SQLstmt = @SQLstmt + 'FROM authors ' 
+
+
+SELECT @SQLstmt = @SQLstmt + 
+CASE @OrdSeq 
+      WHEN 1 THEN 'ORDER BY au_id' 
+      WHEN 2 THEN 'ORDER BY au_fname, au_lname' 
+      WHEN 3 THEN 'ORDER BY au_lname, au_fname' 
+      WHEN 4 THEN 'ORDER BY zip' 
+   END 
+
+
+EXEC (@SQLstmt) 
+   GO 
+
+
+Note that in SQL Server 7.0, you can use the system stored procedure 
+sp_ExecuteSQL in place of the EXEC() function. Please refer to the SQL Server 
+Books Online for the advantages of sp_ExecuteSQL over the EXEC() function. 
+
+
+While this is a perfectly good option, it does have two significant 
+disadvantages. Perhaps the more important of the two is, that the user of the 
+stored procedure must have appropriate permissions on any database objects 
+referred to inside EXEC() or sp_ExecuteSQL, in addition to an EXECUTE privilege 
+on the stored procedure itself. 
+
+
+Also, another possible disadvantage of this coding is that the SELECT 
+statement, when placed inside the EXEC() function is not cached. Thus every 
+invocation of the spAuthor stored procedure, when coded with a call to the 
+EXEC() function, will result in SQL Server reparsing the SELECT code, and 
+generating a query plan anew. This is probably not a concern in most production 
+environments, but it might be of importance in a high-performance OLTP shop. 
+(Note that sp_ExecuteSQL will cache the query plans.) 
+
+
+Option III has garnered some support on the Microsoft SQL Server newsgroups 
+since it was first offered, although I believe that in practice it is perhaps 
+the least flexibility of the 5 options being presented here. Nevertheless, it 
+does lead us away from the EXEC() function and/or sp_ExecuteSQL. 
+
+
+   USE pubs 
+   GO 
+
+
+   CREATE PROCEDURE dbo.spAuthors 
+       @OrdSeq tinyint 
+
+
+   AS 
+SELECT au_id, 
+ au_fname, 
+ au_lname 
+FROM authors 
+ORDER BY CASE @OrdSeq 
+      WHEN 1 THEN au_id 
+      WHEN 2 THEN au_fname + ' ' + au_lname 
+      WHEN 3 THEN au_lname + ' ' + au_fname 
+      WHEN 4 THEN zip 
+      ELSE NULL 
+   END 
+
+
+   GO 
+
+
+It is easy to see why this is a very popular solution. At first glance, it 
+seems to be the ideal solution. However it does suffer from one very serious 
+flaw. The CASE construction evaluates to value of a specific data type. In this 
+case, all four columns ... au_id, au_fname, au_lname and zip ... are character 
+strings, and SQL Server will, when parsing the statement, look at the 
+expressions after the THEN clause and construct a data type that can hold, 
+without lose of precision, any of the individual expressions. In fact, the data 
+type returned by the CASE construction in the above code will be varchar (61). 
+
+
+However, this technique just won't stand up to the demands of sequencing by 
+columns of significantly different data types. 
+
+
+To see how fragile the code actually is, add before the WHEN 1 clause, the 
+following: 
+
+
+WHEN 0 THEN 6.44 
+
+
+and use the following to call the stored procedure ... 
+
+
+       EXEC dbo.spAuthors 1 
+
+
+The technique offered in Option IV was first posted by well-known SQL Guru Joe 
+Celko in response to the technique in Option III. Joe participated in the 
+creation of the ANSI SQL-92 standard, and thus is a strong supporter of ANSI 
+SQL-92 compliant code. Joe frequently makes the point that code written to the 
+SQL-92 standard is portable to any database that supports the standard. 
+
+
+   USE pubs 
+   GO 
+
+
+   CREATE PROCEDURE dbo.spAuthors 
+       @OrdSeq tinyint 
+   AS 
+
+
+SELECT au_id, 
+ au_fname, 
+ au_lname, 
+ CASE @OrdSeq 
+   WHEN 1 THEN au_id 
+   WHEN 2 THEN au_fname + ' ' + au_lname 
+   WHEN 3 THEN au_lname + ' ' + au_fname 
+   WHEN 4 THEN zip 
+   ELSE NULL 
+ END  AS OrdSeq 
+FROM authors 
+   ORDER BY OrdSeq 
+
+
+GO 
+
+
+Note that this code does require an additional column (OrdSeq) in the result 
+set so that the ORDER BY clause has something to "work" on. When Joe Celko 
+posted the technique, there was criticism concerning the additional column. I'd 
+offer as a thought that stored procedures should be invoked not by end-users, 
+but by applications. The application can just ignore the "extraneous" column. 
+Nevertheless, additional bytes are being pushed across a network, and that, 
+thus, can be a performance consideration. It can also be argued that we have 
+changed the definition of the problem to accommodate this solution. 
+Nevertheless, I agree with Joe Celko, that, if portability of code is 
+important, this solution is definitely worth considering. 
+
+
+The careful reader might notice that the columns au_id, au_fname, au_lname and 
+zip are all character strings, and might therefore conclude that the technique 
+works only when with columns of similar data types. As Joe Celko pointed out 
+however, the ANSI SQL-92 standard also supports the CAST function to transform 
+one data type into another. Since all of the common data types are ultimately 
+human readable, they can be converted into an alphanumeric format, and thus 
+columns of the various numeric data types can also be used along with character 
+string data types. (The CAST function was introduced into SQL Server beginning 
+with version 7.0. A SQL Server 6.5 solution would have to use the well-known 
+CONVERT function.) 
+
+
+The authors table in pubs does not contain a column with a strictly numeric 
+data type, so it is a bit difficult to illustrate. Let us assume however that 
+the "zip" column in authors is actually defined as an integer data type rather 
+than as char(5). In that case, the SELECT could be programmed ... 
+
+
+SELECT au_id, 
+ au_fname, 
+ au_lname, 
+ CASE @OrdSeq 
+   WHEN 1 THEN au_id 
+   WHEN 2 THEN au_fname + ' ' + au_lname 
+   WHEN 3 THEN au_lname + ' ' + au_fname 
+   WHEN 4 THEN RIGHT ('00000' + CAST (zip as char(5)), 5) 
+   ELSE NULL 
+ END  AS OrderingSequence 
+FROM authors 
+   ORDER BY OrderingSequence 
+
+
+In order for the sorting to work properly, we do have to be aware of, and take 
+into account, the format of the output from the CAST function. In SQL Server, 
+you can experiment and see for yourself that integer values cast to character 
+format will result in left-aligned output. This will sort incorrectly, so we 
+have to force a right-alignment. Because the ANSI SQL-92 standard is weak on 
+string manipulation functions, we are forced to rely upon the SQL 
+Server-specific RIGHT function to achieve this, thus breaking the portability 
+of the code. 
+
+
+The last piece of code, Option V, was originally posted by the very gifted 
+Richard Romley. It is not ANSI SQL?92 compliant, but just might be with the 
+SQL-99 (aka SQL-3) standard. It is my personal favorite. 
+
+
+   USE pubs 
+   GO 
+
+
+   CREATE PROCEDURE dbo.spAuthors 
+       @OrdSeq tinyint 
+
+
+   AS 
+SELECT au_id, 
+ au_fname, 
+ au_lname 
+FROM authors 
+ORDER BY 
+CASE @OrdSeq WHEN 1 THEN au_id ELSE NULL END, 
+CASE @OrdSeq WHEN 2 THEN au_fname + ' ' + au_lname ELSE NULL END, 
+CASE @OrdSeq WHEN 3 THEN au_lname + ' ' + au_fname ELSE NULL END, 
+CASE @OrdSeq WHEN 4 THEN zip ELSE NULL END 
+
+
+   GO 
+
+
+There are many similarities between this code and the code presented in options 
+III and IV. However, Richard Romley has avoided the problems inherent with the 
+fact that CASE can only return a value of one specific data type by breaking 
+the ORDER BY into four separate CASE expressions. Using this construction, SQL 
+Server can return an appropriate data type for each CASE expression, without 
+ever getting tangled up trying to transform data types. 
+
+
+By the way, the reason that this solution is not SQL-92 compliant is because 
+the SQL-92 standard only permits ORDER BYs using a column, and not an 
+expression. SQL Server has long supported ORDER BYs using an expression, and 
+the SQL-99 appears to be ready to accept that extension. 
+
+
+=== 
+
+
+v2.01 2000.03.24 
+Applies to SQL Server versions  : 6.5, 7.0, 2000 
+FAQ Categories                  : Application Design and Programming 
+Related FAQ articles            : exec 
+Related Microsoft Kb articles   : n/a 
+Other related information       : n/a 
+Authors                         : BPMargolin, Neil Pike 
+
+
+ Neil Pike MVP/MCSE.  Protech Computing Ltd 
+ (Please reply only to newsgroups) 
+ SQL FAQ (428 entries) see 
+ forumsb.compuserve.com/gvforums/UK/default.asp?SRV=MSDevApps (sqlfaq.zip - L7 
+- SQL Public) 
+ or www.ntfaq.com/sql.html 
+ or www.sql-server.co.uk 
+ or www.mssqlserver.com/faq 

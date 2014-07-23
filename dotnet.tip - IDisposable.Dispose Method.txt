@@ -1,0 +1,306 @@
+.NET Framework Class Library 	 
+IDisposable.Dispose Method
+
+Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+
+[Visual Basic]
+Sub Dispose()
+[C#]
+void Dispose();
+[C++]
+void Dispose();
+[JScript]
+function Dispose();
+
+Remarks
+
+Use this method to close or release unmanaged resources such as files, streams, and handles held by an instance of the class that implements this interface. This method is, by convention, used for all tasks associated with freeing resources held by an object, or preparing an object for reuse.
+
+When implementing this method, objects must seek to ensure that all held resources are freed by propagating the call through the containment hierarchy. For example, if an object A allocates an object B, and object B allocates an object C, then A's Dispose implementation must call Dispose on B, which must in turn call Dispose on C. Objects must also call the Dispose method of their base class if the base class implements IDisposable.
+
+If an object's Dispose method is called more than once, the object must ignore all calls after the first one. The object must not throw an exception if its Dispose method is called multiple times. Dispose can throw an exception if an error occurs because a resource has already been freed and Dispose had not been called previously.
+
+A resource type might use a particular convention to denote an allocated state versus a freed state. An example of this is stream classes, which are traditionally thought of as open or closed. Classes that have such conventions might choose to implement a public method with a customized name, such as Close, which calls the Dispose method.
+
+Because the Dispose method must be called explicitly, objects that implement IDisposable must also implement a finalizer to handle freeing resources when Dispose is not called. By default, the garbage collector will automatically call an object's finalizer prior to reclaiming its memory. However, once the Dispose method has been called, it is typically unnecessary for the garbage collector to call the disposed object's finalizer. To prevent automatic finalization, Dispose implementations can call the GC.SuppressFinalize method.
+
+For more information on implementing finalizers, see the GC class and the Object.Finalize method.
+Example
+
+[Visual Basic] 
+Imports System
+Imports System.ComponentModel
+
+' The following example demonstrates how to create
+' a resource class that implements the IDisposable interface
+' and the IDisposable.Dispose method.
+Public Class DisposeExample
+
+   ' A class that implements IDisposable.
+   ' By implementing IDisposable, you are announcing that 
+   ' instances of this type allocate scarce resources.
+   Public Class MyResource
+      Implements IDisposable
+      ' Pointer to an external unmanaged resource.
+      Private handle As IntPtr
+      ' Other managed resource this class uses.
+      Private component As component
+      ' Track whether Dispose has been called.
+      Private disposed As Boolean = False
+
+      ' The class constructor.
+      Public Sub New(ByVal handle As IntPtr)
+         Me.handle = handle
+      End Sub
+
+      ' Implement IDisposable.
+      ' Do not make this method virtual.
+      ' A derived class should not be able to override this method.
+      Public Overloads Sub Dispose() Implements IDisposable.Dispose
+         Dispose(True)
+         ' This object will be cleaned up by the Dispose method.
+         ' Therefore, you should call GC.SupressFinalize to
+         ' take this object off the finalization queue 
+         ' and prevent finalization code for this object
+         ' from executing a second time.
+         GC.SuppressFinalize(Me)
+      End Sub
+
+      ' Dispose(bool disposing) executes in two distinct scenarios.
+      ' If disposing equals true, the method has been called directly
+      ' or indirectly by a user's code. Managed and unmanaged resources
+      ' can be disposed.
+      ' If disposing equals false, the method has been called by the 
+      ' runtime from inside the finalizer and you should not reference 
+      ' other objects. Only unmanaged resources can be disposed.
+      Private Overloads Sub Dispose(ByVal disposing As Boolean)
+         ' Check to see if Dispose has already been called.
+         If Not Me.disposed Then
+            ' If disposing equals true, dispose all managed 
+            ' and unmanaged resources.
+            If disposing Then
+               ' Dispose managed resources.
+               component.Dispose()
+            End If
+
+            ' Call the appropriate methods to clean up 
+            ' unmanaged resources here.
+            ' If disposing is false, 
+            ' only the following code is executed.
+            CloseHandle(handle)
+            handle = IntPtr.Zero
+         End If
+         disposed = True
+      End Sub
+
+      ' Use interop to call the method necessary  
+      ' to clean up the unmanaged resource.
+      <System.Runtime.InteropServices.DllImport("Kernel32")> _
+      Private Shared Function CloseHandle(ByVal handle As IntPtr) As [Boolean]
+      End Function
+
+      ' This finalizer will run only if the Dispose method 
+      ' does not get called.
+      ' It gives your base class the opportunity to finalize.
+      ' Do not provide finalize methods in types derived from this class.
+      Protected Overrides Sub Finalize()
+         ' Do not re-create Dispose clean-up code here.
+         ' Calling Dispose(false) is optimal in terms of
+         ' readability and maintainability.
+         Dispose(False)
+         MyBase.Finalize()
+      End Sub
+   End Class
+
+   Public Shared Sub Main()
+      ' Insert code here to create
+      ' and use the MyResource object.
+   End Sub
+
+End Class
+
+[C#] 
+using System;
+using System.ComponentModel;
+
+// The following example demonstrates how to create
+// a resource class that implements the IDisposable interface
+// and the IDisposable.Dispose method.
+
+public class DisposeExample
+{
+    // A base class that implements IDisposable.
+    // By implementing IDisposable, you are announcing that 
+    // instances of this type allocate scarce resources.
+    public class MyResource: IDisposable
+    {
+        // Pointer to an external unmanaged resource.
+        private IntPtr handle;
+        // Other managed resource this class uses.
+        private Component component = new Component();
+        // Track whether Dispose has been called.
+        private bool disposed = false;
+
+        // The class constructor.
+        public MyResource(IntPtr handle)
+        {
+            this.handle = handle;
+        }
+
+        // Implement IDisposable.
+        // Do not make this method virtual.
+        // A derived class should not be able to override this method.
+        public void Dispose()
+        {
+            Dispose(true);
+            // This object will be cleaned up by the Dispose method.
+            // Therefore, you should call GC.SupressFinalize to
+            // take this object off the finalization queue 
+            // and prevent finalization code for this object
+            // from executing a second time.
+            GC.SuppressFinalize(this);
+        }
+
+        // Dispose(bool disposing) executes in two distinct scenarios.
+        // If disposing equals true, the method has been called directly
+        // or indirectly by a user's code. Managed and unmanaged resources
+        // can be disposed.
+        // If disposing equals false, the method has been called by the 
+        // runtime from inside the finalizer and you should not reference 
+        // other objects. Only unmanaged resources can be disposed.
+        private void Dispose(bool disposing)
+        {
+            // Check to see if Dispose has already been called.
+            if(!this.disposed)
+            {
+                // If disposing equals true, dispose all managed 
+                // and unmanaged resources.
+                if(disposing)
+                {
+                // Dispose managed resources.
+                component.Dispose();
+                }
+             
+                // Call the appropriate methods to clean up 
+                // unmanaged resources here.
+                // If disposing is false, 
+                // only the following code is executed.
+                CloseHandle(handle);
+                handle = IntPtr.Zero;            
+            }
+            disposed = true;         
+        }
+
+        // Use interop to call the method necessary  
+        // to clean up the unmanaged resource.
+        [System.Runtime.InteropServices.DllImport("Kernel32")]
+        private extern static Boolean CloseHandle(IntPtr handle);
+
+        // Use C# destructor syntax for finalization code.
+        // This destructor will run only if the Dispose method 
+        // does not get called.
+        // It gives your base class the opportunity to finalize.
+        // Do not provide destructors in types derived from this class.
+        ~MyResource()      
+        {
+            // Do not re-create Dispose clean-up code here.
+            // Calling Dispose(false) is optimal in terms of
+            // readability and maintainability.
+            Dispose(false);
+        }
+    }
+    public static void Main()
+    {
+        // Insert code here to create
+        // and use the MyResource object.   
+    }
+}
+
+[C++] 
+#using <mscorlib.dll>
+#using <System.dll>
+
+using namespace System;
+using namespace System::ComponentModel;
+
+// The following example demonstrates how to create
+// a resource class that implements the IDisposable interface
+// and the IDisposable.Dispose method.
+
+// A base class that implements IDisposable.
+// By implementing IDisposable, you are announcing that
+// instances of this type allocate scarce resources.
+public __gc class MyResource : public IDisposable {
+   // Pointer to an external unmanaged resource.
+   IntPtr  handle;
+   // Other managed resource this class uses.
+   Component*  component;
+   // Track whether Dispose has been called.
+   bool disposed;
+public:
+   // The class constructor.
+   MyResource(IntPtr handle) {
+      this->handle = handle;
+      disposed = false;
+   }
+
+   // Implement IDisposable*
+   // Do not make this method virtual.
+   // A derived class should not be able to  this method.
+   void Dispose() {
+      Dispose(true);
+      // This object will be cleaned up by the Dispose method.
+      // Therefore, you should call GC::SupressFinalize to
+      // take this object off the finalization queue
+      // and prevent finalization code for this object
+      // from executing a second time.
+      GC::SuppressFinalize(this);
+   }
+
+private:
+   // Dispose(bool disposing) executes in two distinct scenarios.
+   // If disposing equals true, the method has been called directly
+   // or indirectly by a user's code. Managed and unmanaged resources
+   // can be disposed.
+   // If disposing equals false, the method has been called by the
+   // runtime from inside the finalizer and you should not reference
+   // other objects. Only unmanaged resources can be disposed.
+   void Dispose(bool disposing) {
+      // Check to see if Dispose has already been called.
+      if (!this->disposed) {
+         // If disposing equals true, dispose all managed
+         // and unmanaged resources.
+         if (disposing) {
+            // Dispose managed resources.
+            component->Dispose();
+         }
+
+         // Call the appropriate methods to clean up
+         // unmanaged resources here.
+         // If disposing is false,
+         // only the following code is executed.
+         CloseHandle(handle);
+         handle = IntPtr::Zero;
+      }
+      disposed = true;
+   }
+
+   // Use interop to call the method necessary
+   // to clean up the unmanaged resource.
+   [System::Runtime::InteropServices::DllImport(S"Kernel32")]
+   static Boolean CloseHandle(IntPtr handle);
+
+   // Use C# destructor syntax for finalization code.
+   // This destructor will run only if the Dispose method
+   // does not get called.
+   // It gives your base class the opportunity to finalize.
+   // Do not provide destructors in types derived from this class.
+   ~MyResource() {
+      // Do not re-create Dispose clean-up code here.
+      // Calling Dispose(false) is optimal in terms of
+      // readability and maintainability.
+      Dispose(false);
+   }
+};
+
+

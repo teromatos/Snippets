@@ -1,0 +1,51 @@
+Get your public IP (i.e. DSL router, etc) in a few C# lines.
+
+Here is an easy way to find your public IP address.   If you or your customers have DSL, chances are the ISP uses DHCP to assign the IP address to the router.  If the ISP assigns fixed IP to you, then naturally you probably don't need this.  However DHCP addresses can and do change.  This can be a problem if you need to know the IP address for remote support (i.e. Remote Assistance, Admin, etc).   Here is simple solution using a few lines of C# code and leveraging the services of network-tools.com to show the public IP.   I just set this up in a batch file on one of my customer's machine to run every day at 11:00pm and send me the output file in an email using SendMail.exe.  Now I will always know what the IP address is when it changes.  This saves a drive as I can Remote Connect to the Terminal Server port on the server(s) for misc support.
+
+using System;
+using System.Web;
+using System.Net;
+using System.IO;
+using System.Text;
+using System.Text.RegularExpressions;
+
+namespace GetExternalIP
+{
+ // Usage:
+ // Just compile and run GetExternalIP.exe at the command prompt to see your public
+ // facing IP.  If your behind a firewall or DSL/router, this will be the public IP
+ // of that device.  You could redirect output to a file and mail to yourself using
+ // sendmail (or other) and a scheduled job.
+ class Class1
+ {
+  [STAThread]
+  static void Main(string[] args)
+  {
+   try
+   {
+    // Use a web page that displays the IP of the request.  In this case,
+    // I use network-tools.com.  This page has been around for years
+    // and is always up when I have tried it.  You could use others or
+    // your own. 
+    WebRequest myRequest = WebRequest.Create("http://network-tools.com");
+
+    // Send request, get response, and parse out the IP address on the page.
+    using(WebResponse res = myRequest.GetResponse())
+    {
+     using(Stream s = res.GetResponseStream())
+     using(StreamReader sr = new StreamReader(s, Encoding.UTF8))
+     {
+      string html = sr.ReadToEnd();
+      Regex regex = new Regex(@"\b\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}\b");
+      string ipString = regex.Match(html).Value;
+      Console.WriteLine("Public IP: "+ipString);
+     }
+    }
+   }
+   catch(Exception ex)
+   {
+    Console.WriteLine("Error getting IP Address:\n"+ex.Message);
+   }
+     }
+ }
+}

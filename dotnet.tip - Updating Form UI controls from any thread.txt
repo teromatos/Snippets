@@ -1,0 +1,21 @@
+Updating Form UI controls from any thread.
+Here is a general pattern you can use to update a Form from any thread.  Surface your method as a public method.  Now any thread can call this method that has a reference to the form object.  Inside that public method, just check the "InvokeRequired" value and call BeginInvoke on a delegate for a worker method or call the method directly if invoke is not required (i.e. called via another method in the same thread).  The delegate is required so we can call the method async using the BeginInvoke method.  Such as:
+  
+private delegate void AppendDelegate(string message);
+ 
+  public void AppendString(string msg)
+  {
+   if ( InvokeRequired )
+    BeginInvoke(new AppendDelegate(AppendStringToRTB), new object[]{msg});
+   else
+    AppendStringToRTB(msg);
+  }
+ 
+  private void AppendStringToRTB(string msg)
+  {
+   if ( msg == null )
+    return;
+   this.rtbOutput.AppendText(msg);
+  }
+ 
+Now you can call AppendString() either from inside the form or from another thread.  This is thread safe as the request is queued into the form's event queue and handled by the form's UI thread.  Also note that because we call BeginInvoke on a UI method, EndInvoke is not required.  This a special exception made for calling delegates on UI controls.

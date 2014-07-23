@@ -1,0 +1,10 @@
+URL=http://msdn.microsoft.com/msdnmag/issues/04/05/DataPoints/default.aspx
+
+A good rule of thumb for sequencing your action queries via SqlCommand objects is as follows: 
+
+Update parent rows
+Insert parent rows
+Update child rows
+Insert child rows
+Delete child rows
+Delete parent rows

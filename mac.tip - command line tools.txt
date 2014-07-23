@@ -1,0 +1,9 @@
+tcpdump
+host
+netstate
+ifconfig
+ping
+stroke
+dig
+traceroute
+finger

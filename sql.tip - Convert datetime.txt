@@ -1,0 +1,11 @@
+The Sql Server 200 Resource Kit says that Date Round and Date Truncate functions are handled by CONVERT, 
+which means if I want to get midnight, I have to do this: SELECT CONVERT(datetime, CONVERT(varchar(10), getdate(), 101)) 
+You tell me that's intuitive? Convert to a character string to truncate the time portion, then back? I found 
+a web site that displays this method, that makes a little more sense SELECT DATEADD(dd, DATEDIFF(dd,0,getdate()), 0), 
+seeing that there's no conversions involved, just calcuations, but it still seems counterintuitive to have to do calculations 
+on a concept so common it should be a native part of the story.
+
+
+select @Today=GetDate()  -->  07/31/2000 20:01:19.957
+
+select @Today=Convert(varchar, GetDate(), 101)  -->  07/31/2000

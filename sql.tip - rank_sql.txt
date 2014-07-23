@@ -1,0 +1,19 @@
+select tt.*
+from 
+(
+	SELECT Client, GroupNo, MemberId, PersonNo, 
+		   address1, address2, city, [state], zip5, zip4, telephone,
+		   notificationdate, addresskey, 
+		   ranknumber,
+		   row_number() over (partition by ranknumber order by ranknumber, notificationdate desc, addresskey desc) as 'ranknumber2'
+	FROM
+	  (
+	  SELECT Client, GroupNo, MemberId, PersonNo, 
+	 		 address1, address2, city, [state], zip5, zip4, telephone,
+	 		 notificationdate, addresskey, 
+	 		 dense_rank() over (order by client, memberid) as 'ranknumber'
+	  FROM   TempPatient AS TempPatient_1
+	  WHERE    PersonNo = '01' -- and (memberid = '111111111' or memberid = '000000777')
+	  ) AS T
+) AS TT
+WHERE RankNumber2 = 1

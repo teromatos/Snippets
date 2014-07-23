@@ -1,0 +1,94 @@
+Determining Build Date the hard way
+
+One of the key diagnostic data points for any .NET assembly is "when was it built"? Until recently, I thought there were only two ways to suss this out:
+
+   1. Check the filesystem date and time
+   2. Derive the build date from the assembly version 
+
+The filesystem method has obvious limitations: 
+
+Function AssemblyLastWriteTime(ByVal a As Reflection.Assembly) As DateTime
+  Try
+    Return File.GetLastWriteTime(a.Location)
+  Catch ex As Exception
+    Return DateTime.MaxValue
+  End Try
+End Function
+
+The version method, however, works quite well-- as long as developers don't deviate too far from the default .NET version string of <Assembly: AssemblyVersion("1.0.*")>
+
+    When specifying a version, you have to at least specify major. If you specify major and minor, you can specify an asterisk (*) for build. This will cause build to be equal to the number of days since January 1, 2000 local time, and for revision to be equal to the number of seconds since midnight local time, divided by 2.
+
+    If you specify major, minor, and build, you can specify an asterisk for revision. This will cause revision to be equal to the number of seconds since midnight local time, divided by 2. 
+
+Function AssemblyBuildDate(ByVal a As Reflection.Assembly, _
+  Optional ByVal forceFileDate As Boolean = False) As DateTime
+
+  Dim v As System.Version = a.GetName.Version
+  Dim dt As DateTime
+
+  If forceFileDate OrElse (v.Build < 730 Or v.Revision = 0) Then
+    dt = AssemblyLastWriteTime(a)
+  Else
+    dt = New DateTime(2000, 1, 1, 0, 0, 0). _
+      AddDays(v.Build). _
+      AddSeconds(v.Revision * 2)
+    If TimeZone.IsDaylightSavingTime(dt, _
+      TimeZone.CurrentTimeZone.GetDaylightChanges(dt.Year)) Then
+      dt = dt.AddHours(1)
+    End If
+    '-- sanity check
+    If dt > DateTime.Now Or dt < New DateTime(2000, 1, 1, 0, 0, 0) Then
+      dt = AssemblyLastWriteTime(a)
+    End If
+  End If
+
+Return dt
+End Function
+
+Be careful when relying on version to predict build date in Visual Studio .NET. For some reason, the IDE does not update the build number every time you build a solution. Visual Studio only increments the build and revision number when the solution is closed and reopened. If you build fifty times throughout the day in the same solution, every single one of your builds will have the same version. Close and reopen that solution, though, and you'll get a new version immediately. Go figure.
+
+Luckily, we don't have to settle for those two options. There's a third way to calculate build date that's much more reliable. Dustin Aleksiuk recently posted a clever blog entry describing how to retrieve the embedded linker timestamp from the IMAGE_FILE_HEADER section of the Portable Executable header:
+
+Function RetrieveLinkerTimestamp(ByVal filePath As String) As DateTime
+  Const PeHeaderOffset As Integer = 60
+  Const LinkerTimestampOffset As Integer = 8
+
+  Dim b(2047) As Byte
+  Dim s As Stream
+  Try
+    s = New FileStream(filePath, FileMode.Open, FileAccess.Read)
+    s.Read(b, 0, 2048)
+  Finally
+    If Not s Is Nothing Then s.Close()
+  End Try
+  
+  Dim i As Integer = BitConverter.ToInt32(b, PeHeaderOffset)
+  
+  Dim SecondsSince1970 As Integer = BitConverter.ToInt32(b, i + LinkerTimestampOffset)
+  Dim dt As New DateTime(1970, 1, 1, 0, 0, 0)
+  dt = dt.AddSeconds(SecondsSince1970)
+  dt = dt.AddHours(TimeZone.CurrentTimeZone.GetUtcOffset(dt).Hours)
+  Return dt
+End Function
+
+When I ran Dustin's code for the first time, I wondered why the dates and minutes were correct, but the hours were consistently off by four. Even I can figure out GMT/UTC issues when they practically slap me in the face. I emailed Dustin to ask him what he thought, and as it turns out, Dustin lives in GMT-- that's the ultimate "it runs on my machine"! Sure does make those pesky mental IIS logfile date conversions easier, too.. ;)
+
+===============================================================================
+
+That whole "number of days" and "number of seconds" thing made me nervous, even without having to open and close the IDE. Even though some people passionately explained to me why it's a good thing, those numbers seem basically random and make it hard to know what version you are in fact looking at. So I (and lots of others) wrote a little VS macro to update the build number every time I do a build, and I update the other three according to the bigness of the change. Then the file version is pretty useful, I think.
+
+Great blog, btw.
+Posted by: Josh at April 15, 2005 05:02 PM
+
+Though, upon considering your post, I realize that my method doesn't tell you anything about when the file was actually built. I bet another macro could be used to take this string and write it as a resource in the executable. Probably not as sexy as Dustin's approach though.
+Posted by: Josh at April 15, 2005 05:04 PM
+
+> So I (and lots of others) wrote a little VS macro to update the build number every time I do a build
+
+Yes, that's certainly logical. But it begs the question: why didn't Microsoft do it this way? Oversight? Or did they just want to ensure the build and revision number are different every time in the absence of any real metadata provided by the developer?
+
+> My method doesn't tell you anything about when the file was actually built.
+
+Right, and build # is kind of a meaningless number anyway. Does anyone remember the build number of the first release of NT 4.0? of XP? The *date* of the build is much more useful information than how many times the developers on the project happened to press the F5 key before it was packaged into a box and shipped..
+Posted by: Jeff Atwood at April 15, 2005 09:49 PM 

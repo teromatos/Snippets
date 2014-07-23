@@ -1,0 +1,23 @@
+ApplicationData       - C:\Documents and Settings\TERO\Application Data
+CommonApplicationData - C:\Documents and Settings\All Users\Application Data
+CommonProgramFiles    - C:\Program Files\Common Files
+Cookies               - C:\Documents and Settings\TERO\Cookies
+Desktop               - C:\Documents and Settings\TERO\Desktop
+DesktopDirectory      - C:\Documents and Settings\TERO\Desktop
+Favorites             - C:\Documents and Settings\TERO\Favorites
+History               - C:\Documents and Settings\TERO\Local Settings\History
+InternetCache         - C:\Documents and Settings\TERO\Local Settings\Temporary Internet Files
+LocalApplicationData  - C:\Documents and Settings\TERO\Local Settings\Application Data
+MyComputer            - 
+MyMusic               - C:\Documents and Settings\TERO\My Documents\My Music
+MyPictures            - C:\Documents and Settings\TERO\My Documents\My Pictures
+Personal              - C:\Documents and Settings\TERO\My Documents
+ProgramFiles          - C:\Program Files
+Programs              - C:\Documents and Settings\TERO\Start Menu\Programs
+Recent                - C:\Documents and Settings\TERO\Recent
+SendTo                - C:\Documents and Settings\TERO\SendTo
+StartMenu             - C:\Documents and Settings\TERO\Start Menu
+Startup               - C:\Documents and Settings\TERO\Start Menu\Programs\Startup
+System                - C:\WINDOWS\System32
+Templates             - C:\Documents and Settings\TERO\Templates
+

@@ -1,0 +1,27 @@
+The ASP.NET event lifecycle is a series of events and methods that are called in a predefined order that give you the flexibility to develop complex pages. The complexity is heightened when you introduce user controls into your pages. Each page and each user control have their own lifecycle and if you want to provide interaction between the two, you must understand the ASP.NET page event lifecycle.
+
+The following information is not meant to be a treatise on the subject, but rather a "working man's" guide to how to use these concepts in your development.
+
+Each control (I say control because we may be talking about a page or a user control) goes through a series of events. The events are itemized below
+
+
+Self Discovery / Initialization
+	Wireup Events (often VS.NET will do this for you) 
+
+Load
+	Data access 
+	Read user input 
+	Validation 
+
+Control Event Methods
+	Do work based on user input and business rules 
+
+PreRender or SaveViewState
+	PreRender method will only fire if the control's visibility is set to true.
+	DataBind (sometimes - only if you need it to happen on each request!) 
+	Apply permissions 
+	Set control visibility 
+
+
+What is the difference between Page_Load and overriding OnLoad?
+	If you need somehting to execute in a deterministic order, user overrides, if you need to add multiple handlers use event hooks

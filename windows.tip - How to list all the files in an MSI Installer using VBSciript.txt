@@ -1,0 +1,25 @@
+How to list all the files in an MSI Installer using VBSciript
+
+Just a quickie today, someone wanted me to give them a list of all the files that were inside an Windows Installer (MSI) and I remembered that MSI's were databases (Access?) so:
+
+Option Explicit
+Const msiOpenDatabaseModeReadOnly = 0
+Dim installer : Set installer = Nothing
+Dim WshShell : Set WshShell = CreateObject("Wscript.Shell")
+Dim szMSI : szMSI = WScript.Arguments.Item(0)
+Dim folder : folder = WshShell.CurrentDirectory
+Set installer = Wscript.CreateObject("WindowsInstaller.Installer") 
+Dim database : Set database = installer.OpenDatabase(szMSI, msiOpenDatabaseModeReadOnly) 
+Dim View, Record
+Set View = database.OpenView("SELECT FileName FROM File") 'could include FileSize, etc
+View.Execute
+Do
+ Set Record = View.Fetch
+ If Record Is Nothing Then Exit Do
+ Wscript.Echo Record.StringData(1)
+Loop
+Set View = Nothing
+Wscript.Quit(0)
+
+You call it like this: cscript WhateverFileName.vbs YourInstallerDatabase.msi
+ 

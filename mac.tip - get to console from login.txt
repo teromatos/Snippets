@@ -1,0 +1,4 @@
+I came across this somewhere (I can’t remember where, think it was while googling for something else), but it’s rather handy.
+
+At the login dialog on Mac OS X, if no one is logged in, you can type ’>console’ to drop out of the GUI environment into a plain text console. Since virtually nothing is loaded at this point it makes a nicer alternative to the single user login for poking around when trouble calls.
+

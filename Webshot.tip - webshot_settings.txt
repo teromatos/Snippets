@@ -1,0 +1,1 @@
+webshotcmd.exe /url http://www.flickr.com/photos/rebba/171966912 /out c:\dload\webshot.jpg /waitdoc 3 /bwidth 820 /bheight 1200 -debug

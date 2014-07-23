@@ -1,0 +1,24 @@
+A delegate is, in its regular sense, just a kind of an object-oriented function pointer.
+YOu will initialized it and pass a function to be called when the delegate is invoked.
+
+// 1 - Define the funciton which will exectuted when the delegate is called.
+public String DoSomething(int myvalue);
+
+
+//2 - Declare the delegate with the same signature as the function above
+//    Note: When declaring the delegate name, end it with the word Delegate
+delegate String DoSomethingDelegate(int myvalue);
+
+//3 - To use a delegate, you must first create an instance of it.
+DoSomethingDelegate del = new DoSomethingDelegate(DoSomething);		// In the same class
+DoSomethingDelegate del = new DoSomethingDelegate(OtherClass.DoSomething);		// In another Class
+
+//4 - Invoke the delegate
+IAsyncResult ar = del.BeginInvoke(42, null, null)
+//... do something different here
+
+
+//5 - To retrieve the function's (1) return values, call the EndInvoke
+//    NOTE: Calling EndInvoke will block the execution until the function
+//          is finished
+String ret = del.EndInvoke(ar)

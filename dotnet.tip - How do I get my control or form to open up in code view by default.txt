@@ -1,0 +1,13 @@
+How do I get my control/form to open up in code view by default?
+Everyone knows the IDE solution: make the code editor the default editor by right clicking on the file in solution explorer, selecting "Open With", pick your favorite editor, then choose "Set As Default".  Unfortunately this applies to all files, which if you've just got the one that refuses to load...
+
+Fortunately there's a little known attribute which you can plonk onto the top of your class definition to control this.
+
+C#
+[System.ComponentModel.DesignerCategory("code")]
+public class Form1 : System.Windows.Forms.Form
+
+VB
+<System.ComponentModel.DesignerCategory("code")> Public Class Form1
+
+This works in Everett, and will work once again in the final release of Whidbey.  

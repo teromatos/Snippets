@@ -1,0 +1,49 @@
+URL=http://www.codinghorror.com/blog/archives/000428.html
+
+Public Sub SearchGoogleForSelectedText()
+    Dim s As String = ActiveWindowSelection().Trim()
+    If s.Length > 0 Then
+        DTE.ItemOperations.Navigate("http://www.google.com/search?q=" & _
+            Web.HttpUtility.UrlEncode(s))
+    End If
+End Sub
+
+Private Function ActiveWindowSelection() As String
+    If DTE.ActiveWindow.ObjectKind = EnvDTE.Constants.vsWindowKindOutput Then
+        Return OutputWindowSelection()
+    End If
+    Return SelectionText(DTE.ActiveWindow.Selection)
+End Function
+
+Private Function OutputWindowSelection() As String
+    Dim w As Window = DTE.Windows.Item(EnvDTE.Constants.vsWindowKindOutput)
+    Dim ow As OutputWindow = w.Object
+    Dim owp As OutputWindowPane = ow.OutputWindowPanes.Item(ow.ActivePane.Name)
+    Return SelectionText(owp.TextDocument.Selection)
+End Function
+
+Private Function SelectionText(ByVal sel As EnvDTE.TextSelection) As String
+    If sel Is Nothing Then
+        Return ""
+    End If
+    If sel.Text.Length = 0 Then
+        SelectWord(sel)
+    End If
+    If sel.Text.Length <= 2 Then
+        Return ""
+    End If
+    Return sel.Text
+End Function
+
+Private Sub SelectWord(ByVal sel As EnvDTE.TextSelection)
+    Dim leftPos As Integer
+    Dim line As Integer
+    Dim pt As EnvDTE.EditPoint = sel.ActivePoint.CreateEditPoint()
+
+    sel.WordLeft(True, 1)
+    line = sel.TextRanges.Item(1).StartPoint.Line
+    leftPos = sel.TextRanges.Item(1).StartPoint.LineCharOffset
+    pt.MoveToLineAndOffset(line, leftPos)
+    sel.MoveToPoint(pt)
+    sel.WordRight(True, 1)
+End Sub

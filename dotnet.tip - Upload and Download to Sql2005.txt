@@ -1,0 +1,159 @@
+URL= http://spaces.msn.com/members/staceyw/Blog/cns!1pnsZpX0fPvDxLKC6rAAhLsQ!404.entry
+
+Upload/Download to Sql2005 
+ 
+With SQL2005 new VarBinary(max) datatype, it will be more common and easier to store and manage large byte[]s in SQL.  Forget about Blobs, you can now think and act in terms of standard byte[]s.  To manage byte[] columns is different then from previous SQL versions.  For example, to append bytes, you now use the new ".Write" function in the UPDATE TSQL statement.  Things like the old TEXTPTR should not be used going forward as it will be removed in a future version.  So here is a class and Console test app doing a upload and download of a large file to a SQL2005 DB.  The downloads are faster because they are streamed.  The upload is done in chunks so there is more overhead, but still pretty fast.  This can be converted to using Stored Procedures and add transactions, etc.  Your table name and columns may be different.  I use GUID, FileName, FileType, and File (varbinary(max)) as my columns in my "File" table. Here is the code:
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Data;
+using System.Data.Sql;
+using System.Data.SqlTypes;
+using Microsoft.SqlServer.Server;
+using System.Data.SqlClient;
+using System.IO;
+using System.Diagnostics;
+
+namespace DBFileLoader
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            using ( SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=WJS;Integrated Security=True") )
+            {
+                conn.Open();
+                Stopwatch sw = new Stopwatch();
+                sw.Start();
+                Guid guid = DBFileLoader.UploadFile(@"c:\temp\bigfile.bin", "bin", conn);
+                TimeSpan ts = sw.Elapsed;
+                sw.Reset();
+                Console.WriteLine("\nFile written to DB GUID: " + guid.ToString());
+                Console.WriteLine("Time to upload: {0}m {1}s {2}ms", ts.Minutes, ts.Seconds, ts.Milliseconds);
+
+                sw.Start();
+                string downPath = @"c:\temp\binfiledown.bin";
+                long size = DBFileLoader.DownloadFile(guid, downPath);
+                ts = sw.Elapsed;
+                Console.WriteLine("\nFile downloaded to " + downPath);
+                Console.WriteLine("File size: " + size);
+                Console.WriteLine("Time to download: {0}m {1}s {2}ms", ts.Minutes, ts.Seconds, ts.Milliseconds);
+            }
+        }
+    }
+}
+
+using System;
+using System.Data;
+using System.Data.Sql;
+using System.Data.SqlTypes;
+using Microsoft.SqlServer.Server;
+using System.Data.SqlClient;
+using System.IO;
+
+namespace DBFileLoader
+{
+    public static class DBFileLoader
+    {
+        /// <summary>
+        /// Uploads a file to the DB.
+        /// </summary>
+        /// <param name="path">The local path of the file to upload.</param>
+        /// <param name="fileType">The file type.  This can be any string and is user defined.</param>
+        /// <param name="conn">An open connection object to the DB.</param>
+        /// <returns>The unique Guid of the file in the DB.</returns>
+        public static Guid UploadFile(string path, string fileType, SqlConnection conn)
+        {
+            const int CHUNK_SIZE = 8040 * 4; //~32KB.
+
+            // Upload in multiples of 8040 for sql perf reasons. (i.e. 8040, 16080, 24120, 32160, 40200, 48240, 56280...)
+            // Create file in DB first.
+            string fileName = Path.GetFileName(path);
+            Guid guid = CreateFile(fileName, fileType, conn);
+
+            // Upload file in max blocks of CHUNK_SIZE to DB using new guid returned above as file key.
+            SqlCommand cmd = conn.CreateCommand();
+            string cmdString =
+@"UPDATE Files
+SET [File] .Write(@bytes, null, 0)
+OUTPUT DataLength(INSERTED.[File])
+WHERE [Guid] = @guid";
+
+            cmd.CommandText = cmdString;
+            cmd.Parameters.AddWithValue("@guid", guid);
+            cmd.Parameters.AddWithValue("@bytes", null);
+            long dbFileSize = 0;
+            using ( FileStream fs = new FileStream(path, FileMode.Open, FileAccess.Read) )
+            using ( BinaryReader br = new BinaryReader(fs) )
+            {
+                byte[] buffer = br.ReadBytes(CHUNK_SIZE);
+                while ( buffer.Length > 0 )
+                {
+                    cmd.Parameters["@bytes"].Value = buffer;
+                    dbFileSize = (long)cmd.ExecuteScalar();
+                    buffer = br.ReadBytes(CHUNK_SIZE);
+                }
+            }
+            return guid;
+        }
+
+        /// <summary>
+        /// Downloads a file from the DB.
+        /// </summary>
+        /// <param name="guid">The unique guid of the file in the DB.</param>
+        /// <param name="localPath">The local path to store the file.</param>
+        /// <returns>The file size created in bytes.</returns>
+        public static long DownloadFile(Guid guid, string localPath)
+        {
+            const int CHUNK_SIZE = 1024 * 8; //8K write buffer.
+            using ( SqlConnection conn = new SqlConnection("Data Source=.;Initial Catalog=WJS;Integrated Security=True") )
+            {
+                conn.Open();
+                SqlCommand cmd = conn.CreateCommand();
+                cmd.CommandText = "select [File] from Files where Guid = '" + guid + "'";
+
+                // Stream the file down using CommandBehavior.SequentialAccess.
+                using ( SqlDataReader reader = cmd.ExecuteReader(CommandBehavior.SequentialAccess) )
+                {
+                    reader.Read();
+                    // Get the file size by passing null as the byte array parameter.
+                    long fileSize = reader.GetBytes(0, 0, null, 0, 0);
+                    using ( FileStream fs = System.IO.File.Create(localPath) )
+                    {
+                        long bytesRead = 0;
+                        byte[] buffer = new byte[CHUNK_SIZE];
+                        int read = 0;
+                        while ( bytesRead < fileSize )
+                        {
+                            read = (int)reader.GetBytes(0, bytesRead, buffer, 0, buffer.Length);
+                            fs.Write(buffer, 0, read);
+                            bytesRead += read;
+                        }
+                        return bytesRead;
+                    }
+                }
+            }
+        }
+
+        private static Guid CreateFile(string fileName, string fileType, SqlConnection conn)
+        {
+            string cmdString =
+@"declare @guid uniqueidentifier
+set @Guid = NEWID();
+
+INSERT INTO Files ([Guid], [FileName], FileType, [File])
+VALUES (@guid, @fileName, @fileType, 0x)
+select @guid";
+
+            SqlCommand cmd = new SqlCommand(cmdString, conn);
+            cmd.Parameters.AddWithValue("@fileName", fileName);
+            cmd.Parameters.AddWithValue("@fileType", fileType);
+
+            Guid guid = (Guid)cmd.ExecuteScalar();
+            return guid;
+        }
+    }
+}
+
+ 

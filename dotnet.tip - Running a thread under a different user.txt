@@ -1,0 +1,81 @@
+URL=http://channel9.msdn.com/ShowPost.aspx?PostID=70276#70276
+
+Running a thread under a different user
+
+String lpszDomain,
+                     String lpszPassword,
+int dwLogonType,
+int dwLogonProvider,
+ref IntPtr phToken);
+     
+   //CloseHandle parameters. When you are finished,
+//free the memory allocated for the handle.
+[DllImport("kernel32.dll", CharSet=System.Runtime.InteropServices.CharSet.Auto)]
+   public static extern bool CloseHandle(IntPtr handle);
+
+   public static void Main(string[] args)
+   {           
+      IntPtr tokenHandle = IntPtr.Zero;
+
+      try
+      {
+         const int LOGON32_PROVIDER_DEFAULT = 0;
+         const int LOGON32_LOGON_NETWORK = 3;
+
+         //Call LogonUser to obtain a
+//handle to an access token
+         bool returnValue = LogonUser("LogonUser", "jbb2",
+                      "Basic2000",
+                     LOGON32_LOGON_NETWORK,
+LOGON32_PROVIDER_DEFAULT,
+                     ref tokenHandle);
+              
+         if(false == returnValue)
+         {
+            Console.Write("LogonUser failed...");
+            return;
+         }
+
+         //Check the identity
+         Console.WriteLine("Before impersonation: " +
+                  WindowsIdentity.GetCurrent().Name);
+        
+         //Create a WindowsIdentity from the impersonation
+         //token, then impersonate the user.
+         WindowsIdentity newId;
+         newId = new WindowsIdentity(tokenHandle);
+         WindowsPrincipal newPrincipal;
+         newPrincipal = new WindowsPrincipal(newId);
+         WindowsImpersonationContext impersonatedUser;
+         impersonatedUser = newId.Impersonate();
+
+         //Check the identity
+         Console.WriteLine("After impersonation: " +
+WindowsIdentity.GetCurrent().Name);
+
+         //Test to see if the user is in certain groups
+         WindowsBuiltInRole role;
+         role = WindowsBuiltInRole.Administrator;
+         Console.WriteLine("Is user in Administrator group? "
+                  + newPrincipal.IsInRole(role));
+           
+         //Stop impersonating
+         impersonatedUser.Undo();
+
+         //Check the identity
+         Console.WriteLine("After Undo: " +            
+         WindowsIdentity.GetCurrent().Name);
+        
+         //Free the token
+      CloseHandle(tokenHandle);
+      }
+
+      catch (Exception ex)
+      {
+         Console.WriteLine(ex.Message);
+      }
+   }  
+}
+}
+
+Also, for a whole lot more information on .NET, be sure to check out the Dr. GUI .NET column on the MSDN Library. The connection is located at the bottom of this column under Can't get enough of Dr. GUI? The good doctor has been writing this column since November 2000, and you should find some good tips on using this new and exciting framework.

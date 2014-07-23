@@ -1,0 +1,43 @@
+Retrieving client statistics in ADO.NET 2.0
+Now this is quite interesting. SqlClient in ADO.NET 2.0 includes a neat new way of retrieving client statistics. Check this code out --
+
+--------------------------------------------------------------------------------
+SqlConnection testConnection = new SqlConnection(CONN_STR);
+testConnection.StatisticsEnabled = true;
+SqlCommand cmd = testConnection.CreateCommand();
+cmd.CommandText = "Select * from TestDemo";
+testConnection.Open();
+SqlDataReader sqlDr = cmd.ExecuteReader();
+Hashtable stats = (Hashtable)testConnection.RetrieveStatistics();
+foreach (DictionaryEntry en in stats)
+{
+  Console.WriteLine(en.Key + " : " + en.Value) ;
+}
+testConnection.Close();
+testConnection.Dispose();
+
+--------------------------------------------------------------------------------
+
+When I do run the above, I get output that looks somewhat like this --
+
+NetworkServerTime  :  0
+BytesReceived  :  8000
+UnpreparedExecs  :  1
+SumResultSets  :  0
+SelectCount  :  0
+PreparedExecs  :  0
+ConnectionTime  :  0
+ExecutionTime  :  70
+Prepares  :  0
+BuffersSent  :  1
+SelectRows  :  0
+ServerRoundtrips  :  1
+CursorOpens  :  0
+Transactions  :  0
+BytesSent  :  74
+BuffersReceived  :  1
+IduRows  :  0
+IduCount  :  0
+
+Holy Moly !!! :-)
+Point to note though, this does cause an overhead, so I say make this a configurable setting but leave it turned off by default. 

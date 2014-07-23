@@ -1,0 +1,8 @@
+How do you find out where the .NET Framework SDK is installed? 
+
+Aaron Stebner to the rescue. The values beneath 
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\VisualStudio\SxS\FRAMEWORKSDK 
+tell you where the SDK is installed. If there's a 7.1 value, you 
+know where the .NET 1.1 Framework SDK is installed. If there's an 
+8.0 value, you know where the .NET 2.0 Framework SDK is installed. 
+The value on the other side of the version number is the location.

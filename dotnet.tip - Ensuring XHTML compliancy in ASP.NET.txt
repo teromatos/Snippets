@@ -1,0 +1,55 @@
+Ensuring XHTML compliancy in ASP.NET
+Out of the box, ASP.NET generated HTML doesn't validate too well against XHTML 1.0. When one uses <form runat="server"/>, the generated HTML will add a name attribute to the form tag. This is invalid XHTML. The hidden box named __VIEWSTATE needs to be enclosed in a <div> tag. And client-side script blocks should be using type="text/javascript" rather than language="javascript". I have built a class (code below) that uses regular expressions to clean up the neccessary HTML to be XHTML compliant.
+
+My contact page is now compliant with XHTML. I did this by overriding the Render() and importing the Syste.Text and System.IO namespaces for the page:
+
+  <script runat="server">
+  protected override void Render(HtmlTextWriter writer) 
+  {
+   StringBuilder stringBuilder = new StringBuilder();
+   StringWriter stringWriter = new StringWriter(stringBuilder);
+   HtmlTextWriter htmlWriter = new HtmlTextWriter(stringWriter);
+   base.Render(htmlWriter);
+   string html = stringBuilder.ToString();
+   writer.Write(Components.XHTML.CleanStream(html));
+  }
+  </script>
+And here is the code for the class. You'll need to compile it.
+
+using System.Text.RegularExpressions;
+namespace Components
+{
+ public sealed class XHTML
+ {
+  public static string CleanStream(string s)
+  {
+   Regex r;
+   r = new Regex("<form (name=\"([^\"]+)\")",RegexOptions.IgnoreCase);
+   s = r.Replace(s,new MatchEvaluator(FormMatch));
+   r = new Regex("script\\s+(language=\"javascript\")",RegexOptions.IgnoreCase);
+   s = r.Replace(s,new MatchEvaluator(ScriptAttributeMatch));
+   r = new Regex("<input.*?(language=\"javascript\")",RegexOptions.IgnoreCase);
+   s = r.Replace(s,new MatchEvaluator(InputScriptAttributeMatch));
+   r = new Regex("<input\\s+type=\"hidden\"\\s+name=\"__VIEWSTATE\"\\s+value=\"([^\"]+)\"\\s+/>"
+    ,RegexOptions.IgnoreCase);
+   s = r.Replace(s,new MatchEvaluator(ViewstateMatch));
+     return s;
+  }
+  private static string ViewstateMatch(Match m)
+  {
+   return "<div>" + m.ToString() + "</div>";
+  }
+  private static string ScriptAttributeMatch(Match m)
+  {
+   return m.ToString().Replace(m.Groups[1].ToString(),"type=\"text/javascript\"");
+  }
+  private static string InputScriptAttributeMatch(Match m)
+  {
+   return m.ToString().Replace(m.Groups[1].ToString(),"");
+  }
+  private static string FormMatch(Match m)
+  {
+   return m.ToString().Replace(m.Groups[1].ToString(),"");
+  }
+ }
+}

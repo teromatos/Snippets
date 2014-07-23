@@ -1,0 +1,12 @@
+using System; 
+
+class x 
+{ 
+static void Main() 
+{ 
+foreach (char c in "Matthew") 
+{ 
+Console.Write("{0} ",Convert.ToString(c,2).PadLeft(8,'0')); 
+} 
+} 
+} 

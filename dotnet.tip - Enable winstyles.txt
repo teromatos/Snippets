@@ -1,0 +1,14 @@
+1- Call Application.EnableVisualStyles() at the top of the Main method of the application. 
+
+Application.EnableVisualStyles();
+Application.DoEvents();
+Application.Run(new MainForm());
+
+
+
+
+2- Set the FlatStyle property of each control to System. 
+
+Certain controls need an extra property to show themes
+GroupBox, Button, CheckBox, RadioButton, etc.
+Set the FlatStyle property to System

@@ -1,0 +1,9 @@
+avoid session - use httpcontext.items, cache, database
+do not use application.xxx
+use cookies/viewstate
+enable viewstate = "true" on a per page basis
+register controls in web.config
+do not use label control, use literal instead
+use repeater instead of datagrid
+use appoffline.htm for updates
+use page.isvalid in button's eventhandler

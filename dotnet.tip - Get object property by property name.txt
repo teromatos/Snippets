@@ -1,0 +1,2 @@
+Employee employee = new Employee("John", "Smith");
+string firstName = employee.GetType().GetProperty("FirstName").GetValue(employee, null);

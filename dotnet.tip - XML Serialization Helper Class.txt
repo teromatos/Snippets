@@ -1,0 +1,98 @@
+public class SerializationHelper
+
+  {
+
+    /// <summary>
+
+    /// Serialize an object into XML
+
+    /// </summary>
+
+    /// <param name="serializableObject">Object that can be serialized</param>
+
+    /// <returns>Serial XML representation</returns>
+
+    public static string XmlSerialize(object serializableObject)
+
+    { 
+
+      XmlSerializer serializer = new XmlSerializer(serializableObject.GetType());
+
+      System.IO.MemoryStream aMemStr = new System.IO.MemoryStream();
+
+      System.Xml.XmlTextWriter writer = new System.Xml.XmlTextWriter(aMemStr, null);
+
+      serializer.Serialize(writer,serializableObject);
+
+      string strXml = System.Text.Encoding.UTF8.GetString(aMemStr.ToArray());
+
+      return strXml;     
+
+    }
+
+ 
+
+    /// <summary>
+
+    /// Restore (Deserialize) an object, given an XML string
+
+    /// </summary>
+
+    /// <param name="xmlString">XML</param>
+
+    /// <param name="serializableObject">Object to restore as</param>
+
+    public static object XmlDeSerialize(string xmlString, object serializableObject)
+
+    {
+
+      XmlSerializer serializer = new XmlSerializer(serializableObject.GetType());     
+
+      System.IO.MemoryStream aStream = new
+
+        System.IO.MemoryStream(System.Text.ASCIIEncoding.ASCII.GetBytes(xmlString));
+
+ 
+
+      return serializer.Deserialize(aStream);
+
+    }
+
+ 
+
+    /// <summary>
+
+    /// Restore (Deserialize) an object, given an XML string
+
+    /// </summary>
+
+    /// <param name="xmlString">XML</param>
+
+    /// <param name="serializableObject">Type of object to restore as</param>
+
+    public static object XmlDeSerialize(string xmlString, Type objectType)
+
+    {
+
+      XmlSerializer serializer = new XmlSerializer(objectType);     
+
+      System.IO.MemoryStream aStream = new
+
+        System.IO.MemoryStream(System.Text.ASCIIEncoding.ASCII.GetBytes(xmlString));
+
+ 
+
+      return serializer.Deserialize(aStream);
+
+    }
+
+  }
+
+//'To Serialize an object:
+//'[AirCode]
+//'SomeObjectType someObject = new SomeObjectType();
+//'String someString = SerializationHelper.XmlSerialize(someObject)
+
+//'To DeSerialize an object
+//'[AirCode]
+//'someObject = (SomeObjectType) SerializationHelper.XmlDeSerialize(someString, typeof(SomeObjectType));

@@ -1,0 +1,3 @@
+I have a SQL Server view defined to be "SELECT * FROM Table WHERE MyCriteria".  I intentionally coded it with "SELECT *" since I wanted it to be all fields no matter what -- just a subset of records.  A new field was added to my table recently -- no problem -- at least that's what I thought anyhow.  But this new field did not show up in my view afterall -- and Enterprise Manager still shows my view as being defined with "SELECT *".  So I dropped the view and recreated it -- that did the trick -- my new field is now in my view where it should be.  What's up with this behavior?
+  
+>> When I change the underlying tables I use the "sp_refreshview" system sproc.

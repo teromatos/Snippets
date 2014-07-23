@@ -1,0 +1,22 @@
+windows xp
+==========
+
+mstsc /v:00.00.00.00 /f -console
+
+
+vista/windows 7
+===============
+
+mstsc /admin
+
+
+
+net use /user:[username] \\servername\share
+
+query session /server:servername
+
+reset session [ID] /server:servername
+
+
+in whs, remote in rds (not whs connector), and open Administrative Tools -> terminal configuration
+go into the sessions tab, change the override user settings->end a disconnected session: 10 minutes.

@@ -1,0 +1,132 @@
+Windows XP Command Line Utilities
+
+
+bootcfg
+View your boot loader settings, such as your default OS and
+selection timeout, as well as your boot entries and load options.
+
+
+defrag
+You probably already guessed that this defrags your hard drive.
+Type only "defrag" into your command prompt to get a list of possible
+arguments, such as the drive letter and the type of output.
+
+
+diskpart
+Manages your disk partitions.  After you type "diskpart" into
+your command prompt, your prompt will become "DISKPART."  Type a
+question mark to get a list of possible arguments.  Type exit to leave
+diskpart.
+
+
+driverquery
+Will get you a nice list of your drivers and their properties.
+
+
+fsutil
+This is a handy command.  You can do everything from managing
+your hardlinks to querying the free space in a volume.  Type "fsutil"
+into your command prompt, and you'll see a list of options.  I choose
+"fsinfo" from the list, so I type "fsutil fsinfo" into the prompt.  Now
+I get even more options, but I choose drives by typing "fsutil fsinfo
+drives."  It's fun, it's easy, and you'll get the hang of it.  Explore
+this utility.  There are a lot of cool features and hidden twists.
+
+
+getmac
+This gets the MAC (Media Access Control) address.
+
+
+gpresult
+Get the RSoP, user settings, and computer group policy settings.
+
+
+helpctr
+Starts the Help and Support Center.
+
+
+ipseccmd
+Configures Internet protocol security (IPSec) policies in the
+directory service or in a local or remote Registry.  Ipseccmd is a
+command-line version of the IP Security Policies Microsoft Management
+Console (MMC) snap-in.
+
+
+netsh
+A network configuration tool.  Type "netsh" to enter the tool, or
+"netsh /?" to learn more about it.  To exit this tool, type "exit" at
+the "netsh>" prompt.
+
+
+openfiles
+Allows an administrator to display or disconnect open files in
+XP professional.  Type "openfiles /?" for a list of possible parameters.
+
+
+pagefileconfig
+Displays and configures the paging file Virtual Memory
+settings of a system.
+
+
+prncnfg
+Configures or displays configuration information about a printer.
+
+
+prnjobs
+Pauses, resumes, cancels, and lists print jobs.
+
+
+recover
+This command attempts to recover readable information from a
+damaged disk.  Type "recover" to get the syntax.
+
+
+reg
+The console registry tool.  Get syntax help when you type "reg" into
+the prompt.  You can export the registry, copy, restore, compare, and
+more.
+
+
+
+schtasks
+The administrator can schedule, run, change, or delete tasks on
+a local or remote machine.  Type "schtasks /?" without the quotes for a
+list of options.
+
+
+sfc
+The system file checker scans protected system files and replaces
+the ones you (or your applications) hacked beyond repair with the real,
+official Microsoft versions.  Type "sfc" into the command prompt to get
+a list of options.
+
+
+shutdown
+You can shut down or restart your own computer, or an
+administrator can shut down or restart a remote computer.  Type
+"shutdown" into your command prompt to see a list of possible arguments.
+
+
+systeminfo
+Basic system configuration information, such as the system
+type, the processor type, your time zone, your virtual memory settings,
+and much more.
+
+
+tasklist
+Want to know what's going on behind the scenes?  Type
+"tasklist" into the command prompt, and get a list of current processes.
+
+
+taskkill
+Now that you know what's going on behind the scenes, maybe you
+want to shut a few of these extraneous tasks down.  That's where
+taskkill comes in.  Type "taskkill /?" for a quick lesson in the syntax
+of the command, then shut down all those random processes.  I just
+killed my MS messenger by typing "taskkill /PID 1680."  I got the PID
+from running tasklist, above.
+
+
+typeperf
+Writes performance-counter data to the command window or to a
+supported log file format.

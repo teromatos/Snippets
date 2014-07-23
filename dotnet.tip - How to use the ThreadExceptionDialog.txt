@@ -1,0 +1,23 @@
+Imports System.Threading
+
+Public Class Form1
+
+    Private Sub btnExit_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnExit.Click
+        Me.Close()
+    End Sub
+
+    Private Sub btnException_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles btnException.Click
+        Throw New Exception("User thrown exception.")
+    End Sub
+
+    Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+        AddHandler Application.ThreadException, AddressOf Application_ThreadException
+    End Sub
+
+    Private Sub Application_ThreadException(ByVal sender As Object, ByVal e As ThreadExceptionEventArgs)
+        Using dlg As New ThreadExceptionDialog(e.Exception)
+            dlg.ShowDialog()
+        End Using
+    End Sub
+
+End Class

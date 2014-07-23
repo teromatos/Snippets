@@ -1,0 +1,10 @@
+build - will hold the build scripts, as well as any documentation of the build process
+build/logs - will hold the results of each build i do
+code - is the overrall starting point in the tree for source code
+code/downloadengine - will hold code for the download engine project
+code/downloadtracker - will hold the main Download Tracker code
+code/plugins - will hold the code for publishing plug-ins
+database - will hold the sql statements to rebuild the database
+doc - will hold source files for end-user documentation
+setup - will hold a Windows Installer project to setup Download Tracker on an end user's computer
+tests - will hold code and instructions for automated testing

@@ -1,0 +1,16 @@
+1) Add the following to the app.config
+
+<configuration>
+  <system.diagnostics>
+    <trace autoflush="true" >
+      <listeners>
+        <add name="myListener" type="System.Diagnostics.TextWriterTraceListener" initializeData="TextWriterOutput.log" />
+        <remove name="Default" />
+      </listeners>
+    </trace>
+  </system.diagnostics>
+</configuration>
+
+2) Trace.Writeline("Hello world")
+
+if autoflush = false, remember to call Trace.Flush() at the end of the application.

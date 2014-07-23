@@ -1,0 +1,21 @@
+
+User created documents (default)
+	C:\Documents and Settings\[User Name]\My Documents						System.Environment.GetFolderPath(System.Environment.SpecialFolder.Personal)
+
+Read only application files and sample data or libraries
+	C:\Program Files\[Application Name]										AppDomain.BaseDirectory method (recommend)
+																			System.AppDomain.CurrentDomain.BaseDirectory
+																			System.Windows.Forms.Application.StartupPath																															
+																															
+User customizable per-appllication data
+	c:\Documents and Settings\[User Name]\Application Data\[Company name]\[Prodruct Name]		Application.UserAppDataPath
+	
+	
+User customizable system-wide application data
+	C:\Documents and Settings\All Users\Application Data\[Company name]\[Prodruct Name]			System.IO.Path.Combine(System.Environment.GetFolderPath(System.Environment.SpecialFolder.CommonApplicationData), System.IO.Path.Combine(Application.CompanyName, Application.ProductName))
+
+
+
+
+
+

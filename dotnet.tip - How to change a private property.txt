@@ -1,0 +1,43 @@
+Imports System.Reflection
+
+Public Class Form1
+
+  Private Sub ImgViewControl1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles ImgViewControl1.Load
+
+  End Sub
+
+  Private Sub ImgViewControl1_RectangleSelected(ByVal iTop As Integer, ByVal iLeft As Integer, ByVal iWidth As Integer, ByVal iHeight As Integer, ByVal iPage As Integer) Handles ImgViewControl1.RectangleSelected
+
+  End Sub
+
+  Private Sub Form1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+
+    Dim propName As String = "IsRegistered"
+    Dim t As Type = ImgViewControl1.GetType()
+    Dim fi As System.Reflection.FieldInfo = Nothing
+
+    While (fi Is Nothing AndAlso Not t Is Nothing)
+      fi = t.GetField(propName, Reflection.BindingFlags.NonPublic Or Reflection.BindingFlags.Instance Or Reflection.BindingFlags.Public)
+      t = t.BaseType
+    End While
+
+    If (fi Is Nothing) Then Throw New ArgumentOutOfRangeException("propName", String.Format("Field {0} was not found in Type {1}", propName, ImgViewControl1.GetType().FullName))
+    fi.SetValue(ImgViewControl1, True)
+
+    ImgViewControl1.OpenImageFile("I:\Dload\scanning\Scans\tif_splitting\tiffsplit3.tif", 1.0)
+    ImgViewControl1.ImgFitToWidth()
+
+  End Sub
+
+  Private Sub Form1_Resize(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Resize
+    ImgViewControl1.ImgFitToWidth()
+  End Sub
+
+  Private Sub Button1_Click(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles Button1.Click
+    Dim myAssembly As Assembly = Assembly.LoadFile("I:\Dload\scanning\CodeTesting\TestANCITImgView\imgview.dll")
+    Dim names() As String = myAssembly.GetManifestResourceNames()
+    For Each x As String In names
+      Debug.Print(x)
+    Next
+  End Sub
+End Class

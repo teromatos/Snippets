@@ -1,0 +1,47 @@
+URL=http://codebetter.com/blogs/jeremy.miller/archive/2007/10/31/development-trivial-pursuit-the-difference-between-mvc-and-the-different-flavors-of-mvp.aspx
+
+Development Trivial Pursuit: The difference between MVC and the different flavors of MVP 
+You can happily go your entire career without knowing the textbook definitions of either pattern and churn out working software.  On the off chance that you're training for some sort of Coding Trivial Pursuit, here's my shot at explaining the difference.
+
+My new teamate and I had a discussion a couple weeks back on design patterns for user interface and he was using the terms MVP and MVC interchangeably.  Being the obnoxious pedant that I am, I told him that they weren't quite the same thing, but had to run to the train before I could explain.  Later, the discussion became a little more serious as we got into the details of our system.  My new coworker is familiar with the Passive View approach to Model View Presenter (MVP)  and was trying to frame the implementation of his new feature in those terms.  For a variety of reasons I've followed a Supervising Controller pattern in our WinForms client.  Once I explained the difference and spent a little time on the rationale behind my design decisions he was able to work inside the architectural conventions and make some beneficial suggestions.  In this case, understanding the differences between two outwardly similar flavors of the Model View Presenter design pattern turned out to be important.
+
+While all variants of both MVC and MVP are an attempt to separate the various responsibilities of a screen into cohesive classes, they differ in the details.  In a classic Model View Controller architecture, both the View and Controller have a reference to the Model.  Both View and Controller "observe" the Model and directly manipulate the properties of the Model.  There is typically little or no direct communication between the View and Controller.
+
+In a Model View Presenter architecture the Presenter (basically the Controller) communicates directly with the View and tells the View what to do.  The Presenter is also listening directly to events from the View and takes action when an event is raised from the View.  
+
+If you're peeking ahead to Acropolis, you'll see yet a third way to split up responsibilities in a screen that's neither MVC or MVP.  As far as I can tell, Acropolis is pushing a Presentation Model approach that effectively merges the "Model" and "Presenter" into a single Presentation Model (or hides the Model inside the Presenter).  In this case, the View is bound directly to the Presentation Model.  Whereas the Model in MVC/MVP is typically ignorant of the screen, the Presentation Model is fully part of the screen behavior and can expose screen specific properties like "TheSuchAndSuchIsEnabled" or "ButtonsAreVisible."  The Presentation Model classes might completely wrap what would be the Model in an MVC/MVP architecture.  Microsoft's name for this pattern is Model-View-ViewModel, which might be a more apt description anyway.  
+
+ 
+
+Web vs. Thick Clients
+The relationship between the View and Presenter in MVP is continuous and the state is generally in the View and/or Model.  Because of this, MVP is most appropriately applied to stateful screens like WinForms or Swing clients.  I've used both flavors of MVP with WinForms and been pleased with the results.  While there's absolutely nothing in WinForms to encourage you to go down any kind of MVC or MVP approach, there's not much stopping you from using MVP.  I don't see any reason why you couldn't do classical MVC with WinForms, but MVP seems simpler to me.
+
+Web clients are a completely different story.  You can do MVP with WebForms like I wrote about way back when, but I've found it to be no better than an acceptable compromise.  On the other hand, you've no doubt seen a tremendous amount of buzz over Microsoft's new MVC framework for web development.  As applied to web development, MVC means a linear cycle of:
+
+Get the request in some sort of Front Controller 
+Select the Controller and method to call 
+If required, handle the requested transaction 
+Build the Model structure of the data to be displayed 
+Pass off the Model to the View to render into HTML
+In this case the Controller simply builds the Model and passes it off to the View for rendering.  No stateful interplay between the View and Controller, just a "hey, here's the Model, see you later" from the Controller to the View.
+
+ 
+
+ 
+
+If my explanations were worth anything, you should now be perfectly confident in your ability to get that last pie piece in the development version of Trivial Pursuit.
+
+
+======================================
+
+Just to prove that no 2 developers can ever agree on what is MVP/C, here's my $0.02.
+
+"Classical" MVC has the View talking to both the Controller and the Model (hence MVC, instead of VMC). The View receives input, calls the Controller to manipulate the Model, and then syncs its output directly against the Model. The Controller is (more or less) reusable, as it has no knowledge of the View.
+
+MVP, in contrast, should really be called MPV, as the View never accesses the Model. Instead, the Presenter both manipulates the Model, and tells the View how to display it. I don't think it's required that the Presenter listen directly to View events - the View can respond to widget events, and call the appropriate method on the Presenter. You can even have some logic in the View to decide what method to call, or what parameters to pass, etc (same as MVC). The Presenter is tightly coupled to the View now, but the Model is not.
+
+Once you start trimming logic out of the View, you're moving into Passive View, or Supervising Controller. Those variants mainly boil down to how much the View is responsible for. 
+
+Passive View (an MVP variant) is all about testability, and keeps View code to the bare minimum - the Presenter does everything.
+
+Supervising Controller allows you to have declarative or very simplistic databinding within the View, and delegates the complex view logic to the Controller (along with it's other responsibilities). The fact that the View is directly accessing the Model (via databinding) means it's a variant of MVC (albeit, with some Presenter logic thrown into the Controller). 

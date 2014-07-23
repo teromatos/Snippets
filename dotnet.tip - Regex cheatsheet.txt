@@ -1,0 +1,27 @@
+I'm getting tested on regular expressions in VB.NET today so here is yet another regex cheatsheet:
+
+. = one character 
+[abc] =  a, b or c 
+[ae][ea] = ae, aa, ee, or ea 
+[^x] = not x
+
+^ = when not contained in [] signifies the start of a string 
+$ = when not conatined in [] signifies the end of a string 
+* = zero or more of the previous character or regular expression 
++ = one or more of the previous character or regular expression 
+? = zero or one of the previous character or regular expression
+
+{n}= match previous character or expression exactly n times 
+{m,n} = match previous character or expression at least m and no more than n times 
+{n,} = match previous character or expression at least n times
+
+( ) = create subexpressions within in parentheses for use with *, +, ? or { }
+
+| = or
+
+\w = word character, letter or digit 
+\W = anything but \w 
+\s = space character 
+\S = anything but \s 
+\d = any digit 
+\D = anything but \d

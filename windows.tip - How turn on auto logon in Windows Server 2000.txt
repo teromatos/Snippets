@@ -1,0 +1,17 @@
+To enable automatically logon, do the following: 1. Start Regedt32.exe, and then locate the following registry subkey:
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Winlogon 
+2. Using your account name and password, double-click the DefaultUserName entry, type your user name, and then click OK. 
+3. Double-click the DefaultPassword entry, type your password, and then click OK.
+
+NOTE: If the DefaultPassword value does not exist, follow these steps:
+
+a.  Click Add Value on the Edit menu. 
+b.  In the Value Name box, type DefaultPassword, and then click REG_SZ for the Data Type 
+c.  Type your password in the String box, and then save your changes. 
+Also, if no DefaultPassword string is specified, Windows automatically changes the value of the AutoAdminLogon key from 1 (true) to 0 (false), which disables the AutoAdminLogon feature.  
+4. Click Add Value on the Edit menu, enter AutoAdminLogon in the Value Name box, and then click REG_SZ for the Data Type. 
+5. Type 1 in the String box, and then save your changes. 
+6. Quit Regedt32. 
+7. Click Start, click Shutdown, and then click OK to turn off your computer. 
+8. Restart your computer and Windows. You are now able to log on automatically. 
+NOTE: To bypass the AutoAdminLogon process, and to log on as a different user, hold down the SHIFT key after you log off or after Windows restarts.

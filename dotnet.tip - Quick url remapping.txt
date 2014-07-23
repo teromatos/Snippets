@@ -1,0 +1,24 @@
+URL=http://weblogs.asp.net/wwright/archive/2006/11/22/how-to-turn-that-that-ugly-url-into-something-memorable-a-k-a-url-remapping-in-asp-net.aspx
+
+How to turn that that ugly URL into something memorable... a.k.a Url Remapping in ASP.NET
+Have you ever had some horrific URL that you needed to email, tell someone over the phone or just type yourself? Wouldn’t it be nice if instead of 
+
+http://www.nddnug.net/Meeting.aspx?ID=fa92013d-9d75-43b5-b611-55ce3ec1ea18 
+
+you could just have a little URL http://www.nddnug.net/scottgu.aspx ?  
+
+
+
+All it takes is a little magic in the Web.Config:
+
+    <system.web>
+
+      <urlMappings enabled="true">
+
+        <add url="~/scottgu.aspx"
+
+             mappedUrl="~/Meeting.aspx?ID=fa92013d-9d75-43b5-b611-55ce3ec1ea18" />
+
+        </urlMappings>
+
+    </system.web>

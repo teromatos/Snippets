@@ -1,0 +1,50 @@
+/*************************************************************************************************
+		Copyright © 2001 Narayana Vyas Kondreddi. All rights reserved.
+                                          
+Purpose:	To select a random row from a given table
+
+Written by:	Narayana Vyas Kondreddi
+		http://vyaskn.tripod.com
+
+Tested on: 	SQL Server 7.0 and SQL Server 2000
+
+Date modified:	March-29-2001 11:30 AM
+
+Email: 		vyaskn@hotmail.com
+*************************************************************************************************/
+
+--Create a table to store the users
+CREATE TABLE users
+(
+uid int,
+uname varchar(30)
+)
+GO
+
+--Inserting 15 rows into the table users
+SET NOCOUNT ON
+INSERT [users] ([uid],[uname])VALUES(1,'Vyas Kondreddi')
+INSERT [users] ([uid],[uname])VALUES(2,'Narayana Kondreddi')
+INSERT [users] ([uid],[uname])VALUES(3,'Kondreddi')
+INSERT [users] ([uid],[uname])VALUES(4,'Narayana Vyas Kondreddi')
+INSERT [users] ([uid],[uname])VALUES(5,'Subhadra Jyothsna')
+INSERT [users] ([uid],[uname])VALUES(6,'Geetha Madhuri Vungarala')
+INSERT [users] ([uid],[uname])VALUES(7,'Sridhar Vungarala')
+INSERT [users] ([uid],[uname])VALUES(8,'Vamsee Mohan')
+INSERT [users] ([uid],[uname])VALUES(9,'Gopala Krishna Kondreddi')
+INSERT [users] ([uid],[uname])VALUES(10,'Nagaja Devi Kondreddi')
+INSERT [users] ([uid],[uname])VALUES(11,'Vijaya Madhuri Govindaraju')
+INSERT [users] ([uid],[uname])VALUES(12,'Pamarthy Pradeep Kumar')
+INSERT [users] ([uid],[uname])VALUES(13,'Pamarthy Harinath')
+INSERT [users] ([uid],[uname])VALUES(14,'Vungarala Sathyanarayana')
+INSERT [users] ([uid],[uname])VALUES(15,'Pamarthy Ramakrishna')
+SET NOCOUNT OFF
+GO
+
+--Here is the piece of code to pick a user randomly.
+--Run the following code repeatedly to see the results
+DECLARE @mx int, @mn int
+SELECT @mx = MAX(uid) FROM users
+SELECT @mn = MIN(uid) FROM users
+SELECT uid,uname [Lucky Winner is...] FROM users WHERE uid = ROUND(@mn + (RAND() * (@mx-@mn)),0)
+

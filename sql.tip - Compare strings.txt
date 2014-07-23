@@ -1,0 +1,23 @@
+DECLARE @nameOne varchar(10)
+DECLARE @nameTwo varchar(10)
+ 
+SET @nameOne = 'Ryan'
+SET @nameTwo = 'RYAN'
+ 
+IF @nameOne = @nameTwo
+BEGIN
+ PRINT 'They are the same!'
+END
+ELSE
+BEGIN
+ PRINT 'They are NOT the same!'
+END
+ 
+IF CAST(@nameOne as varbinary) = CAST(@nameTwo as varbinary)
+BEGIN
+ PRINT 'They are the same!'
+END
+ELSE
+BEGIN
+ PRINT 'They are NOT the same!'
+END

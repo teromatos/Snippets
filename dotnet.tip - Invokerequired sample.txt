@@ -1,0 +1,35 @@
+using System;
+using System.Threading;
+using System.Windows.Forms;
+
+namespace WindowsApplication1
+{
+    static class Program {
+        [STAThread] static void Main() {
+            Application.Run(new Form1());
+        }
+    }
+
+    public partial class Form1 : Form {
+        public Form1() {
+            InitializeComponent();
+        }
+
+        protected override void OnLoad(EventArgs e) {
+            base.OnLoad(e);
+            new Thread(delegate() {
+                Thread.Sleep(1000);
+                Console.WriteLine("The result is: {0}", MyMethod(10, 4.2));
+            }).Start();
+        }
+
+        delegate double MyMethodDelegate(int x, double y);
+
+        public double MyMethod(int x, double y) {
+            if (InvokeRequired)
+                return (double)EndInvoke(BeginInvoke(new MyMethodDelegate(MyMethod), x, y));
+
+            return y * x;
+        }
+    }
+}

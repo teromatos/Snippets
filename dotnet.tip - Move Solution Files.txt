@@ -1,0 +1,47 @@
+    Sub MoveSolutionFiles(ByVal rootPath As String)
+        Dim dirs As String()
+        Dim i As Integer
+
+        dirs = Directory.GetDirectories(rootPath)
+
+        For i = 0 To dirs.Length - 1
+            Dim di As New DirectoryInfo(dirs(i))
+
+            If di.Name.StartsWith("_") = False Then
+
+                Try
+                    Dim slnFile As String
+                    Dim suoFile As String
+
+                    slnFile = Path.Combine(Path.Combine(di.FullName, di.Name), di.Name & ".sln")
+                    suoFile = Path.Combine(Path.Combine(di.FullName, di.Name), di.Name & ".suo")
+
+                    If File.Exists(slnFile) = False Then
+                        Throw New Exception("Unable to locate " & slnFile)
+                    End If
+
+                    If File.Exists(suoFile) = False Then
+                        Throw New Exception("Unable to locate " & suoFile)
+                    End If
+
+                    Dim fi As FileInfo
+
+                    fi = New FileInfo(slnFile)
+                    ModifySLNFile(slnFile, Path.Combine(fi.Directory.Parent.FullName, fi.Name), Path.GetFileNameWithoutExtension(fi.FullName))
+                    File.Delete(fi.FullName)
+
+                    '-- Copy SUO file
+                    fi = New FileInfo(suoFile)
+                    File.Move(suoFile, Path.Combine(fi.Directory.Parent.FullName, fi.Name))
+
+                Catch ex As Exception
+                    Debug.WriteLine("")
+                    Debug.WriteLine(di.FullName)
+                    Debug.WriteLine(ex.Message)
+                    Debug.WriteLine("----------------------------------------------------------------------------------")
+                End Try
+
+            End If
+        Next
+
+    End Sub

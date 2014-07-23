@@ -1,0 +1,35 @@
+Form Events:
+
+    *
+      Construtor
+    *
+      Load
+    *
+      Layout
+    *
+      Activated
+    *
+      Paint­
+    *
+      Closing
+    *
+      Closed
+    *
+      Deactivate
+    *
+      Dispose 
+
+and for Controls:
+
+    *
+      Enter 
+    *
+      GotFocus 
+    *
+      Leave 
+    *
+      Validating 
+    *
+      Validated 
+    *
+      LostFocus 

@@ -1,0 +1,14 @@
+SELECT *
+FROM ExportTableACTWU
+UNION SELECT *
+FROM ExportTableAmalgamated
+UNION SELECT *
+FROM ExportTableLocal1182
+UNION SELECT *
+FROM ExportTableLocal1183
+UNION SELECT *
+FROM ExportTableLocal300
+UNION SELECT *
+FROM ExportTableLocal992
+UNION SELECT *
+FROM ExportTablePlumbers;

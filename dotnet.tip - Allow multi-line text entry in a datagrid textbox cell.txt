@@ -1,0 +1,14 @@
+http://forums.microsoft.com/MSDN/ShowPost.aspx?PostID=70746&SiteID=1
+
+Allow multi-line text entry in a datagrid textbox cell, or How to capture ctrl+enter in a datagridview textbox cell
+	
+You can enable Multi-line in the DataGridView by setting the column/cells WrapMode to be True.
+
+The grid's KeyPress event doesn't get called when the editing control is being shown because the editing control gets the keypress event instead.
+
+Hope this helps!
+
+-mark
+DataGridView Program Manager
+Microsoft
+This post is provided "as-is" 

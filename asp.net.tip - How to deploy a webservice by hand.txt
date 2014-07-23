@@ -1,0 +1,42 @@
+url= http://jachman.wordpress.com/2008/10/07/how-to-deploy-a-webservice-by-hand/
+
+How to deploy a webservice by hand
+October 7, 2008 — Gerhard Stephan 
+When you search the web for webservice deployment you always hear: “Setup a Web Setup project …” Sure, that’s the easiest solution, but not if you see it in a wider scope. E.g. I had to implement the webservice setup within an other setup environment where I haven’t been able to use such kind of Web Setup Projects …
+
+So here’s the manual way of deploying a .NET WebService (and it’s a really simplay way)
+
+First you have to create a new deployment directory on your local machine. Than create a virtual directory within the Internet Information Service Manager (inetmgr.exe) that points to your new directory.
+
+After that you can use the aspnet_compiler command within the “Visual Studio Command Prompt” to pre-compile your webservice by hand.
+
+For that I’m using the following parameters:
+
+-v : The virtual directory (e.g. /myWebService)
+-p : The local path to the web service project (e.g. d:\projekte\myWebService)
+-f : The local path to the virtual directory (e.g. d:\output\myWebService)
+-keyfile: The local path to the key file that is used for signing the webservice (this is optional)
+
+aspnet_compiler -v /myWebService -p d:\projekte\myWebService -f d:\output\myWebService
+
+So be sure, that you delete all files within the virtual directory before you are re-deploy the webservice. Instead you’ll maybe have old and unused files in that place.
+
+Hint: In my case the aspnet_compiler.exe copied a lot more data to the virtual directory than needed. If you are using NANT you can use the following part to delete the unused files in the virtual directory.
+
+<delete includeemptydirs="true">
+<fileset basedir="${webservice.root}" defaultexcludes="false">
+<include name="**"/>
+<exclude name="bin"/>
+<exclude name="*.config"/>
+<exclude name="*.asmx"/>
+<exclude name="**\*.dll"/>
+<exclude name="**\*.pdb"/>
+<exclude name="**\*.compiled"/>
+</fileset>
+</delete>
+
+Now that directory can be safely packaged and deployed to another server without giving the source code for the web service to the customer.
+
+Cheers
+- Gerhard
+

@@ -1,0 +1,64 @@
+url=http://stevenf.com/mt/2006/06/ftp_demystified.php
+
+FTP Demystified
+June 06, 2006 @ 02:41 PM Pacific 
+The File Transfer Protocol (FTP) is as nuanced as it is handy. There are a few things about FTP that confuse even the smartest geeks, so I thought it might be useful to put up a cheat-sheet on the web.
+
+If you're a smartypants and you already know all this, then just skip this entry. No need to get sassy in the comments, I'm just trying to help a few more people reach smartypants status. :)
+
+Here are what I consider to be the most confusing things about FTP:
+
+1. What is the difference between FTP, FTPS, and SFTP?
+
+FTP is the original file transfer protocol whose origins trace back to the 1970's. It is interesting that it has survived so many generations of computers with relatively few modifications, although no shortage of aging or obsolete capabilities.
+
+FTPS is shorthand for "FTP over SSL". This is literally the same protocol as FTP, but sent over SSL-encrypted connections, in more or less the same way that HTTPS is just HTTP sent securely. This prevents problems with conventional FTP such as your password being sent over the network unencrypted. In a nutshell, it's original FTP for the security-conscious.
+
+SFTP is also a secure protocol, but it has nothing in common with the original FTP protocol. Its commands and responses are completely different. It's sort of a next-generation FTP that strips away a lot of the older facilities of FTP that are no longer needed. If your server has SSH installed, you probably also have SFTP access. 
+
+2. What is "passive mode"?
+
+The concept of "passive mode" is something that applies only to the original FTP protocol, and not SFTP. The reason for this is that FTP creates and destroys numerous connections during a single session, where SFTP uses just one.
+
+So, what is passive mode? Briefly, passive mode indicates that your computer, the client, will make connections to the server. The opposite of passive mode (either PORT mode or active mode, depending on who you talk to) works the other way around -- the server makes connections to the client.
+
+To get a little more in-depth, I have to briefly explain how FTP handles connections. When you "connect to a server" using FTP, what you are actually establishing is called a "control connection". This is the channel on which commands are sent, and responses to those commands are received.
+
+When a request is sent on the control connection for any upload, download, or directory listing, an additional channel of communication must be opened, called the "data connection". Passive mode determines whether the client or the server initiates these data connections.
+
+In passive mode, you are telling the server to "be passive" and wait for a connection from you, the client. In active mode, it's the other way around: the client tells the server "OK, I'm opening up a port for you at this address -- now you be active, and connect to me."
+
+Why is this important? Well, a lot of FTP clients these days live behind routers and firewalls that conceal the client's IP address from the internet at large. Say for example you have an Airport base station. Typically your Mac will have a fake IP address (such as 10.0.1.2) that is meaningful only on your local network. The base station, on the other hand, has a real IP address and is directly connected to the internet.
+
+If you try to make an active mode connection in such an environment, it won't work. Why not? Because your FTP client will say "OK server, I'm opening up a port on 10.0.1.2 for you to connect to." Then the server says, "OK, I'll connect to 10.0.1.2". Except it can't, because 10.0.1.2 has no meaning to the world outside of your LAN. So, the server goes off trying to connect to this fake IP address and your transfer will never start.
+
+Switching to passive mode usually solves this problem, because in passive mode, it's the server's responsibility to provide the address for the data connection, and the server is (hopefully) not hiding behind a fake IP address of its own.
+
+As if this wasn't confusing enough, some routers are actually smart enough to "recognize" FTP activity, and will actually rewrite the FTP commands before sending them along, providing their external IP address, rather than your private, fake IP address. In this case, you may find that you can successfully use FTP in either passive or active mode. But generally, only one or the other works, and it depends on both how your network is set up, and how the server's network is set up.
+
+Smarter FTP clients (such as Transmit :)) will attempt to switch you from active to passive mode (or vice-versa) if at first it doesn't succeed.
+
+3. What is the difference between ASCII mode, Binary mode, and Auto mode?
+
+Once again, this is something that only applies to conventional FTP. SFTP effectively uses Binary mode for all transfers.
+
+If you've only ever worked on one operating system, be it Windows, Mac OS, Unix, etc, you may not have ever run into problems with end-of-line characters. You wouldn't think a simple format like a plain text file would have compatibility problems, but it turns out that each operating system likes to use its own particular end-of-line character.
+
+Unix and Mac OS X use a single linefeed (LF) character. Classic Mac OS used a single carriage return (CR) character. Windows uses BOTH CR+LF to signal the end of a line.
+
+This creates quite a conundrum if you are sending a text file from one operating system to another. Depending on which way you're going, you may end up with a file that is double-spaced, or has the entire text on a single line.
+
+This is what ASCII mode was designed to solve. When an FTP client and server agree to use ASCII mode, they perform the necessary conversions to make sure that the end-of-line characters are transformed into the ones expected by the receiving computer.
+
+Yep, that means ASCII mode modifies your data stream on the fly, as it goes from one side to the other. And that's why ASCII mode is extremely bad news for ANYTHING other than plain text files.
+
+Unless you are sending a plain text file, you ALWAYS want to use binary mode. Binary mode sends the file as-is, without any conversions. If you send a GIF or JPEG image using ASCII mode, you will likely see a garbled mess when you try to view it on the other side, as all the bytes that correspond to end-of-line characters in ASCII will have been converted to some other value.
+
+"Auto" mode is offered by smart FTP clients, and is independent of the protocol itself. Generally, it looks at your file extension and makes a decision whether the file is best sent in ASCII or Binary mode, so that you don't need to constantly switch back and forth between the two. 
+
+Transmit of course offers Auto mode, and will try to warn you if it looks like you're trying to send something in ASCII mode that you shouldn't.
+
+The End
+
+Hope that clears a few things up!
+

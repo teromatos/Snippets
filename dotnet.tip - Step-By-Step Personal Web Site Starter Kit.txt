@@ -1,0 +1,28 @@
+URL=http://weblogs.asp.net/bsimser/archive/2005/11/30/431896.aspx
+
+Step-By-Step: Personal Web Site Starter Kit 
+Okay, I've got a lot of emails from people that read my prevoius posts about using SQL 2000 (or 2005, but not Express) and are still scratching their heads about how the heck do I actually make this work. So here it is. This assumes you are going to be using the Personal Web Site Starter Kit with a remote database (2000 or 2005) and a userid and password rather than integrated security (these instructions also work for the Club Web Site and Time Tracker Starter Kits, although some names are changed to protect the innocent).
+
+Prequisites
+
+Install Visual Studio .NET 2005 
+Install SQL Server 2000 or 2005 (any edition except Express) 
+Download and run the Personal Web Site Starter Kit from here
+Step-By-Step
+
+Launch Visual Studio 
+Select File | New Web Site from the Visual Studio menu 
+Choose the Personal Web Site Starter Kit from the available templates and click OK 
+Launch SQL Server Management Studio (2005) or Enterprise Manager (2000) 
+Create a new login using the user id and password you'll use 
+Create a new database for your site 
+Run "aspnet_regsql" using the export option (see my previous post here on how to do this) 
+Execute the file exported in step #7 against the database you created (using Query Analyzer or SQL Server Management Studio). This will provision the database to support the membership provider the starter kit will use 
+Execute the "personal-add.sql" file found in the App_Data directory in the solution against the database you created (using Query Analyzer or SQL Server Management Studio). This will create all the tables and stored procs for your personal site to use. 
+Back in Visual Studio open up the web.config file 
+Change the connection string called "Personal" to this: "Data Source=(local);Initial Catalog=*****;User ID=*****;Password=*****" (replacing ***** with the values you decided to use) 
+Change the connection string called "LocalSqlServer" to the same thing 
+Hit Ctrl+F5 to launch the site. You should now be connected to your local SQL instance.
+For a remote setup, you'll need to create the database using whatever tools your host has and run the two SQL scripts (personal-add.sql to create the site and the one you exported in step #7). If you're using a remote database, change "(local)" in both connection strings to the servername or IP address you need.
+
+Clear as mud now?

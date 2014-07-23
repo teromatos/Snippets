@@ -1,0 +1,3 @@
+Public Declare Function HideCaret Lib "user32" Alias "HideCaret" (ByVal hwnd As Integer) As Integer
+
+HideCaret(RTB.Handle.ToInt32)

@@ -1,0 +1,102 @@
+Get local DNS server addresses and domain name.
+
+Here is a way to get the host, domain name, and DNS servers of local machine.
+
+using System;
+using System.Net;
+using System.Collections;
+using System.Runtime.InteropServices;
+using MVPTools;
+
+namespace MVPTools.Net
+{
+ /// <summary>
+ /// Summary description for IPConfig.
+ /// </summary>
+ public class IPConfig
+ {
+  private string hostName;
+  private string domainName;
+  private IPAddress[] dnsServers;
+
+  public IPConfig()
+  {
+   GetParms();
+  }
+
+  private void GetParms()
+  {
+   uint uintBufferSize = 0;
+   ArrayList dnsIPList = new ArrayList();
+   IPAddress dnsIP;
+   Native.IP_ADDR_STRING DNSIP;
+
+   //run the method once to find the size of the buffer required
+   if( Native.GetNetworkParams(IntPtr.Zero , ref uintBufferSize) != 111 )
+    throw new ApplicationException("Error calling GetNetworkParams().");
+ 
+   //declare a space in unmanaged memory to hold the data
+   IntPtr pBuffer = Marshal.AllocHGlobal((int)uintBufferSize);
+
+   //run the function
+   if( Native.GetNetworkParams( pBuffer, ref uintBufferSize ) !=0 )
+    throw new ApplicationException("Error getting adapter info.");
+
+   Native.FIXED_INFO FInfo = (Native.FIXED_INFO)Marshal.PtrToStructure(pBuffer, typeof(Native.FIXED_INFO));
+   this.hostName = FInfo.HostName;
+   this.domainName = FInfo.DomainName;
+
+   //Get DNS Server IPs:
+   DNSIP = FInfo.DnsServerList;
+   
+   dnsIP = GetIP(DNSIP.IpAddress.AddrString);
+   if ( dnsIP != null )
+    dnsIPList.Add(dnsIP);
+   
+   while( DNSIP.Next != IntPtr.Zero)
+   {
+    DNSIP = (Native.IP_ADDR_STRING)Marshal.PtrToStructure(DNSIP.Next, typeof(Native.IP_ADDR_STRING));
+    dnsIP = GetIP(DNSIP.IpAddress.AddrString);
+    if ( dnsIP != null )
+     dnsIPList.Add(dnsIP);
+    else
+     break;
+   }
+
+   this.dnsServers = (IPAddress[])dnsIPList.ToArray(typeof(IPAddress));
+   Marshal.FreeHGlobal(pBuffer);
+  }
+
+  private IPAddress GetIP(string ipString)
+  {
+   if ( ipString == null || ipString == "" )
+    return null;
+
+   try
+   {
+    return IPAddress.Parse(ipString);
+   }
+   catch
+   {
+    return null;
+   }
+  }
+
+  public string HostName
+  {
+   get { return this.hostName; }
+  }
+
+  public string DomainName
+  {
+   get { return this.domainName; }
+  }
+
+  public IPAddress[] DnsServers
+  {
+   get { return this.dnsServers; }
+  }
+ }
+}
+
+--William

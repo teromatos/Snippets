@@ -1,0 +1,234 @@
+URL=http://blogs.msdn.com/kathykam/archive/2006/03/29/564426.aspx
+
+.NET Format String 101
+"I see stuff like {0,-8:G2} passed in as a format string. What exactly does that do?" -- Very Confused String Formatter
+
+The above format can be translated into this:
+
+"{<argument index>[,<alignment>][:<formatString><zeros>]}"
+
+argument index: This represent which argument goes into the string.
+
+String.Format("first = {0};second = {1}", "apple", "orange");
+
+String.Format("first = {1};second = {0}", "apple", "orange");
+
+ 
+
+gives the following strings:
+
+ 
+
+"first = apple;second = orange"
+
+"first = orange;second = apple"
+
+ 
+
+alignment (optional): This represent the minimal length of the string. 
+
+Postive values, the string argument will be right justified and if the string is not long enough, the string will be padded with spaces on the left.
+
+Negative values, the string argument will be left justied and if the string is not long enough, the string will be padded with spaces on the right.
+
+If this value was not specified, we will default to the length of the string argument.
+
+ 
+
+String.Format("{0,-10}", "apple");      //"apple     "
+
+String.Format("{0,10}", "apple");       //"     apple"
+
+format string (optional): This represent the format code. 
+
+Numeric format specifier is available here. (e.g. C, G...etc.)
+Datetime format specifier is available here. 
+
+Enumeration format specifier is available here.
+
+Custom Numeric format specifier is available here. (e.g. 0. #...etc.)
+
+ 
+
+Custom formatting is kinda hard to understand. The best way I know how to explain something is via code:
+
+ 
+
+int pos = 10;
+
+int neg = -10;
+
+int bigpos = 123456;
+
+int bigneg = -123456;
+
+int zero = 0;
+
+string strInt = "120ab";
+
+ 
+
+String.Format("{0:00000}", pos);      //"00010"
+
+String.Format("{0:00000}", neg);      //"-00010"
+
+String.Format("{0:00000}", bigpos);   //"123456"
+
+String.Format("{0:00000}", bigneg);   //"-123456"
+
+String.Format("{0:00000}", zero);     //"00000"
+
+String.Format("{0:00000}", strInt);   //"120ab"
+
+String.Format("{0:#####}", pos);      //"10"
+
+String.Format("{0:#####}", neg);      //"-10"
+
+String.Format("{0:#####}", bigpos);   //"123456"
+
+String.Format("{0:#####}", bigneg);   //"-123456"
+
+String.Format("{0:#####}", zero);     //""
+
+String.Format("{0:#####}", strInt);   //"120ab"
+
+ 
+
+While playing around with this, I made an interesting observation:
+
+ 
+
+String.Format("{0:X00000}", pos);      //"A"
+
+String.Format("{0:X00000}", neg);      //"FFFFFFF6"
+
+String.Format("{0:X#####}", pos);      //"X10"
+
+String.Format("{0:X#####}", neg);      //"-X10"
+
+ 
+
+The "0" specifier works well with other numeric specifier, but the "#" doesn't. Umm... I think the "Custom Numeric Format String" probably deserve a whole post of it's own. Since this is only the "101" post, I'll move on to the next argument in the format string.
+
+ 
+
+ 
+
+zeros (optional): It actually has a different meaning depending on which numeric specifier you use. 
+
+ 
+
+int neg = -10;
+
+int pos = 10;
+
+ 
+
+// C or c (Currency): It represent how many decimal place of zeros to show.
+
+String.Format("{0:C4}", pos);      //"$10.0000"
+
+String.Format("{0:C4}", neg);      //"($10.0000)"
+
+ 
+
+// D or d (Decimal): It represent leading zeros
+
+String.Format("{0:D4}", pos);      //"0010"
+
+String.Format("{0:D4}", neg);      //"-0010"
+
+ 
+
+// E or e (Exponential): It represent how many decimal places of zeros to show.
+
+String.Format("{0:E4}", pos);      //"1.0000E+001"
+
+String.Format("{0:E4}", neg);      //"-1.0000E+001"
+
+ 
+
+// F or f (Fixed-point): It represent how many decimal places of zeros to show.
+
+String.Format("{0:F4}", pos);      //"10.0000"
+
+String.Format("{0:F4}", neg);      //"-10.0000"
+
+ 
+
+// G or g (General): This does nothing
+
+String.Format("{0:G4}", pos);      //"10"
+
+String.Format("{0:G4}", neg);      //"-10"
+
+ 
+
+// N or n (Number): It represent how many decimal places of zeros to show.
+
+String.Format("{0:N4}", pos);      //"10"
+
+String.Format("{0:N4}", neg);      //"-10"
+
+ 
+
+// P or p (Percent): It represent how many decimal places of zeros to show.
+
+String.Format("{0:P4}", pos);      //"1,000.0000%"
+
+String.Format("{0:P4}", neg);      //"-1,000.0000%"
+
+ 
+
+// R or r (Round-Trip): This is invalid, FormatException is thrown.
+
+String.Format("{0:R4}", pos);      //FormatException thrown
+
+String.Format("{0:R4}", neg);      //FormatException thrown
+
+ 
+
+// X or x (Hex): It represent leading zeros
+
+String.Format("{0:X4}", pos);      //"000A"
+
+String.Format("{0:X4}", neg);      //"FFFFFFF6"
+
+ 
+
+// nothing: This is invalid, no exception is thrown.
+
+String.Format("{0:4}", pos));      //"4"
+
+String.Format("{0:4}", neg));      //"-4"
+
+ 
+
+In summary, there are four types of behaviour when using this <zeros> specifier:
+
+Leading Zeros: D, X
+
+Trailing Zeros: C, E, F, N, P
+
+Nothing: G
+
+Invalid: R, <empty>
+
+ 
+
+Now, that we've gone through the valid specifiers, you can actually use this in more than just String.Format(). For example, when using this with Byte.ToString():
+
+ 
+
+Byte b = 10;
+
+b.ToString("D4");      //"0010"
+
+b.ToString("X4");      //"000A"
+
+ 
+
+Wow... this was way longer than I expected. The BCL team is having blog day today, I need to get back to posting something for the BCLWeblog. 
+
+
+<

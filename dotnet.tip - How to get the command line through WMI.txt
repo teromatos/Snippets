@@ -1,0 +1,18 @@
+using System;
+using System.Management;
+
+class cmdline 
+{
+	static void Main(string[] args) 
+	{
+		if( args.Length != 1 ) 
+		{
+			Console.WriteLine("usage: cmdline <processId>");
+			return;
+		}
+
+		ManagementObject obj =
+			new ManagementObject(string.Format("Win32_Process.Handle=\"{0}\"", args[0]));
+		Console.WriteLine(obj.Properties["CommandLine"].Value);
+	}
+}

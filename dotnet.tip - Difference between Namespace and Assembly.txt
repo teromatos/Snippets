@@ -1,0 +1,28 @@
+URL= http://weblogs.asp.net/Varad/archive/2005/09/02/424325.aspx
+
+Difference between Namespace and Assembly 
+This is one of the important question asked in most of the .NET technical interviews,  I thought of keeping a post for this to refer anytime :)
+
+A namespace is a logical naming scheme for types in which a simple type name, such as MyType, is preceded with a dot-separated hierarchical name. Such a naming scheme is completely under control of the developers. For example, types MyCompany.FileAccess.A and MyCompany.FileAccess.B might be logically expected to have functionality related to file access. The .NET Framework uses a hierarchical naming scheme for grouping types into logical categories of related functionality, such as the ASP.NET application framework, or remoting functionality. Design tools can make use of namespaces to make it easier for developers to browse and reference types in their code. 
+
+The concept of a namespace is not related to that of an assembly. A single assembly may contain many types whose hierarchical names have different namespace roots, and a logical namespace root may span multiple assemblies. In the .NET Framework, a namespace is a logical design-time naming convention, whereas an assembly establishes the name scope for types at run time. 
+
+Namespace: It is a Collection of names wherein each name is Unique.
+They form the logical boundary for a Group of classes.
+Namespace must be specified in Project-Properties.
+
+Assembly: It is an Output Unit. It is a unit of Deployment & a unit of versioning. Assemblies contain MSIL code.
+Assemblies are Self-Describing. [e.g. metadata,manifest]
+An assembly is the primary building block of a .NET Framework application. It is a collection of functionality that is built, versioned, and deployed as a single implementation unit (as one or more files). All managed types and resources are marked either as accessible only within their implementation unit, or by code outside that unit. 
+
+.NET Assembly contains all the metadata about the modules, types, and other elements it contains in the form of a manifest. The CLR loves assemblies because different programming languages are just perfect for creating certain kinds of applications. For example, COBOL stands for Common Business-Oriented Language because it is tailor-made for creating business applications. However, it is not much good for creating drafting programs. Regardless of what language you used to create your modules, they can all work together within one Portable Executable Assembly. 
+
+There is a hierarchy to the structure of .NET code. That hierarchy is Assembly -> Module -> Type -> Method. 
+Assemblies can be static or dynamic. Static assemblies can include .NET Framework types (interfaces and classes), as well as resources for the assembly (bitmaps, JPEG files, resource files, and so on). Static assemblies are stored on disk in portable executable (PE) files. You can also use the .NET Framework to create dynamic assemblies, which are run directly from memory and are not saved to disk before execution. You can save dynamic assemblies to disk after they have executed.
+
+Assemblies also allow Side-by-Side execution, 2 versions of same assembly can be used at the same time.
+
+References ALWAYS contain names which are ASSEMBLY names of External Dependencies in the Project.
+code-construct for Attribute [attribute for assembly]
+[Assembly: company name]
+[Assembly: configuration]

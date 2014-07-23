@@ -1,0 +1,21 @@
+URL=http://jamesewelch.wordpress.com/2007/08/30/how-to-tell-if-a-net-assembly-is-debug-or-release/
+
+Yesterday, I was asked by a ISV developer to check to see if their product was built in debug or release. I didn’t question why a ISV development team would package and deliver debug assemblies to a customer…
+
+The first thing that I did was open up .NET Reflector - a great product from Lutz Roeder that I’ve used for years. However, I wasn’t exactly sure what I was looking for. And the .NET Reflector can’t show attributes that don’t exist, so I didn’t see the Debuggable attribute.
+
+If the assembly was built for debug, then the .NET Reflector would show this line on the Disassembler window:
+
+[assembly: Debuggable(…)]
+
+So since I wasn’t 100% sure of what I was looking for, I wrote a simple function to load an assembly and check to see if it was debug or release.
+
+Assembly assemb = Assembly.LoadFile(Path.GetFullPath(fileName));
+bool isDebug = false;
+foreach (object att in assemb.GetCustomAttributes(false))
+     if (att is DebuggableAttribute)
+          isDebug = ((DebuggableAttribute)att).IsJITTrackingEnabled;
+Console.WriteLine(“Assembly is {0}.”, isDebug ? “debug” : “release”);
+The above code takes the file name of a .NET assembly and then loops through each of the custom attributes assigned to the assembly.  If the assembly was built for debug, then one of the attributes is the type of DebuggableAttribute. Otherwise, if it was built for release, then the DebuggableAttribute will not be found.
+
+ 

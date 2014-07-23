@@ -1,0 +1,25 @@
+SQL has some cleaner nifty ways of manipulating OLEDB datasources directly using the OPENDATASOURCE and OPENROWSET T-SQL functions.
+
+They may work better for your scenario if is as simple as you wrote above.
+
+From the T-SQL docs -
+
+
+D. Use OPENROWSET and another table in an INNER JOIN
+This example selects all data from the customers table from the local SQL Server Northwind database and from the orders table from the Access Northwind database stored on the same computer.
+
+
+ 
+ 
+
+
+USE pubs
+GO
+SELECT c.*, o.*
+FROM Northwind.dbo.Customers AS c INNER JOIN 
+   OPENROWSET('Microsoft.Jet.OLEDB.4.0', 
+   'c:\MSOffice\Access\Samples\northwind.mdb';'admin';'mypwd', Orders) 
+   AS o
+   ON c.CustomerID = o.CustomerID 
+GO
+

@@ -1,0 +1,167 @@
+Protected Config Sections in .NET 2.0
+
+(I really hope CS/FTB don't screw up the formatting in this blog post - if they do - sorry dude !!)
+
+Here is another gem from my upcoming book -
+
+A neat way of protecting sensitive config file info, such as connection strings in .NET 2.0 is to use the protectedData section.
+
+This is easy to do -
+
+1. Create a template config file that looks somewhat like this -
+
+<configuration>
+
+   <connectionStrings>
+
+      <EncryptedData/>
+
+   </connectionStrings>
+
+ 
+
+   <protectedData>
+
+      <providers>
+
+         <add name="MyProvider"
+
+              type="System.Configuration.RsaProtectedConfigurationProvider"
+
+              keyContainerName="MyKeys"
+
+              useMachineContainer="true" />
+
+      </providers>
+
+ 
+
+      <protectedDataSections>
+
+         <add name="connectionStrings"
+
+            provider="MyProvider"
+
+            inheritedByChildren="false"/>
+
+      </protectedDataSections>
+
+   </protectedData>
+
+</configuration>
+
+2. Setup a machine level RSA key-pair by executing the following at Dos prompt -
+
+aspnet_regiis -pc "MyKeys" –exp
+
+Even though the above looks like ASP.NET'ish - this technique can be used to secure connection strings for anything - once the keyset is setup. Also it doesn't have to be Machine level - it just makes your life easier if it is LOL . :)
+
+3. Run code like this -
+
+Configuration config =
+
+   ConfigurationManager.OpenExeConfiguration(ConfigurationUserLevel.None, "");
+
+config.ConnectionStrings.ConnectionStrings.Add(
+
+   new ConnectionStringSettings(
+
+     "MyConnectionString",
+
+     "Server=local; Database=Test; Password=myPassword; User Id=myUser;")
+
+     );
+
+That's it, now if you open the config file, it would have encrypted it like this -
+
+<configuration>
+
+   <connectionStrings>
+
+      <EncryptedData Type="http://www.w3.org/2001/04/xmlenc#Element"
+
+         xmlns="http://www.w3.org/2001/04/xmlenc#">
+
+     <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#tripledes-cbc" />
+
+         <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+
+            <EncryptedKey Recipient="" xmlns="http://www.w3.org/2001/04/xmlenc#">
+
+          <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5" />
+
+               <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+
+                  <KeyName>Rsa Key</KeyName>
+
+               </KeyInfo>
+
+               <CipherData>
+
+                  <CipherValue>fquSeRPQvoa47qFzEys62yWC1VxNABD318DrCQc/hL6zLnuaGGgQE6qxYSStHOccUntJ67H
+
+rDTjlpM0pRTxgXLLGzIq3vVLLMdKnRTE6eFAZcQepB7qBiK+PWuWTAcy4mFXfaHznPNiQNU4bDtkJCUO3j9F
+
+bLhUqeprSUCjOp1c=</CipherValue>
+
+               </CipherData>
+
+            </EncryptedKey>
+
+         </KeyInfo>
+
+         <CipherData>
+
+            <CipherValue>b/6ILwoFPKGop5jyGQfbHAu00Q48M9JaHSYUJf1rTy4Tt1Kqr8qIY0xa7ufMFEXzdavBUE7
+
+V41+ul7oBQZK14UedkqvPPXXIRUNsqqJPkmtDDgombNPNaiAt2YVcL6339lw3NwNLAeRZlFOq5vqo9xvFAA/
+
+/eyW13HkNvV14Bxm9rn7zNv4iQ5PCexOOi8TJJDMtUpetuYVccfYzuVwoK2LQTiqDJ/ILeVsiVfyGsRA=</C
+
+ipherValue>
+
+         </CipherData>
+
+      </EncryptedData>
+
+   </connectionStrings>
+
+ 
+
+   <protectedData>
+
+      <providers>
+
+         <add name="MyProvider"
+
+              type="System.Configuration.RsaProtectedConfigurationProvider"
+
+              keyContainerName="MyKeys"
+
+              useMachineContainer="true" />
+
+      </providers>
+
+ 
+
+      <protectedDataSections>
+
+         <add name="connectionStrings"
+
+            provider="MyProvider"
+
+            inheritedByChildren="false"/>
+
+      </protectedDataSections>
+
+   </protectedData>
+
+</configuration>
+
+4. That's it .. :-). Now whenever you request the connection string as below -
+
+ConfigurationManager.ConnectionStrings["MyConnectionSring"].ConnectionString
+
+The framework will take care of encrypting/decrypting the relevant sections for you. :-)
+
+NOW ISN'T THAT COOOOOOOOOOOOOOOOOOOOL ??? :-)

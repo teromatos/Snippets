@@ -1,0 +1,98 @@
+Assembly.Unload? Use AppDomain.Unload instead.
+
+Well we ended up writing a VS.Net plugin to add to our developer testing tools (something like NUnitPlugin, but different). Not much, but almost the whole program was written and then there was this problem that all VS.Net plug-in writers face, atleast once in their life. Namely, you load an assembly, using Assembly.Load, but then how do you unload it? There is no Assembly.Unload out there ( Why isn’t there an Assembly.Unload method out there? ).
+
+Solutions posted by Jason Zander, Suzanne Cook (if you haven’t read her blog, go read it, especially if you’re missing one Mr. Chris Brumme, and btw, Suzanne hasn’t posted for a long time too, so ping them and tell them that we want them back) mention that you need to load an assembly into a secondary appdomain, and then unload that appdomain. Eric Gunnerson’s MSDN article is a great help,here.
+
+I will try to explain the pattern, with a console app that I wrote.
+
+   The Type “Test” is the dynamic type we have, and even when the assembly containing this type is changed, the final console application should run the latest compilation. For simplicity, lets have a simple class that writes to console. Compile this and keep this in an assembly.
+
+	public class Tested
+	{
+		public void Test()
+		{
+			Console.WriteLine("First Run");
+		}
+	}
+
+First, create the assembly loader. The following code loads an assembly using a file path (hard coded here, you need to do it in a better way).
+It gets the Type I wanted to run (Tested) and then invokes a method in the class ( “Test”) using an object of the Type. Create another assembly for this class.
+
+ 
+
+          [Serializable]
+	public class AssemblyLoader : MarshalByRef /*<updated>*/
+	{
+		public void LoadAndRun()
+		{
+			
+			Assembly _assembly = Assembly.Load(<< assembly file path>>);
+			Type _type =_assembly.GetType(“Tested”);
+			MethodInfo _method =_type.GetMethod("Test");
+			_method.Invoke(Activator.CreateInstance(_type),null);
+
+		}
+		
+	}
+
+ 
+
+Next create an AppDomainLoader(code below) (console exe here, you can have a class of your own in an assembly of your own) which creates an AppDomain. It then loads an instance of the assembly Loder class, using CreateInstanceAndUnwrap, which combines the CreateInstance and Object.Unwrap. It then runs the LoadAndRun method to indirectly invoke the latest version of the “Test” function in the “Tested” class.
+
+ 
+
+	class AppDomainLoader
+	{
+		[STAThread]
+		static void Main(string[] args)
+		{
+			while(Console.ReadLine() != "X")
+			{
+				try
+				{
+					Console.WriteLine("Press  to start");
+					Console.ReadLine();
+					AppDomain _domain = AppDomain.CreateDomain("Remote Load");
+					AssemblyLoader _aLoader = 
+						(AssemblyLoader)_domain.CreateInstanceAndUnwrap(
+						"AssemblyLoader","Proteans.IPDev.PoC.AssemblyLoader ");
+					
+					_aLoader.LoadAndRun();
+
+					AppDomain.Unload(_domain);
+				}
+				catch(Exception ex)
+				{
+					Console.WriteLine(ex.ToString());
+				}
+			}
+		}
+
+	}
+
+Once you unload the app domain, the assembly automatically (well!) gets unloaded with it. I have written a while loop here,
+which shall run the the process repetetively, till you want, and in between this, you can go ahead and recompile the “Tested” 
+class with a changed Console statement, and check if the latest changes are reflected in the output.
+
+This can be a good skeleton to build on. Helpful?
+
+If SQL had known attributes I should have decorated my Like query with [AirCode]. Several comments questioned wheter and how it was vulnerable to a sql-injection attack. Well, the aircode version is. The original is harder to break.
+
+The vulnerable one :
+
+orgSql = "SELECT id, Info FROM Table1";
+sqlDataAdapterBuildSql.SelectCommand.CommandText = orgSql + (" WHERE Info LIKE '" + textBoxInput.Text + "%'");
+
+Guess what happens when the user types this in the textbox
+
+e'  drop table table2 --
+
+Yes, table2 is gone. Provided your app has adminstrator rights on the database. A lot off apps do.
+
+The other one, as seen in "Writing Secure Code":
+
+sqlDataAdapterUseParameter.SelectCommand = "SELECT id, Info FROM Table1 WHERE (Info LIKE @param1)"
+sqlDataAdapterUseParameter.SelectCommand.Parameters["@Param1"].Value = string.Format("{0}%", textBoxInput.Text);
+
+When the malicious user now tries to inject sql via the textbox the only result will be that the database is queried for e'  drop table table2 -- A large resultset is not that likely .

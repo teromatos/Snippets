@@ -1,0 +1,612 @@
+URL=http://blogs.msdn.com/ricom/archive/2005/08/08/449246.aspx
+
+LogDump: CLRProfiler Log analysis tool
+Ever wonder how I produce nice textual allocation summaries like this one?
+
+This report shows allocations in dictread.log
+
+Total Allocations 136301 Objects 6694232 Bytes
+
+Top 10 Allocated Types
+
+   Count    Bytes Type
+  108040  5836392 System.String
+   26726   534520 DictionaryEntry
+      73   275604 System.Object []
+    1010    20200 System.Text.StringBuilder
+      51    10466 System.Char []
+      11     6358 System.Byte []
+      53     1272 System.Collections.ArrayList
+      52     1248 ArrayListEnumeratorSimple
+       6     1008 bucket []
+      18      504 System.Security.SecurityElement
+
+Top 10 Allocating Stacks
+
+Stack 1 allocates 3132656 bytes
+NS.Test::Main static void (String[])
+Dictionary::.ctor void ()
+DictionaryEntry::Parse static DictionaryEntry (String)
+System.String::Substring String (int32 int32)
+   80178  3132656 System.String
+
+Stack 2 allocates 2402768 bytes
+NS.Test::Main static void (String[])
+Dictionary::.ctor void ()
+System.IO.StreamReader::ReadLine String ()
+   25723  2382668 System.String
+    1005    20100 System.Text.StringBuilder
+
+Stack 3 allocates 534520 bytes
+NS.Test::Main static void (String[])
+Dictionary::.ctor void ()
+DictionaryEntry::Parse static DictionaryEntry (String)
+   26726   534520 DictionaryEntry
+
+
+
+That's a report similar to the one that I generated for Performance Quiz #6 -- I get a ton of mileage out of these.  Just use CLRProfiler for Beta2 or greater, save your .log files and run this little tool over it to get a summary of the total costs and their major sources.  This little guy saves me a ton of time and I've used it to anlayze multi-gigabyte log files where the UI approach just isn't going to work.  The algorithm is to just attribute each allocation to a callstack and then compute the callstacks with the biggest cost -- which is basically the same as going into the tree view in the UI and opening the biggest choice at each step, then 2nd biggest etc.
+
+I've just posted the source code for this little dumper -- it's a quickie I wrote one afternoon and it shows -- but hopefully you can get some good usage out of it as well.
+
+Legal Note: Like all other code samples this program is offered AS IS with no warranty implied and confers no rights.
+
+
+
+===============================================================================================================
+
+
+// logdump.cs -- a little utility program that dumps summary statistics for CLR profiler logs
+// © 2005 Microsoft Corporation 
+// csc /o+ logdump.cs is all you need to do to build it.
+// this program is offered as is with no warranty implied and confers no rights.
+
+using System;
+using System.Text;
+using System.IO;
+using System.Collections;
+using System.Collections.Generic;
+using System.Globalization;
+
+class LogDumper
+{
+    // this tells us the current number of allocations and total bytes at a specific stack for a specific type
+    class MemCharge
+    {
+        public int count;
+        public int bytes;
+    };
+
+    // this is used to help us find the top N of any kind of id by size
+    struct TopCalc
+    {
+        public int id;
+        public int bytes;
+    }
+
+    // the log file we will be reading
+    private String strLogFile = null;
+
+    // the filter file if we are going to only analyze specific types
+    private String strFilterFile = null;
+
+    // the number of stacks and types we will be dumping
+    private int cTop = 10;
+
+    private TopCalc[] topStacks = null;
+    private TopCalc[] topTypes = null;
+
+    private int bytesTotal = 0;
+    private int allocsTotal = 0;
+
+    private Char[] space = { ' ' };
+    // storage is in these dictionaries
+
+    private Dictionary<String, bool> dictTypenameFilterSet = null;
+    private Dictionary<String, int> dictFuncNameToFuncId = new Dictionary<String, int>();
+    private Dictionary<int, String> dictFuncIdToFuncName = new Dictionary<int, String>();
+
+    private Dictionary<String, int> dictTypeNameToTypeId = new Dictionary<String, int>();
+    private Dictionary<int, String> dictTypeIdToTypeName = new Dictionary<int, String>();
+
+    private Dictionary<int, String> dictStackIdToStackstring = new Dictionary<int, String>();
+    private Dictionary<String, int> dictStackstringToStackId = new Dictionary<String, int>();
+
+    private Dictionary<int, Dictionary<int, MemCharge>> dictStackIdToCharges =
+        new Dictionary<int, Dictionary<int, MemCharge>>();
+
+    private Dictionary<int, int> dictStackIdToTypeId = new Dictionary<int, int>();
+    private Dictionary<int, int> dictStackIdToSize = new Dictionary<int, int>();
+
+    private Dictionary<int, MemCharge> dictTypeIdToCharges = new Dictionary<int, MemCharge>();
+   
+    public static void Main(String[] args)
+    {
+        new LogDumper().InitializeAndRun(args);
+    }
+
+    private void InitializeAndRun(String[] args)
+    {
+        if (args.Length == 0)
+            goto UsageMessage;
+
+        for (int iarg = 0; iarg < args.Length; iarg++)
+        {
+            if (args[iarg].Length >= 2 && args[iarg][0] == '-' || args[iarg][0] == '/')
+            {
+                switch (args[iarg][1])
+                {
+                    case 'n':
+                        if (iarg + 1 >= args.Length)
+                            goto UsageMessage;
+                        iarg++;
+                        cTop = Int32.Parse(args[iarg]);
+                        break;
+
+                    case 'f':
+                        if (iarg + 1 >= args.Length)
+                            goto UsageMessage;
+                        iarg++;
+                        strFilterFile = args[iarg];
+                        break;
+                    default:
+                        goto UsageMessage;
+                }
+                continue;
+            }
+
+            strLogFile = args[iarg];
+            break;
+        }
+
+        // establish the filter set if there is to be one
+        if (strFilterFile != null)
+        {
+            ReadFilterStream(strFilterFile);
+        }
+
+        if (strLogFile == null)
+            goto UsageMessage;
+
+        // read the "new" file building up the full cost of the allocs
+        ReadLogFile(strLogFile);
+
+        WriteSummary();
+        return;
+
+    UsageMessage:
+        Console.WriteLine("Usage: logdump [-n num] [-f filter] file");
+        Console.WriteLine("-f filter : filter file indicates types to consider");
+        Console.WriteLine("-n num : top num types and stacks displayed in summary");
+        Console.WriteLine("file : the input file generated by clrprofiler for beta2 or later");
+
+        return;
+    }
+
+    private void ReadLogFile(String strFile)
+    {
+        String line;
+
+        int id, code;
+        String s;
+        int typeid = -1;
+        int typesize = -1;
+        int referredStackId = -1;
+        String[] a = null;
+        Char[] space = { ' ' };
+
+        using (StreamReader stmIn = new StreamReader(strFile))
+        {
+            while ((line = stmIn.ReadLine()) != null)
+            {
+                switch (line[0])
+                {
+                    // defines a function
+                    case 'f':
+                        // we'll use the trailing ')' character to find the full function name definition
+                        {
+                            int i1, i2, i3;
+
+                            i1 = line.IndexOf(' ');
+                            if (i1 < 0) break;
+                            i1++;
+
+                            i2 = line.IndexOf(' ', i1);
+                            if (i2 < 0) break;
+
+                            id = Int32.Parse(line.Substring(i1, i2 - i1 + 1));
+                            i2++;
+
+                            i3 = line.IndexOf(')', i2);
+                            if (i3 < 0) break;
+
+                            s = line.Substring(i2, i3 - i2 + 1);
+                        }
+
+                        // function names are not unique so we have to de-dupe, we'll use the first one
+                        // for the canonical mapping
+                        if (!dictFuncNameToFuncId.ContainsKey(s))
+                            dictFuncNameToFuncId.Add(s, id);
+
+                        if (!dictFuncIdToFuncName.ContainsKey(id))
+                        {
+                            dictFuncIdToFuncName.Add(id, s);
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine("Warning: function id {0} duplicated", id);
+                            Console.Error.WriteLine("Warning: 1st def: {0}", dictFuncIdToFuncName[id]);
+                            Console.Error.WriteLine("Warning: 2nd def: {0}", s);
+                            Console.Error.WriteLine();
+                        }
+                        break;
+
+                    // an allocation
+                    case '!':
+                        a = line.Split(space);
+                        if (a.Length != 4)
+                        {
+                            Console.Error.WriteLine("Corrupt allocation line: {0}", line);
+                            break;
+                        }
+                        
+                        ProcessAlloc(Int32.Parse(a[3]));
+                        break;
+
+                    // a new stack
+                    case 'n':
+                        a = line.Split(space);
+
+                        id = Int32.Parse(a[1]);
+                        code = Int32.Parse(a[2]);
+
+                        int bit0 = code & 1;
+                        code >>= 1;
+                        int bit1 = code & 1;
+                        code >>= 1;
+
+                        int next = 3;
+
+                        // indicates type and size of allocation present
+                        if (bit0 != 0)
+                        {
+                            typeid = Int32.Parse(a[next]);
+                            typesize = Int32.Parse(a[next + 1]);
+                            next += 2;
+                        }
+
+                        referredStackId = -1;
+
+                        if (code != 0)
+                        {
+                            referredStackId = Int32.Parse(a[next]);
+                            next++;
+                        }
+
+                        // we're going to make the full stack string for the stack
+                        // including any part which was done by reference to a previous stack
+                        StringBuilder sb = new StringBuilder();
+
+                        if (referredStackId != -1)
+                        {
+                            String t = dictStackIdToStackstring[referredStackId];
+
+                            int cch = 0;
+                            for (int i = 0; i < code; i++)
+                            {
+                                cch = t.IndexOf(' ', cch + 1);
+                                if (cch < 0)
+                                {
+                                    cch = t.Length;
+                                    break;
+                                }
+                            }
+
+                            if (cch == t.Length)
+                                sb.Append(t);
+                            else
+                                sb.Append(t, 0, cch);
+                        }
+
+                        while (next < a.Length)
+                        {
+                            if (sb.Length != 0)
+                                sb.Append(" ");
+
+                            int funcId = Int32.Parse(a[next++]);
+
+                            funcId = dictFuncNameToFuncId[dictFuncIdToFuncName[funcId]];
+
+                            sb.Append(funcId.ToString());
+                        }
+
+                        s = sb.ToString();
+
+                        dictStackIdToStackstring.Add(id, s);
+
+                        if (bit0 != 0)
+                        {
+                            dictStackIdToTypeId.Add(id, typeid);
+                            dictStackIdToSize.Add(id, typesize);
+                        }
+
+                        break;
+
+                    // type definition
+                    case 't':
+                        {
+                            int i1, i2;
+
+                            i1 = line.IndexOf(' ');
+                            if (i1 < 0) break;
+                            i1++;
+
+                            i2 = line.IndexOf(' ', i1);
+                            if (i2 < 0) break;
+
+                            id = Int32.Parse(line.Substring(i1, i2 - i1 + 1));
+                            i2++;
+
+                            if (i2 + 1 >= line.Length)
+                                break;
+
+                            // try to be compatible with formats with an extra number before the type or not
+                            while (line[i2] >= '0' && line[i2] <= '9')
+                            {
+                                i2 = line.IndexOf(' ', i2);
+                                i2++;
+                                if (i2 + 1 >= line.Length)
+                                    break;
+                            }
+
+                            s = line.Substring(i2);
+
+                            if (dictTypenameFilterSet != null && !dictTypenameFilterSet.ContainsKey(s))
+                                break;
+
+                            if (!dictTypeNameToTypeId.ContainsKey(s))
+                                dictTypeNameToTypeId.Add(s, id);
+
+                            dictTypeIdToTypeName.Add(id, s);
+                        }
+                        break;
+
+                    default:
+                        // the rest we can ignore for this dumper
+                        break;
+                }
+            }
+        }
+    }
+
+    private void WriteSummary()
+    {
+        Dictionary<int, MemCharge> dictTypeIdToCharges = new Dictionary<int, MemCharge>();
+
+        topStacks = new TopCalc[cTop];
+        topTypes = new TopCalc[cTop];
+
+        Console.WriteLine("This report shows allocations in {0}", strLogFile);
+
+        if (strFilterFile != null)
+        {
+            Console.WriteLine("This report only considers object types found in {0}", strFilterFile);
+        }
+
+        Array.Clear(topStacks, 0, cTop);
+        Array.Clear(topTypes, 0, cTop);
+
+        ComputeTopStacks();
+        ComputeTopTypes();
+
+        Console.WriteLine();
+        Console.WriteLine("Total Allocations {0} Objects {1} Bytes", allocsTotal, bytesTotal);
+        Console.WriteLine();
+
+        PrintTypes();
+        PrintStacks();
+    }
+
+    private void ComputeTopStacks()
+    {
+        foreach (KeyValuePair<int, Dictionary<int, MemCharge>> kvStack in dictStackIdToCharges)
+        {
+            Dictionary<int, MemCharge> d = kvStack.Value;
+            int stackbytes = 0;
+
+            foreach (KeyValuePair<int, MemCharge> kv in d)
+            {
+                if (kv.Value.count == 0 || kv.Value.bytes == 0)
+                    continue;
+
+                bytesTotal += kv.Value.bytes;
+                allocsTotal += kv.Value.count;
+
+                stackbytes += kv.Value.bytes;
+
+                MemCharge charge = null;
+
+                if (dictTypeIdToCharges.ContainsKey(kv.Key))
+                {
+                    charge = dictTypeIdToCharges[kv.Key];
+                    charge.bytes += kv.Value.bytes;
+                    charge.count += kv.Value.count;
+                }
+                else
+                {
+                    charge = new MemCharge();
+                    dictTypeIdToCharges.Add(kv.Key, charge);
+                    charge.bytes = kv.Value.bytes;
+                    charge.count = kv.Value.count;
+                }
+            }
+
+            int i;
+            for (i = cTop; --i >= 0; )
+            {
+                if (topStacks[i].bytes > stackbytes)
+                    break;
+            }
+
+            int iNew = i + 1;
+            if (iNew < cTop)
+            {
+                for (i = cTop - 1; --i >= iNew; )
+                {
+                    topStacks[i + 1] = topStacks[i];
+                }
+
+                topStacks[iNew].bytes = stackbytes;
+                topStacks[iNew].id = kvStack.Key;
+            }
+        }
+    }
+
+    private void ComputeTopTypes()
+    {
+        foreach (KeyValuePair<int, MemCharge> tmem in dictTypeIdToCharges)
+        {
+            int i;
+            for (i = cTop; --i >= 0; )
+            {
+                if (topTypes[i].bytes > tmem.Value.bytes)
+                    break;
+            }
+
+            int iNew = i + 1;
+            if (iNew < cTop)
+            {
+                for (i = cTop - 1; --i >= iNew; )
+                {
+                    topTypes[i + 1] = topTypes[i];
+                }
+
+                topTypes[iNew].bytes = tmem.Value.bytes;
+                topTypes[iNew].id = tmem.Key;
+            }
+        }
+    }
+
+    private void PrintTypes()
+    {
+        Console.WriteLine("Top {0} Allocated Types", cTop);
+        Console.WriteLine();
+        Console.WriteLine("{0,8:s} {1,8:s} {2}", "Count", "Bytes", "Type");
+
+        for (int i = 0; i < cTop; i++)
+        {
+            int id = topTypes[i].id;
+
+            if (id == 0)
+                break;
+
+            MemCharge charge = dictTypeIdToCharges[id];
+
+            Console.WriteLine("{0,8:d} {1,8:d} {2}", charge.count, charge.bytes, dictTypeIdToTypeName[id]);
+        }
+    }
+
+    private void PrintStacks()
+    {
+        Console.WriteLine();
+        Console.WriteLine("Top {0} Allocating Stacks", cTop);
+
+        for (int i = 0; i < cTop; i++)
+        {
+            int id = topStacks[i].id;
+
+            if (id == 0 || topStacks[i].bytes == 0)
+                break;
+
+            Console.WriteLine();
+            Console.WriteLine("Stack {0} allocates {1} bytes", i + 1, topStacks[i].bytes);
+
+            String[] a = dictStackIdToStackstring[id].Split(space);
+            for (int j = 0; j < a.Length; j++)
+            {
+                if (a[j].Length == 0)
+                    break;
+
+                int fid = Int32.Parse(a[j]);
+
+                Console.WriteLine("{0}", dictFuncIdToFuncName[fid]);
+            }
+
+            Dictionary<int, MemCharge> d = dictStackIdToCharges[id];
+
+            foreach (KeyValuePair<int, MemCharge> kv in d)
+            {
+                if (kv.Value.count == 0 || kv.Value.bytes == 0)
+                    continue;
+
+                Console.WriteLine("{0,8:d} {1,8:d} {2}", kv.Value.count, kv.Value.bytes, dictTypeIdToTypeName[kv.Key]);
+            }
+        }
+    }
+
+    private void ReadFilterStream(String ffilter)
+    {
+        using (StreamReader sr = new StreamReader(ffilter))
+        {
+            dictTypenameFilterSet = new Dictionary<String, bool>();
+
+            String line;
+            while ((line = sr.ReadLine()) != null)
+            {
+                dictTypenameFilterSet.Add(line, true);
+            }
+        }
+    }
+
+    private void ProcessAlloc(int stackid)
+    {
+        int typeid = dictStackIdToTypeId[stackid];
+        int size = dictStackIdToSize[stackid];
+        String s;
+
+        if (!dictStackIdToStackstring.ContainsKey(stackid))
+            return;
+
+        s = dictStackIdToStackstring[stackid];
+
+        // We want to report the results as though there was one unique
+        // stackids for each callstack.  So we choose a standard stack
+        // to charge here.  The other stacks will have no allocations
+        
+        if (dictStackstringToStackId.ContainsKey(s))
+            stackid = dictStackstringToStackId[s];
+        else
+            dictStackstringToStackId.Add(s, stackid);
+
+        // don't count allocations against types we filtered out
+        if (!dictTypeIdToTypeName.ContainsKey(typeid))
+            return;
+
+        s = dictTypeIdToTypeName[typeid];
+        if (!dictTypeNameToTypeId.ContainsKey(s))
+            return;
+
+        typeid = dictTypeNameToTypeId[s];
+
+        if (!dictStackIdToCharges.ContainsKey(stackid))
+            dictStackIdToCharges.Add(stackid, new Dictionary<int, MemCharge>());
+
+        Dictionary<int, MemCharge> dictCharges = dictStackIdToCharges[stackid];
+
+        MemCharge charge = null;
+
+        if (dictCharges.ContainsKey(typeid))
+        {
+            charge = dictCharges[typeid];
+            charge.count++;
+            charge.bytes += size;
+        }
+        else
+        {
+            charge = new MemCharge();
+            charge.count = 1;
+            charge.bytes = size;
+            dictCharges.Add(typeid, charge);
+        }
+    }
+}

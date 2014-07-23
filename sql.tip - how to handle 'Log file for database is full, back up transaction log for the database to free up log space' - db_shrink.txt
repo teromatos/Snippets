@@ -1,0 +1,9 @@
+URL:http://www.experts-exchange.com/Databases/Microsoft_SQL_Server/Q_21090815.html
+
+backup log db_name with truncate_only
+go
+dbcc shrinkfile (db_name_log,0)
+go
+
+Make sure to backup up afterwards.
+Setup DB with maintenance plan as to no increase the log size.

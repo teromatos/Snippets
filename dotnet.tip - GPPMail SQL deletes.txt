@@ -1,0 +1,25 @@
+-- Delete messages sent from system 
+
+select count (*)
+from messages
+where msgdeleted = 0 and msgreceived = 0 and fromuserkey = 99
+go 
+
+delete
+from messages
+where msgdeleted = 0 and msgreceived = 0 and fromuserkey = 99
+go
+
+
+-- Delete all deleted messages
+
+select count (*)
+from messages
+where msgdeleted = 1
+go 
+
+delete
+from messages
+where msgdeleted = 1
+go
+

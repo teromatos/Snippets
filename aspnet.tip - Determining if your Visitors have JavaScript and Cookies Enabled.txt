@@ -1,0 +1,61 @@
+URL=http://www.4guysfromrolla.com/webtech/082400-1.shtml
+
+Determining if your Visitors have JavaScript and Cookies Enabled 
+
+
+In the member area of my site I wanted to be sure that users had cookies and JavaScript enabled. Most member areas are rather complex as far as maintaining session state and form validation are concerned. You need fairly bullet proof ways to validate data. On my site I use client-side JavaScript form validation; therefore, for the validation to work, the user's browser must have JavaScript enabled. Also, I use Session variables, requiring that my visitors have Cookies enabled. To ensure that these preconditions are met, I use a nifty script to check that my users have both JavaScript and Cookies enabled; I simply do not allow users to log on if they do not have these two technologies enabled. In this article I am presenting the login page for my site. 
+
+In plain language to do this with client-side JavaScript code. We start by creating a Cookie using JavaScript and then checking to see if that Cookie exists. Since we use JavaScript to test if the user has Cookies enabled, if they don't have JavaScript enabled, but do have Cookies enabled, we'll get word back that they don't have Cookies enabled. This is fine, since I require that my users have both JavaScript and Cookies enabled. (If you are interested in if your users have just Cookies enabled (or disabled), check out this ASPMessageboard post: Checking for Cookies.) To determine if a user has JavaScript enabled, I create a HIDDEN form field in the HTML and call a JavaScript function on the ONLOAD page event, altering the value of this HIDDEN form field. That way, if the form field has been altered, then we know JavaScript is enabled (else the JavaScript function that alters the HIDDEN form field wouldn't have been called). (Both the JavaScript and Cookie checks are handled in a single JavaScript function.) 
+
+To get started, first we'll need to place a HIDDEN field in our HTML, which we'll use to determine whether or not JavaScript is supported. Place this hidden field within <form> ... </form> tags. (This FORM could also contain a username/password if you require that sort of information for someone to login to your site.) 
+
+<FORM>
+  ...
+  <input type="hidden" name="cookieexists" value="false">
+</FORM>  
+
+
+As long as the value of this field is false then we know that the user's browser does not support JavaScript. Note that it is false by default. Our JavaScript function will switch the value to true. Therefore, if JavaScript is enabled, the JavaScript function will run, and the value will be toggled to true. In your BODY tag place the code to call the JavaScript function that checks for cookies (cc()). 
+
+<body onload="cc()">  
+
+
+If the function does not execute (which will only occur if JavaScript is disabled), the cc() function will not change the value of the HIDDEN field. The code for the cc() function is rather simple. 
+
+<script language="JavaScript">
+<!--
+function cc()
+{
+ /* check for a cookie */
+  if (document.cookie == "") 
+  {
+    /* if a cookie is not found - alert user -
+     change cookieexists field value to false */
+    alert("COOKIES need to be enabled!");
+
+    /* If the user has Cookies disabled an alert will let him know 
+        that cookies need to be enabled to log on.*/ 
+
+    document.Form1.cookieexists.value ="false"  
+  } else {
+   /* this sets the value to true and nothing else will happen,
+       the user will be able to log on*/
+    document.Form1.cookieexists.value ="true"
+  }
+}
+
+/* Set a cookie to be sure that one exists.
+   Note that this is outside the function*/
+document.cookie = 'killme' + escape('nothing')
+// -->
+</script>
+
+ 
+
+
+Note that the line of JavaScript code outside of the function will execute before the page is loaded and, therefore, before the cc() function is called. As always, the JavaScript code block should be placed in the HEAD section of your HTML page. 
+
+At this point if JavaScript is enabled and Cookies are not, the user will have been alerted that he needs cookies enabled to proceed. If JavaScript is disabled of course no alert can be displayed. If JavaScript is disabled we can't really tell if Cookies are enabled or not. However, since I only let the user login if they have both JavaScript and Cookies enabled, it's no big deal if they have Cookies enabled but I can't tell. If JavaScript is disabled, however, I can't alert the user that they need to enable JavaScript (since an alert would require JavaScript code, which won't run on a user's browser if they have JavaScript disabled!). So what you can do is, when the form is submitted, check to see if the HIDDEN field cookieexists equals true or false. If it equals false then JavaScript is not enabled (and possible Cookies are also disabled, although we can't tell for sure with this method if JavaScript is disabled). 
+
+Happy Programming! 
+

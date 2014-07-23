@@ -1,0 +1,16 @@
+URL=http://staff.interesource.com/james/jul06/case_insensitive_hashtable.htm
+
+public class CaseInsensitiveHashtable : Hashtable 
+{ 
+  public CaseInsensitiveHashtable() : base () 
+  { 
+    this.hcp = new CaseInsensitiveHashCodeProvider(); 
+    this.comparer = new CaseInsensitiveComparer(); 
+  } 
+
+  public CaseInsensitiveHashtable(int capacity) : base (capacity) 
+  { 
+    this.hcp = new CaseInsensitiveHashCodeProvider(); 
+    this.comparer = new CaseInsensitiveComparer(); 
+  } 
+}

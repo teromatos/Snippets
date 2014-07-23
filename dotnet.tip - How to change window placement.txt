@@ -1,0 +1,49 @@
+Private Const SW_MINIMIZE = 6
+Private Type POINTAPI
+        x As Long
+        y As Long
+End Type
+Private Type RECT
+        Left As Long
+        Top As Long
+        Right As Long
+        Bottom As Long
+End Type
+Private Type WINDOWPLACEMENT
+        Length As Long
+        flags As Long
+        showCmd As Long
+        ptMinPosition As POINTAPI
+        ptMaxPosition As POINTAPI
+        rcNormalPosition As RECT
+End Type
+Private Declare Function ClientToScreen Lib "user32" (ByVal hwnd As Long, lpPoint As POINTAPI) As Long
+Private Declare Function GetWindowPlacement Lib "user32" (ByVal hwnd As Long, lpwndpl As WINDOWPLACEMENT) As Long
+Private Declare Function SetWindowPlacement Lib "user32" (ByVal hwnd As Long, lpwndpl As WINDOWPLACEMENT) As Long
+Dim Rectan As RECT
+Private Sub Form_Load()
+    'Tip submitted by pyp99 (pyp99@hotmail.com)
+    Dim WinEst As WINDOWPLACEMENT
+    Dim rtn As Long
+    WinEst.Length = Len(WinEst)
+    'get the current window placement
+    rtn = GetWindowPlacement(Me.hwnd, WinEst)
+    Rectan = WinEst.rcNormalPosition
+End Sub
+Private Sub Command1_Click()
+    Dim WinEst As WINDOWPLACEMENT
+    Dim Punto As POINTAPI
+    Dim rtn As Long
+    'set the new min/max positions
+    Punto.x = 100
+    Punto.y = 100
+    'initialize the structure
+    WinEst.Length = Len(WinEst)
+    WinEst.showCmd = SW_MINIMIZE
+    WinEst.ptMinPosition = Punto
+    WinEst.ptMaxPosition = Punto
+    WinEst.rcNormalPosition = Rectan
+    'set the new window placement (minimized)
+    rtn = SetWindowPlacement(Me.hwnd, WinEst)
+End Sub
+ 

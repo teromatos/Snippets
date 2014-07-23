@@ -1,0 +1,22 @@
+Samples of DateTime.Now.ToString(formatgoeshere)
+
+where formatgoeshere is the value below between the first 2 colons (:)
+
+#  format   Date
+01 : d : 6/22/2007
+02 : D : Friday, June 22, 2007
+03 : f : Friday, June 22, 2007 4:17 PM
+04 : F : Friday, June 22, 2007 4:17:03 PM
+05 : g : 6/22/2007 4:17 PM
+06 : G : 6/22/2007 4:17:03 PM
+07 : M : June 22
+08 : m : June 22
+09 : o : 2007-06-22T16:17:03.4558750-04:00
+10 : r : Fri, 22 Jun 2007 16:17:03 GMT
+11 : R : Fri, 22 Jun 2007 16:17:03 GMT
+12 : t : 4:17 PM
+13 : T : 4:17:03 PM
+14 : u : 2007-06-22 16:17:03Z
+15 : U : Friday, June 22, 2007 8:17:03 PM
+16 : y : June, 2007
+17 : Y : June, 2007

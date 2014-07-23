@@ -1,0 +1,24 @@
+    Declare Function MoveWindow Lib "user32.dll" Alias "MoveWindow" (ByVal hWnd As Integer, _
+                                                                     ByVal X As Integer, _
+                                                                     ByVal Y As Integer, _
+                                                                     ByVal nWidth As Integer, _
+                                                                     ByVal nHeight As Integer, _
+                                                                     ByVal bRepaint As Boolean) As Boolean
+
+    Private Sub MoveIEWindow()
+
+        Dim ps As System.Diagnostics.Process()
+        Dim p As System.Diagnostics.Process
+        ps = System.Diagnostics.Process.GetProcesses()
+
+        For Each p In ps
+            Try
+                If p.MainWindowTitle.Trim.Length > 0 Then
+                    If p.MainWindowTitle.EndsWith("Microsoft Internet Explorer") = True Then
+                        MoveWindow(p.MainWindowHandle.ToInt32, -1000, -1000, 400, 400, True)
+                    End If
+                End If
+            Catch ex As Exception
+            End Try
+        Next
+    End Sub

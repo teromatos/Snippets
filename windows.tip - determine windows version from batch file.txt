@@ -1,0 +1,57 @@
+Windows XP and DOS
+Batch File to Determine Operating System Version
+
+SUMMARY: Inside a batch file determine if the operating system is Windows NT, Windows 2000, Windows XP, or Windows 2003.
+
+Many DOS commands in the 32-bit versions of Windows are similar but support different parameters or a few different commands. Thus, if you wish to write a batch file that can run on different types of machines, it may prove beneficial to determine the version of Windows on which the batch file is running. This way the batch file can execute commands appropriate to the operating system.
+
+The following batch file will determine whether or not the machine is running Windows 2003, XP, 2000, or NT. It can easily be modified to support other versions of Windows as necessary or to set an environment variable based on the version of Windows detected.
+
+1) Open a Notepad window.
+
+2) Copy the following text into Notepad:
+
+@echo off
+
+ver | find "2003" > nul
+if %ERRORLEVEL% == 0 goto ver_2003
+
+ver | find "XP" > nul
+if %ERRORLEVEL% == 0 goto ver_xp
+
+ver | find "2000" > nul
+if %ERRORLEVEL% == 0 goto ver_2000
+
+ver | find "NT" > nul
+if %ERRORLEVEL% == 0 goto ver_nt
+
+echo Machine undetermined.
+goto exit
+
+:ver_2003
+:Run Windows 2003-specific commands here.
+echo Windows 2003
+goto exit
+
+:ver_xp
+:Run Windows XP-specific commands here.
+echo Windows XP
+goto exit
+
+:ver_2000
+:Run Windows 2000-specific commands here.
+echo Windows 2000
+goto exit
+
+:ver_nt
+:Run Windows NT-specific commands here.
+echo Windows NT
+goto exit
+
+:exit
+
+3) Save the file as %WINDIR%\whichvers.bat
+
+4) Now, from the command prompt, enter:
+
+whichvers

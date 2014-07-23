@@ -1,0 +1,47 @@
+URL=http://davidhayden.com/blog/dave/archive/2006/01/13/2692.aspx
+
+/// 
+/// CopyData
+/// 
+public class CopyData
+{
+    string _sourceConnectionString;
+    string _destinationConnectionString;
+
+    public CopyData(string sourceConnectionString,
+                    string destinationConnectionString)
+    {
+        _sourceConnectionString =
+                    sourceConnectionString;
+        _destinationConnectionString =
+                    destinationConnectionString;
+    }
+
+    public void CopyTable(string table)
+    {
+        using (SqlConnection source =
+                new SqlConnection(_sourceConnectionString))
+        {
+            string sql = string.Format("SELECT * FROM [{0}]", table);
+
+            SqlCommand command = new SqlCommand(sql, source);
+
+            source.Open();
+            IDataReader dr = command.ExecuteReader();
+
+            using (SqlBulkCopy copy =
+                    new SqlBulkCopy(_destinationConnectionString))
+            {
+                copy.DestinationTableName = table;
+                copy.WriteToServer(dr);
+            }
+        }
+    }
+}
+ 
+
+
+//Usage
+
+CopyData copier = new CopyData(".ConnectionString1.", ".ConnectionString2.");
+copier.CopyTable(".TableName.");

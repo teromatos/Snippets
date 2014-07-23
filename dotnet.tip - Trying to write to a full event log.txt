@@ -1,0 +1,61 @@
+Trying to write to a full event log 
+This got us this week.  Our app was trying to write exception details to the event log (Application) and the user's log was full.
+
+To 'handle' this, I now handle the 'log is full' exception and ask the user if I can clear the log for them.  Note, to clear you must be an admin.  The below code picks up from the "Log is full" exception:
+
+ 
+
+Catch win32Ex As System.ComponentModel.Win32Exception
+
+Dim dr As DialogResult = MessageBox.Show("AM.NET needs to log an exception to the " & logName & " Log, though the log is full." & vbCr & vbCr & _
+
+"AM.NET can clear the log for you or you can clear the log manually. Would you like AM.NET to clear the log for you (note, you must be an administrator to clear the log)?", _
+
+logName & " Log is Full", _
+
+MessageBoxButtons.YesNo, _
+
+MessageBoxIcon.Question)
+
+If dr = DialogResult.Yes Then
+
+Dim myDomain As AppDomain = Thread.GetDomain()
+
+myDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal)
+
+Dim myPrincipal As WindowsPrincipal = CType(Thread.CurrentPrincipal, WindowsPrincipal)
+
+If myPrincipal.IsInRole(WindowsBuiltInRole.Administrator) Then
+
+Dim log As New EventLog
+
+log.Log = logName
+
+log.Source = applicationName
+
+Try
+
+log.Clear()
+
+Me.WriteToLog(entry, type)
+
+Catch ex As Exception
+
+MessageBox.Show(ex.ToString())
+
+Exit Sub
+
+End Try
+
+Else
+
+MessageBox.Show(Environment.UserName & " is not an Administrator. Please log on as an Administrator and manually clear the " & logName & " Log.", _
+
+"Not an Administrator", _
+
+MessageBoxButtons.OK, _
+
+MessageBoxIcon.Information)
+
+End If
+

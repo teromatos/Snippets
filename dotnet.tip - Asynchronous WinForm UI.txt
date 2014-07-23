@@ -1,0 +1,23 @@
+URL:http://jachman.wordpress.com/2009/09/07/asynchronous-winform-ui/
+
+Asynchronous WinForm UI
+September 7, 2009 — Gerhard Stephan
+
+When you’re trying to create a WinForm Application that is working asynchronously, you’ll probably in a common failure:
+
+    System.InvalidOperationException occurred
+    Message="Cross-thread operation not valid: Control 'MainForm' accessed from a thread other than the thread it was created on."
+    Source="System.Windows.Forms"
+
+You’ll get this failure, because it’s not allowed to update a UI control from another thread than the thread that has created the control.
+
+A fluent way around this is to use the MethodInvoker class.
+Let’s asume that you have a statement like the following one:
+
+    appForm.Text = appInfo; 
+
+Using the MethodInvoker class would look like:
+
+    appForm.Invoke(new MethodInvoker(() => { appForm.Text = appInfo; }));
+
+That’s still a one-liner;-) And with that small hint, you’ll get around such annoying exceptions.

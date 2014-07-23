@@ -1,0 +1,34 @@
+URL=http://www.molberg.dk/blogs/steen/default.aspx?BlogId=59
+
+WSS2 WebParts compiled with framework 1.1 on VS2005 7/4/2006 01:50:14 PM 
+by Steen Molberg Comments(2) 
+I just prepared my new Dell Latitude D820 (and what a fine machine it is!! Woww!!) and I really wanted to avoid installing the VS2003 and move full time to VS2005 witch is a much nicer and more powerful environment.
+
+In the past I have stumbled over this post from Carlos Segura Sanz, who created a WSS2 F1.1 WebPart Project Template for VS2005. Great work! I used the information from this post to find out how I could  move my VS2003 projects to the VS2005-platform. I puzzled around a bit with this and it turned out to be quite simple, so I thought I post the steps here for your convenience:
+
+1.
+Install VS2005
+2.
+Install .NET Framework 1.1 SDK
+3.
+Install MsBee.
+4.
+Open your F1.1 Vs2003 solution with VS2005. The conversion wizard appears.
+5.
+Let the wizard do it’s thing. Don’t worry, it will make a backup before conversion. Be careful that no file are locked by VSS or something like that.
+6.
+After the conversion, witch should run without errors, close the solution.
+7.
+Now go to the folder and subfolder holding your solution, and locate the “.csproj”-file(s) (the C# projectfiles), and open this or these with notepad.
+8.
+Locate the following line:
+<Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+9.
+Paste in the following line in right after the above:
+<Import Project="$(MSBuildExtensionsPath)\MSBee\MSBuildExtras.Fx1_1.CSharp.targets" />
+10.
+Save and close the file and reopen the solution with VS2005. Now you should be able to compile your solution with 1.1 Framework.
+
+Hope this helps somebody.
+
+ 

@@ -1,0 +1,140 @@
+Function DownloadChunks(ByVal sURL As String, ByVal pProgress As ProgressBar, ByVal Filename As String) 
+        Dim wRemote As System.Net.WebRequest 
+        Dim URLReq As HttpWebRequest 
+        Dim URLRes As HttpWebResponse 
+        Dim FileStreamer As New FileStream(Filename, FileMode.Create) 
+        Dim bBuffer(999) As Byte 
+        Dim iBytesRead As Integer 
+
+        Try 
+            URLReq = WebRequest.Create(sURL) 
+            URLRes = URLReq.GetResponse 
+            Dim sChunks As Stream = URLReq.GetResponse.GetResponseStream 
+            pProgress.Maximum = URLRes.ContentLength 
+
+            Do 
+                iBytesRead = sChunks.Read(bBuffer, 0, 1000) 
+                FileStreamer.Write(bBuffer, 0, iBytesRead) 
+                If pProgress.Value + iBytesRead <= pProgress.Maximum Then 
+                    pProgress.Value += iBytesRead 
+                Else 
+                    pProgress.Value = pProgress.Maximum 
+                End If 
+            Loop Until iBytesRead = 0 
+            pProgress.Value = pProgress.Maximum 
+            sChunks.Close() 
+            FileStreamer.Close() 
+            Return sResponseData 
+        Catch 
+            MsgBox(Err.Description) 
+        End Try 
+End Function 
+
+======================================================================================================================================
+
+
+Protected Shared Function GetImageFromFile(ByVal FileName As String) As Byte() 
+    Dim myFile As String = FileName 
+    Dim fs As FileStream = New FileStream(myFile, FileMode.Open, FileAccess.Read) 
+    Dim br As BinaryReader = New BinaryReader(fs) 
+    Dim bytesize As Long = fs.Length 
+    ReDim GetImageFromFile(bytesize) 
+    GetImageFromFile = br.ReadBytes(bytesize) 
+End Function 
+
+So, I produced this; 
+Function GetImageFromURL(ByVal url As String) As Byte() 
+    Dim wr As HttpWebRequest = _ 
+       DirectCast(WebRequest.Create(url), HttpWebRequest) 
+    Dim wresponse As HttpWebResponse = _ 
+       DirectCast(wr.GetResponse, HttpWebResponse) 
+    Dim responseStream As Stream = wresponse.GetResponseStream 
+    Dim br As BinaryReader = New BinaryReader(responseStream) 
+    Dim bytesize As Long = wresponse.ContentLength 
+    Return br.ReadBytes(bytesize) 
+End Function 
+
+with a bit of test code thrown into a button..... 
+Private Sub Button1_Click(ByVal sender As System.Object, _ 
+    ByVal e As System.EventArgs) Handles Button1.Click 
+    Dim img As New Bitmap( _ 
+       New IO.MemoryStream( _ 
+        GetImageFromURL( _ 
+        "http://msdn.microsoft.com/longhorn/art/codenameLonghorn.JPG") _ 
+        )) 
+    Me.BackgroundImage = img 
+End Sub 
+
+======================================================================================================================================
+
+NetworkCredential myCred = new
+NetworkCredential(www.sUser,www.sPassword);
+
+CredentialCache myCache = new CredentialCache();
+myCache.Add(new Uri("http://www.jpeyroux.com";), "Basic", myCred);
+HttpWebRequest wr =(HttpWebRequest) 
+HttpWebRequest.Create(sFileDest);
+wr.Credentials = myCache;
+
+======================================================================================================================================
+
+Private Sub GetImage2()
+	Dim inet As New InetCtlsObjects.InetClass
+
+	Dim bytes As Byte()
+	Dim obj As Object
+	obj = inet.OpenURL("http://www.codeproject.com/aspnet/XYEMailService/XYEMail.zip", InetCtlsObjects.DataTypeConstants.icByteArray)
+	bytes = CType(obj, Byte())
+
+	Dim x As New StreamWriter("c:\junk\test.zip")
+	x.WriteLine(bytes)
+	x.Close()
+End Sub
+
+======================================================================================================================================
+
+Public Function GetImage3(strImage As String, strImagePath As String) As Boolean
+'-- All of the images used in the web pages are already
+'-- on the hard drive. But in case this image does not
+'-- exist or gets deleted, go back to the internet and
+'-- get the image and save to the hard drive.
+'
+    Dim intFile As Integer
+    Dim bImageData() As Byte
+    
+    On Error GoTo MakeItFalse
+    GetImage = False
+    
+    '-- Get unused file number
+    intFile = FreeFile()
+    
+    '-- Open transfer of internet file into byte array
+    bImageData() = Me.Inet1.OpenURL(strImagePath, icByteArray)
+    
+    '-- Open local file for binary output
+    Open (strImage) For Binary Access Write As #intFile
+    
+    '-- Place retrived byte array into local file
+    Put #intFile, , bImageData()
+    
+    '-- Close local file
+    Close #intFile
+    
+    '-- Make sure size is reasonable
+    '-- This is not 100% effective, sine the image
+    '-- could be less and 500 bytes, but since the
+    '-- average is between 500 to 1000, I'm fine with it
+    If FileLen(strImage) > 500 Then
+        GetImage = True
+    End If
+    
+    Exit Function
+    
+
+MakeItFalse:
+    '-- If error just make sure it the calling procedure
+    '-- must be redone by setting it to false
+    GetImage = False
+    Exit Function
+
+End Function ' GetImage

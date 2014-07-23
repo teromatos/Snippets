@@ -1,0 +1,16 @@
+Q I'm using DirectoryInfo.GetFiles in a console application to enumerate all of the files on various disks in my computer. When I attempt to do so for my CD-ROM drive when no disc is in the drive, I get a dialog box as shown in Figure 2. But as this is a console application, users aren't expecting to receive dialog boxes, and sometimes there aren't any physical users at the machine. Can you tell me what various options are available to me?
+
+
+A The System.IO namespace uses the file management functions FindFirstFile/FindNextFile from the Win32® API to enumerate all of the files in a specified directory. When a serious system error is encountered, such as a drive that isn't ready, the default system behavior is to handle the error and display an error dialog to the user. You'll notice that after you get this dialog and continue out of it, you'll receive the expected System.IO.IOException that states "The device is not ready." 
+
+Kernel32.dll provides the SetErrorMode method that allows for this behavior to be changed, allowing the caller to specify whether the system will handle these sorts of errors or whether it will expect the process to handle them instead. For the .NET Framework 2.0, Directory.InternalGetFileDirectoryNames (on which DirectoryInfo.GetFiles relies) has been modified to use this method through P/Invoke in order to change the error mode so that this dialog is not displayed. To achieve this same functionality with the .NET Framework 1.x, you can do the same thing and manually P/Invoke to SetErrorMode.
+
+Little code is required to make working with this very straightforward, as is demonstrated in Figure 3. The ChangeErrorMode struct implements IDisposable; in its constructor it changes the error mode to the specified value, and in its IDisposable.Dispose method it changes the mode back to its original value. This pattern makes it easy to incorporate this functionality into your application via the C# using statement: 
+
+using(new ChangeErrorMode(ErrorModes.FailCriticalErrors))
+{
+    string [] files = Directory.GetFiles(@"D:\");
+}
+
+
+When used with SetErrorMode, SEM_FAILCRITICALERRORS, defined as 0x1 in WinBase.h, causes the system to not display the critical-error-handler message box when a serious error is encountered. Instead, the system sends the error to the calling process, which is exactly the functionality you desire.

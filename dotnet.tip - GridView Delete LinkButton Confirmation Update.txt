@@ -1,0 +1,52 @@
+GridView Delete LinkButton Confirmation Update
+ 
+Well, as commonly happens I put up the first post and realized that that solution didn't cover everything.
+
+Like the fact that when I clicked on the edit button rather that the delete button I ended up with errors.
+
+So here is the corrected code that should not cause any problems. As a matter of fact, I think this solution opens up a lot more possibilities.
+
+Anyway, if you want a formatted version you can get it by clicking on the title of this post. That will take you to a share google docs that has the code in it.
+
+Below is a copy as well.
+
+==============================================================
+protected void GridView1_RowCreated(object sender, GridViewRowEventArgs e)
+{
+if (e.Row.RowType == DataControlRowType.DataRow)
+{
+foreach (DataControlFieldCell myCell in e.Row.Cells)
+{
+foreach (Control myControl in myCell.Controls)
+{
+switch(myControl.GetType().ToString())
+{
+case "System.Web.UI.WebControls.DataControlLinkButton":
+LinkButton myLinkButton = (LinkButton)myControl;
+switch(myLinkButton.CommandName)
+{
+case "Delete":
+myLinkButton.Attributes["onclick"] = "if(confirm('Are you sure you want to delete this record?')==false){return false;}";
+break;
+case "Edit":
+break;
+case "Update":
+break;
+case "Cancel":
+break;
+default:
+break;
+}
+break;
+case "System.Web.UI.WebControls.HyperLink":
+break;
+case "System.Web.UI.WebControls.TextBox":
+break;
+default:
+break;
+}
+}
+}
+}
+}
+==============================================================

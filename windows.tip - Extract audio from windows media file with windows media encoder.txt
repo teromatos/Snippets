@@ -1,0 +1,10 @@
+1) Don't run the wizard
+2) Click on the "Properties" button
+3) Sources -> Source From -> File
+4) Browse for your WMV
+5) Uncheck "Video"
+6) Output -> Uncheck "Pull from encoder"
+7) Check "Encode to file" & enter your file name (.wma)
+8) Compression -> Destination -> File Archive
+9) Audio -> CD Quality Audio
+10) Start Encoding

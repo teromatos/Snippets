@@ -1,0 +1,13 @@
+How to pass Null as a parameter
+
+Ran across this today. Since I've done this differently in the past, I decided to make a note of it for the future: 
+
+Passing Null as a Parameter Value
+When sending a null value as a Parameter value in a command to the database, you cannot use null (Nothing in Visual Basic® .NET). Instead you need to use DBNull.Value. For example:
+'Visual Basic
+Dim param As SqlParameter = New SqlParameter("@Name", SqlDbType.NVarChar, 20)
+param.Value = DBNull.Value
+
+//C#
+SqlParameter param = new SqlParameter("@Name", SqlDbType.NVarChar, 20);
+param.Value = DBNull.Value;

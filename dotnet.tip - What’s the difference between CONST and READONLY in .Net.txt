@@ -1,0 +1,26 @@
+url=http://www.carlj.ca/2009/03/09/whats-the-difference-between-const-and-readonly-in-net/
+
+What’s the difference between CONST and READONLY in .Net?
+03.09.09 | Permalink | 
+Share & Save Slashdot  Slashdot  Digg  Reddit  Del.icio.us  Facebook  Technorati  Google Bookmarks  StumbleUpon 1 2 3 4 5 6 7 More ... 
+Ever sit around talking to your co-workers about random things, when all of a sudden you ask “What’s the difference between const and readonly in .Net?“. If so, you are not alone. If not, well, you’re just weird.
+
+A few weeks ago, I was talking to a developer that I work with, when I asked the exact same question. I remembered though, that when I was working on Poynt while at my last job, we kept getting warnings saying that we should either change our const to readonly, or vice versa. I can’t remember exactly which one, or the reason that was given. I do also vaguley remember that it had something to do with compile time.
+
+Knowing that I wouldn’t be able to sleep without knowing the answer to this riddle, I decided to use Google to see what I could find (If you’ve never used Google, I suggest giving it a try It’s a neat little web site that gives you links to web pages, that are relevant to what you are searching for. I have a feeling that it will become big one day). From the const page on the MSDN web site:
+
+The readonly keyword differs from the const keyword. A const field can only be initialized at the declaration of the field. A readonly field can be initialized either at the declaration or in a constructor. Therefore, readonly fields can have different values depending on the constructor used. Also, although a const field is a compile-time constant, the readonly field can be used for run-time constants, as in this line: public static readonly uint l1 = (uint)DateTime.Now.Ticks;
+
+So what does that actually mean? Well, without getting into the boring low level details, I will try to explain. 
+
+When using const, the value has to be set before compiling, and can not be changed. Once you make your assembly, the value of the const is baked in there. If you want to change the value of the const, you must go back into your code, change the value, then recompile. 
+
+If another assembly (Assembly B) wants to use the const in the first assembly (Assembly A), the const is also baked in there as well. So, if you change the value of the const, not only will you have to rebuild your first Assembly (Assembly A), you will also have to build all other assemblies (Assembly B, C, D, …).
+
+Unlike const, when using readonly, the value is set when the instance is created. This means that you can specify the value of the readonly in the constructor of your class.
+
+Another difference between const and readonly, is that const are static by default, where with readonly, you must define it as static (if you want it to be). 
+
+As I mentioned above, when you change the value of a const, you must rebuild your assembly. So if the value can change, you should think about using readonly instead. To store the date for Thanksgiving (since it changes from year to year), readonly should probably be used, where as the date for New Years could be specified in a const. You could use const for things like the number of days in a week and months in a year. If you’re retrieving settings from a config file (such as urls or server addresses) and they won’t be changed after they are retrieved, then use readonly.
+
+This is just a quick comparison between the two. If you know of anything that I have missed, or have any stories that you would like to share from personal experiences using either one, feel free to share.

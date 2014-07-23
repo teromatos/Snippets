@@ -1,0 +1,103 @@
+// Also see http://msdn2.microsoft.com/en-us/library/awbftdfh(VS.80).aspx
+
+
+namespace BaseClassEvents
+{
+	using System;
+
+	public class ShapeEventArgs : EventArgs
+	{
+		private double newArea;
+
+		public ShapeEventArgs(double d)
+		{
+			newArea = d;
+		}
+		public double NewArea
+		{
+			get { return newArea; }
+		}
+	}
+
+	internal class InnerClass
+	{
+		internal event EventHandler<ShapeEventArgs> InnerClassChanged;
+
+		protected virtual void OnChanged(ShapeEventArgs e)
+		{
+
+			// Make a temporary copy of the event to avoid possibility of
+			// a race condition if the last subscriber unsubscribes
+			// immediately after the null check and before the event is raised.
+			EventHandler<ShapeEventArgs> handler = InnerClassChanged;
+			if (handler != null)
+			{
+				handler(this, e);
+			}
+		}
+
+		internal void RaiseEvent()
+		{
+			OnChanged(new ShapeEventArgs(65.87));
+		}
+	}
+
+	public class OuterClass
+	{
+		private InnerClass ic;
+
+		public OuterClass()
+		{
+			ic = new InnerClass();
+		}
+
+		// Make sure the object ic, exists by now otherwise whenever the
+		// caller subscribes to this.InnerClassChanged event, an error will
+		// be thrown.
+		public event EventHandler<ShapeEventArgs> InnerClassChanged
+		{
+			add
+			{
+				lock (this.ic)
+				{
+					this.ic.InnerClassChanged += value;
+				}
+			}
+			remove
+			{
+				lock (this.ic)
+				{
+					this.ic.InnerClassChanged -= value;
+				}
+			}
+		}
+
+		public void RaiseEventInInnerClass()
+		{
+			ic.RaiseEvent();
+		}
+	}
+
+	class Test
+	{
+
+		static void Main(string[] args)
+		{
+
+			OuterClass oc = new OuterClass();
+			oc.InnerClassChanged += oc_InnerClassChanged;
+			oc.RaiseEventInInnerClass();
+			oc.InnerClassChanged -= oc_InnerClassChanged;
+
+			// Keep the console window open.
+			Console.WriteLine();
+			Console.WriteLine("Press Enter to exit");
+			Console.ReadLine();
+		}
+
+		static void oc_InnerClassChanged(object sender, ShapeEventArgs e)
+		{
+			Console.WriteLine(e.NewArea);
+		}
+	}
+}

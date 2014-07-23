@@ -1,0 +1,68 @@
+I've seen a number of posts to the peer support lists and personally received a few requests for a code sample that performs Forms Authentication against a database. 
+
+I took code from an earlier article that authenticated against an XML file (Forms Authentication Against An XML File) and converted the code to use the ExecuteScalar method of the command object to query a database to validate the username and password. 
+
+I used SQL Server as the data source when writing this code, but the database can be any type supported by ASP.Net. The sample database I created has a single table named tUsers and has just two columns - username and password - both varchar(50) data types. 
+
+There are plenty of articles online explaining the integration of ASP.Net and databases, so I'm not going to spend time re-explaining that. The code below should be fully functional though and it should be a good starting place for you to integrate your own Forms Authentication against a database. 
+
+
+<%@ Page Language="VB" Trace="false" EnableViewState="False" %>
+<%@ Import Namespace="System.Web.Security" %>
+<%@ Import Namespace="System.Data"%>
+<%@ Import Namespace="System.Data.SqlClient" %>
+
+<script language="VB" runat=server>
+Sub Login(Src as Object, E as EventArgs) 
+  Dim sUsername as string = txtUser.Value.Replace("'","''")
+  Dim sPassword as string = txtPwd.Value.Replace("'","''")
+
+  if (CheckLoginFromDb(sUsername, sPassword)) <> "no match" then
+    FormsAuthentication.RedirectFromLoginPage(sUsername, false)
+  else
+    lblStatus.InnerHtml = "Invalid login"
+  end if
+end sub
+
+Function CheckLoginFromDb(sUsername as string, sPassword as string) as string
+  Dim sSQL          as String
+  Dim sRetUsername  as String
+
+  sSQL = "SELECT username FROM tUsers WHERE "
+  sSQL += "username = '" & sUsername & "' "
+  sSQL += "AND password = '" & sPassword & "'"
+
+  Dim sConnStr As String = CStr(ConfigurationSettings.AppSettings("MyConn"))
+  Dim oConn As SqlConnection = New SqlConnection(sConnStr)
+  Dim oCommand as SQLCommand = New SQLCommand(sSQL, oConn)
+  oCommand.CommandType = CommandType.Text
+
+  Try 
+    ' Open the connection and execute the Command 
+    oConn.Open()     
+    sRetUsername = oCommand.ExecuteScalar() 
+  Catch e As Exception
+    throw e
+  Finally 
+    ' Close the Connection 
+    If oConn.State = ConnectionState.Open then 
+      oConn.Close() 
+    End If 
+  End Try
+
+  If trim(sRetUsername) = "" then
+    return "no match"
+  else
+    return sRetUsername
+  end if
+End Function
+
+</script>
+
+<form method=post runat=server>
+  Username: <INPUT type=text name=txtUser id=txtUser runat=server/><BR>
+  Password: <INPUT type=password name=txtPwd id=txtPwd runat=server/><BR>
+<INPUT type=submit OnServerClick="Login" runat=server/>
+</form>
+
+<SPAN id="lblStatus" runat=server/>

@@ -1,0 +1,81 @@
+Public Sub AutoSizeGrid(ByRef grdCont As DataGrid, ByVal Tablestyle
+As String)
+
+Dim numCols As Integer
+numCols = CType(grdCont.DataSource, DataTable).Columns.Count
+Dim i As Integer
+i = 0
+
+Do While (i < numCols)
+AutoSizeCol(i, grdCont, Tablestyle)
+i = (i + 1)
+
+Loop
+
+End Sub
+
+Public Sub AutoSizeCol(ByVal col As Integer, ByRef grdCont As DataGrid,
+ByVal Tablestyle As String)
+
+Dim width As Single
+width = 0
+Dim numRows As Integer
+numRows = CType(grdCont.DataSource, DataTable).Rows.Count
+Dim g As Graphics
+g = Graphics.FromHwnd(grdCont.Handle)
+Dim sf As StringFormat
+sf = New StringFormat(StringFormat.GenericTypographic)
+'This is used for taking care of leading and trailing padding of the
+etxt field
+'You can experiment with it to find the right padding factor for
+your tables.
+Dim paddingFactorData As Integer = 10
+Dim paddingFactorHeader As Integer = 10
+'This var is used to check the size of the header text
+Dim headerSize As SizeF
+'Gets the size of the header text of the grid
+headerSize =
+g.MeasureString(grdCont.TableStyles(Tablestyle).GridColumnStyles(col).Header
+Text, grdCont.Font, 500, sf)
+Dim size As SizeF
+Dim i As Integer
+i = 0
+
+Do While (i < numRows)
+size = g.MeasureString(grdCont(i, col).ToString, grdCont.Font,
+500, sf)
+If (size.Width > width) Then
+width = size.Width
+End If
+i = (i + 1)
+
+Loop
+g.Dispose()
+'If the width of the header is less than the Maximum Column Data
+width then use
+'Max Column Width
+'Else
+'Use the width of the column header
+If headerSize.Width < width Then
+grdCont.TableStyles(Tablestyle).GridColumnStyles(col).Width =
+CType(width, Integer) + paddingFactorData 'This is for taking care of
+Padding of the text field
+Else
+grdCont.TableStyles(Tablestyle).GridColumnStyles(col).Width =
+CType(headerSize.Width, Integer) + paddingFactorHeader 'This is for taking
+care of Padding of the text field
+End If
+End Sub
+
+Winthin Your Form_load sub set your Styles as follwoing
+
+Dim tblStyle As New DataGridTableStyle()
+tblStyle.MappingName = "YourTableStylesName"
+' make the dataGrid use your new tablestyle and bind it to your
+table
+grdCalls.TableStyles.Clear()
+grdCalls.TableStyles.Add(tblStyle)
+
+Within your form Paint call sub as the following
+
+AutoSizeGrid(YourName, "YourTableStylesName")

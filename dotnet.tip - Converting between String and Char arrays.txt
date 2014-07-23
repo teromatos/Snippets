@@ -1,0 +1,5 @@
+Converting between String and Char arrays 
+
+Dim original As String = "Testing 1.2.3."
+Dim array As Char() = CType(original, Char())
+Dim text As String = CStr(array)

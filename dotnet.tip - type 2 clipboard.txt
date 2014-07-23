@@ -1,0 +1,10 @@
+using System;
+using System.Windows.Forms;
+
+class Clip
+{
+   static void Main() 
+  {
+     Clipboard.SetDataObject(Console.In.ReadToEnd(), true);  
+  }
+}

@@ -1,0 +1,5 @@
+(gci *.jpg ).Count
+
+ (gci *.jpg | where {!$_.Name.Contains("IMG_")} ).Count
+ 
+ gci *.jpg | where {!$_.Name.Contains("IMG_")} | Move-Item -Destination "C:\_temp\_done\jps_other_rename"

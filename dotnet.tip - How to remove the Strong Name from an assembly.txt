@@ -1,0 +1,5 @@
+AssemblyNameReference anr; 
+... 
+anr.Flags &= ~AssemblyFlags.PublicKey; 
+anr.HashAlgorithm = AssemblyHashAlgorithm.None; 
+anr.PublicKey = null; 

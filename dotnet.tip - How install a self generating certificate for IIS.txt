@@ -1,0 +1,141 @@
+Self Generating Certificates for IIS
+(https, SSL, makecert.exe)
+
+Self-generating Certificate for SSL (https://) using makecert.exe
+ 
+SSL for Development only (Self Generating certificates)
+SSL Pre-Test
+https://localhost - this should give the following error if you don't have a SSL certificate installed.
+The page must be viewed over a secure channel 
+Obtain the Certificate Creation Tool (Makecert.exe) 
+Option #1:
+Search your PC and see if you can find the file "makecert.exe".
+(ie: C:\i387\files\pfiles\msoffice\office10)
+If you don't find one, you can get the file from a .NET SDK install.
+ie: 
+C:\Program Files\Microsoft.NET\SDK\v2.0\Bin
+or 
+C:\Program Files\Microsoft.NET\SDK\v1.1\Bin 
+Option #2:
+Download and install the "Platform Software Development Kit (SDK)" from Microsoft which will contain the Certificate Creation Tool (Makecert.exe) which is in the \bin folder.
+http://support.microsoft.com 
+Search and download:  (~400 MB of files)
+On 3/23/07 the latest version was:
+Microsoft® Windows Server 2003 R2 Platform SDK - March 2006 Edition
+(Note: Other search terms could be: "Tools to Create, View, and Manage Certificates")
+Title: Windows® Server 2003 R2 Platform SDK Full Download
+(Note: Have fun trying to install...) 
+From DOS run:
+Note: %ComputerName% grabs the computer names from your system variables.  To see the list run the following: (c:\> set ) 
+Create a batch file called:  CreateLocalCert.bat
+Place the following in the batch file:
+makecert.exe -a SHA1 -ss my -sr LocalMachine -n "CN="%ComputerName% -b 01/01/2000 -e 01/01/2050 -eku 1.3.6.1.5.5.7.3.1 -sky exchange -sp "Microsoft RSA SChannel Cryptographic Provider" -sy 12
+pause 
+Run the batch file.  
+Results: Succeeded
+
+Note: Every time you run the batch file a new certificate will be added in addition to any other certificates you have. 
+Skip this step, unless you are instructed to run it in the next step.
+start> run > mmc
+File > Add/Remove snap-in
+Select Add and select “Certificates” from the list
+Select “Computer Account” from the options then “Local Computer” then “Finish”
+Close the options panel and hit “ok” 
+Install certificate on IIS
+Win XP
+Launch IIS 
+Right click on the web site (ie: Default Web Site) and choose "properties" 
+Click the tab "Directory Security" 
+Click "Server Certificate" the follow the Wizard with "Next" 
+Select "Assign an existing certificate", "Next" 
+Select the certificate that you just created.  Look for the "Issued To" that is the same as the Computer Name.
+(Note: If you don't see the certificate, the do the MMC step above.)
+Click Next.
+Certificate Summary example:
+Issued To THOMASMA9300
+Issued By Root Agency
+Expiration Date 1/1/2050
+Intended Purpose Server Authentication
+Friendly Name <None> 
+Click Next 
+Click "Finished" 
+SSL Post-Test #1
+https://localhost
+Expected results:
+There is a problem with this website's security certificate. 
+The security certificate presented by this website was not issued by a trusted certificate authority.
+The security certificate presented by this website was issued for a different website's address.
+Security certificate problems may indicate an attempt to fool you or intercept any data you send to the server. 
+Click - Continue to this website (not recommended) 
+SSL Post-Test #2 - force a user to use https to access files in a directory
+Create the following directory:
+C:\Inetpub\wwwroot\ssltesting 
+Create a file called "index.html" with the following content:
+<html>
+<title>ssltesting index</title>
+<body>
+<p>SSL Testing index file</p>
+</body>
+</html> 
+IIS Manager - force https access to a directory
+Launch "Internet Information Services" from the Administration Tools menu. 
+Under "Web Sites", "Default Web Site" right click on the directory "ssltesting" that you created above and click "Properties" 
+Click the tab "Directory Security". 
+Under "Secure Communications" click "Edit" 
+Check the box "Requires a secure channel (SSL) 
+Client certificates - use the default I guess. 
+Click OK, the OK to exit. 
+http://localhost/ssltesting/index.html - result is:  The page must be viewed over a secure channel 
+https://localhost/ssltesting/index.html - works fine because it is https://
+  
+makecert.exe Options
+
+Usage: MakeCert [ basic|extended options] [outputCertificateFile]
+Basic Options
+-sk <keyName> Subject's key container name; To be created if not present
+-pe Mark generated private key as exportable
+-ss <store> Subject's certificate store name that stores the output
+certificate
+-sr <location> Subject's certificate store location.
+<CurrentUser|LocalMachine>. Default to 'CurrentUser'
+-# <number> Serial Number from 1 to 2^31-1. Default to be unique
+-$ <authority> The signing authority of the certificate
+<individual|commercial>
+-n <X509name> Certificate subject X500 name (eg: CN=Fred Dews)
+-? Return a list of basic options
+-! Return a list of extended options
+
+Extended Options
+-sc <file> Subject's certificate file
+-sv <pvkFile> Subject's PVK file; To be created if not present
+-ic <file> Issuer's certificate file
+-ik <keyName> Issuer's key container name
+-iv <pvkFile> Issuer's PVK file
+-is <store> Issuer's certificate store name.
+-ir <location> Issuer's certificate store location
+<CurrentUser|LocalMachine>. Default to 'CurrentUser'
+-in <name> Issuer's certificate common name.(eg: Fred Dews)
+-a <algorithm> The signature algorithm
+<md5|sha1>. Default to 'md5'
+-ip <provider> Issuer's CryptoAPI provider's name
+-iy <type> Issuer's CryptoAPI provider's type
+-sp <provider> Subject's CryptoAPI provider's name
+-sy <type> Subject's CryptoAPI provider's type
+-iky <keytype> Issuer key type
+<signature|exchange|<integer>>.
+-sky <keytype> Subject key type
+<signature|exchange|<integer>>.
+-l <link> Link to the policy information (such as a URL)
+-cy <certType> Certificate types
+<end|authority>
+-b <mm/dd/yyyy> Start of the validity period; default to now.
+-m <number> The number of months for the cert validity period
+-e <mm/dd/yyyy> End of validity period; defaults to 2039
+-h <number> Max height of the tree below this cert
+-len <number> Generated Key Length (Bits)
+-r Create a self signed certificate
+-nscp Include netscape client auth extension
+-eku <oid[<,oid>]> Comma separated enhanced key usage OIDs
+-? Return a list of basic options
+-! Return a list of extended options
+  

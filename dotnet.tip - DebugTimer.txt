@@ -1,0 +1,42 @@
+URL= http://weblogs.asp.net/AvnerK/archive/2005/09/28/426150.aspx
+
+//Debug Timing
+
+public class DebugTimer : IDisposable
+{
+   private DateTime start;
+   private string label;
+   private static int level = 0;
+
+   public static DebugTimer Start (string Label)
+   {
+      return new DebugTimer(Label);
+   }
+
+   private DebugTimer (string Label)
+   {
+      level++;
+      this.label = Label;
+      this.start = DateTime.Now;
+      string message = string.Format("{2}{0}: {1}", this.label, "Starting", new string(' ', level));
+      System.Diagnostics.Debug.WriteLine(message);
+   }
+
+   public void Dispose()
+   {
+      TimeSpan time = DateTime.Now.Subtract(this.start);
+      string message = string.Format("{2}{0}: {1}", this.label, time.ToString(), new string(' ', level));
+      System.Diagnostics.Debug.WriteLine(message);
+      level--;
+   }
+}
+
+EDIT: I forgot to add a little usage sample here. Should be pretty clear, but just to cover all my bases:
+
+public void SomeMethod ()
+{
+   using (DebugTimer.Start("My Code Block"))
+   {
+      // Code to time.
+   }
+}

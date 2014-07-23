@@ -1,0 +1,13 @@
+object objstr = DBNull.Value; 
+string str1 = (string)objstr; //Cast throws an Exception 
+string str2 = objstr as string; //No exception is thrown, and str2 == null
+            
+if ( objstr == DBNull.Value )
+{ 
+  strResult = "Default";
+}
+else
+{ 
+  strResult = (string)objstr;
+} 
+//Is equivalent to strResult = objstr as string ?? "Default";

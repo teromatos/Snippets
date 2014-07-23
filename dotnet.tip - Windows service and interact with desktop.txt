@@ -1,0 +1,34 @@
+private void ServiceInstaller_AfterInstall(object sender, System.Configuration.Install.InstallEventArgs e)
+{
+ConnectionOptions coOptions = new ConnectionOptions();
+
+coOptions.Impersonation = ImpersonationLevel.Impersonate;
+
+ManagementScope mgmtScope = new System.Management.ManagementScope(@"root\CIMV2", coOptions);
+
+mgmtScope.Connect();
+
+ManagementObject wmiService;
+
+wmiService = new ManagementObject("Win32_Service.Name='" + ServiceController.ServiceName + "'");
+
+ManagementBaseObject InParam = wmiService.GetMethodParameters("Change");
+
+InParam["DesktopInteract"] = true;
+
+ManagementBaseObject OutParam = wmiService.InvokeMethod("Change", InParam, null);
+
+ServiceController.Start();
+}
+
+
+this is the way to do this.
+this code was provided by microsoft msdn support for the problem "interact with desktop".
+
+after the installation, you will be able to run a service than can interact with the desktop.
+
+greetings! 
+ 
+
+
+http://msdn.microsoft.com/library/en-us/dllproc/base/changeserviceconfig.asp

@@ -1,0 +1,7 @@
+2) Increase the Camera Raw Cache.  The default setting for this cache is 1 GB.  
+   Unless you’re using a 3.2 megapixel camera from 2001 this likely won’t be enough.  
+   The maximum cache is 50 GB.  I set mine to 30 GB.  Problem solved.  
+   I’ve had no issues with LR3 being sluggish in about a week now.  
+   Making this change seemed to have the most profound effect on Lightroom 3 performance.  
+   To increase the Camera Raw Cache, on a Mac, follow this click string: Lightroom > Preferences > File Handling.  
+   At the bottom of the dialogue box you will see “Camera Raw Cache Settings”.

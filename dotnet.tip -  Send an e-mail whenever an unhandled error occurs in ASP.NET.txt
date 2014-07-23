@@ -1,0 +1,52 @@
+URL=http://www.madskristensen.dk/blog/Health+Monitoring+In+ASPNET+20.aspx
+
+Health monitoring in ASP.NET 2.0
+by Mads Kristensen
+
+The new ASP.NET 2.0 provider model has once again amazed me. It lets you write to the EventLog, Sql Server and WMI as standard and lets you write your own provider that monitors the different events that occurs in a web application or ones you raise yourself. Read more on MSDN about using health monitoring in ASP.NET 2.0.
+
+It also lets you send an email when an error occurs with writing anything but some lines in the web.config. This is amazing. I don’t know how many times I’ve written some code that would send me a mail when a critical or unexpected error happens. For smaller web applications, this is absolutely amazing, because you probably don’t want a big event logging framework when building a simple presentational website.
+
+It is built so clever, that you don’t get an email every time an error occurs. You can set the interval or get with the one minute default. If five errors occur within that one minute, only one mail is sent with the information of all the errors so you mailbox won’t get flooded.
+
+I couldn't find an example of how to use health monitoring to send an e-mail, but a lot of articles on the web led me in the right direction. After doing some research and trial-and-error I finally made it work.
+
+Here is a very simple web.config file that sends an e-mail whenever an unhandled error occurs. Pay attention to the <healthMonitoring> and <system.net> section. These are the important ones that makes it work.
+
+
+<?xml version="1.0"?>
+<configuration>
+   <appSettings/>
+   <connectionStrings/>
+
+   <system.web>
+      <compilation debug="false" />
+      <trace enabled="true" localOnly="false" />
+
+      <healthMonitoring enabled="true">
+         <providers>
+            <add name="EmailProvider" 
+               type="System.Web.Management.SimpleMailWebEventProvider"
+               from="you@domain.com"
+               to="you@domain.com"
+               subjectPrefix="Error: "
+               buffer="true"
+               bufferMode="Notification" />
+         </providers>
+         <rules>
+            <add provider="EmailProvider" name="All App Events" eventName="All Errors" />
+         </rules>
+      </healthMonitoring>
+
+   </system.web>
+   <system.net>
+      <mailSettings>
+         <smtp from="you@domain.com">
+            <network host="smtp.domain.com" />
+         </smtp>
+      </mailSettings>
+   </system.net>
+</configuration>
+
+How easy can it get? Truly amazing.
+

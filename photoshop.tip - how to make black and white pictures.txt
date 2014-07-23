@@ -1,0 +1,9 @@
+add hue/saturation layer (hue/saturation name, normal mode)
+add hue/saturation layer (saturation name, color mode)
+
+on 'saturation' layer, change saturation to -100
+on 'hue/saturation' layer change hue to desired location
+
+
+===
+

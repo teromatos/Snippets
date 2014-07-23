@@ -1,0 +1,216 @@
+Run the following under TestDll\TestDll\bin\debug directory
+
+al /link:testdll.dll.config /out:policy.1.0.TestDll.dll /keyfile:..\..\TERO.snk /v:1.0.0.0
+
+===========================================
+
+Articl URL: http://www.dotnetforce.com/Content.aspx?t=a&n=226
+
+===========================================
+
+Assembly is the building block with metadata to provide the information of version, types and resources. During development the assembly version number in metadata will be changing continuously. So there may be situations in which your application will require the latest version of the assembly, but your application metadata will be referring to an older version of the assembly.
+
+
+By default your application search for the exact version assembly inside the GAC first and then in your working folder path. During runtime the applications binds with exact version of assembly. . If there are any changes in the new version of the assembly, it will not be reflected to the application, because still it will try to bind with older version of the assembly.
+
+
+The assembly binding behavior can be configured in three ways.
+
+
+Publisher Policy
+Application Configuration
+Machine Configuration
+The configuration files are useful to redirect the assemblies from one version to another version. During runtime CLR determines the correct version of assembly by looking inside application configuration file, publisher policy file or machine configuration file. 
+
+
+In the rest of this article we will look into how the publisher policy will work to redirect into different versions of assembly.
+
+
+Following are the sequence of steps to create and work with publisher policy
+
+
+Create class file and compile it into an assembly (dll). We create different versions of this assembly and deploy it to the GAC for redirecting the application to different versions. 
+MyClass.cs
+using System.Reflection;
+
+[assembly: AssemblyKeyFile("MyClass.StrongName")]
+
+[assembly: AssemblyVersion("1.0.0.*")]
+
+public class MyClass
+
+{
+
+public static string GetMeTheVersionDetails()
+
+{
+
+return "I am old version\r\n" + typeof(MyClass).Assembly.FullName;
+
+}
+
+} 
+
+
+
+
+
+2. Create application file to consume above library
+
+My Application.cs
+
+
+using System;
+
+class Simple
+
+{
+
+static void Main()
+
+{
+
+Console.WriteLine( "Your Assembly Details : {0}", MyClass.GetMeTheVersionDetails()); 
+
+Console.ReadLine();
+
+}
+
+} 
+
+
+
+3. Create Strong name to sign the MyClass assembly 
+sn -k MyClass.StrongName 
+
+
+
+4. Create an assembly with MyClass.cs using the following command line and note down the version number. My sample version number is ‘1.0.0.19553’.
+csc /t:library MyClass.cs 
+
+
+
+5. Create an .exe with MyApplication.cs. It will create the MyApplication.exe. This exe will be holding the reference assembly with version number. 
+csc /t:exe /r:MyClass.dll MyApplication.cs 
+
+
+
+6. Add MyClass.dll to the GAC
+gacutil /i MyClass.dll 
+
+
+
+7. Delete the “MyClass.dll” which exists in your working folder. So runtime will search for the assembly into the GAC
+
+8. Run the MyApplication.exe. You will see the following output 
+
+
+
+9. Now we change the dll code to check whether the changes are reflected or not. I changed the return statement line as follows.
+
+return "I am new version\r\n" + typeof(MyClass).Assembly.FullName;
+
+10. Now create a DLL of new version and make a note of the version number. For my sample, version number is ‘1.0.0.19675’. 
+csc /t:library MyClass.cs 
+
+
+
+11. Add the DLL to the GAC and delete the existing DLL in your working folder
+gacutil /i MyClass.dll 
+
+
+
+12. List the added dlls to the GAC to check whether our both dll’s exits in the GAC
+
+
+C:\Personal\Rosi\Articles\Publishing Policy>gacutil /l MyClass
+
+Microsoft (R) .NET Global Assembly Cache Utility. Version 1.1.4322.573
+
+Copyright (C) Microsoft Corporation 1998-2002. All rights reserved.
+
+The Global Assembly Cache contains the following assemblies:
+
+MyClass, Version=1.0.0.19553, Culture=neutral, PublicKeyToken=965555b3b8
+
+607d46, Custom=null
+
+MyClass, Version=1.0.0.19675, Culture=neutral, PublicKeyToken=965555b3b8
+
+607d46, Custom=null
+
+The cache of ngen files contains the following entries:
+
+Number of items = 2 
+
+
+
+13. Run the application.exe and you could see that it is still returning the old version information. That’s because the application metadata is referring to the old version assembly. 
+
+
+
+See the application manifest details below for detail information.
+
+
+
+14. Following is the publisher policy configuration file that redirects the one version of assembly to another version assembly. Create the configuration file as below and enter the assembly name, public key token, old version number and new version number to the publisher policy file. Here “assemblyIdentity” element specifies the assembly identity details and “bindingRedirect” element redirects to the different version by overriding the version in the original reference with new version number. 
+<configuration>
+
+<runtime>
+
+<assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+
+<dependentAssembly>
+
+<assemblyIdentity name="MyClass"
+
+publicKeyToken="965555b3b8607d46"
+
+culture="" />
+
+<bindingRedirect oldVersion="1.0.0.19553"
+
+newVersion="1.0.0.19675" />
+
+</dependentAssembly>
+
+</assemblyBinding>
+
+</runtime>
+
+</configuration> 
+
+
+
+
+
+15. Create the publisher Policy assembly using the assembly linker. The command to create publisher policy assembly is given below for your reference.
+al /link:publisherPolicyFile /out:publisherPolicyAssemblyFile /keyfile:keyPairFile 
+
+
+publisherPolicyFile: publisher policy file is the configuration file to redirect to different version
+
+publisherPolicyAssemblyFile: This is the name of the publisher policy assembly file created by this command. This assembly name should be in the form of MajorNumber.MinorNumber.AssemblyName.dll
+
+keyPairFile: File name of strong name key
+
+The following command creates the policy.1.0.MyClass.dll using MyClass.dll.config and MyClass.StrongName 
+al /link:MyClass.dll.config /out:policy.1.0.MyClass.dll /keyf:MyClass.StrongName /v:1.0.0.0 
+
+
+
+16. Add the publisher policy assembly to the GAC using GACutil tool
+Gacutil /i policy.1.0.MyClass.dll 
+
+
+
+17. Run the MyApplication.exe to see the response of new version assembly. During runtime CLR is looking into the publisher policy file and redirect the application to bind with new version assembly as specified inside the publisher policy. 
+
+
+
+
+
+If there are multiple publisher policy assembly versions inside the GAC, CLR will pick the publisher policy, which is having the highest version number. For example we uploaded policy.1.0.MyClass.dll, version 1.0.0.0 and policy.1.0.MyClass.dll, version 2.0.0.0. Since second one is having highest version number, it will pick up the second publisher policy file and binds it accordingly
+
+
+Conclusion: Publisher policy is useful for applications to bind with required version assembly. This is the simplest way to redirect the assemblies during runtime and also there is no need of redeploying your application again and again. If there is any issues contact me at rosireddyr@yahoo.com.

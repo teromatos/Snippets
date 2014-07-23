@@ -1,0 +1,7 @@
+With Cust AS
+    ( SELECT CustomerID, CompanyName,
+    ROW_NUMBER() OVER (order by CompanyName) as RowNumber 
+    FROM Customers )
+select *
+from Cust
+Where RowNumber Between 20 and 30

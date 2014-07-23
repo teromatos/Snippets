@@ -1,0 +1,1 @@
+Hold down the shift key when you press the take picture button and your picture will be taken without using the flash. If you hold down the option key when you press the take picture button your picture will be taken without using the count-down delay. If you hold down both the shift and options keys, your picture will be taken immediately and without the flash.

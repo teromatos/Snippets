@@ -1,0 +1,160 @@
+Ten CSS tricks you may not know
+By Trenton Moss 
+
+http://www.codeproject.com/html/CSSTrcicks.asp
+
+
+1. CSS font shorthand rule
+When styling fonts with CSS you may be doing this:
+
+font-size: 1em;
+line-height: 1.5em;
+font-weight: bold;
+font-style: italic;
+font-varient: small-caps;
+font-family: verdana,serif
+There's no need though as you can use this CSS shorthand property:
+
+font: 1em/1.5em bold italic small-caps verdana,serif
+Much better! Just a couple of words of warning: This CSS shorthand version will only work if you're specifying both the font-size and the font-family. Also, if you don't specify the font-weight, font-style, or font-varient then these values will automatically default to a value of normal, so do bear this in mind too.
+
+2. Two classes together
+Usually attributes are assigned just one class, but this doesn't mean that that's all you're allowed. In reality, you can assign as many classes as you like! For example:
+
+<p class="text side">...</p>
+Using these two classes together (separated by a space, not with a comma) means that the paragraph calls up the rules assigned to both text and side. If any rules overlap between the two classes then the class which is below the other in the CSS document will take precedence.
+
+3. CSS border default value
+When writing a border rule you'll usually specify the colour, width and style (in any order). For example, border: 3px solid #000 will give you a black solid border, 3px thick. However the only required value here is the border style.
+
+If you were to write just border: solid then the defaults for that border will be used. But what defaults? Well, the default width for a border is medium (equivalent to about 3 to 4px) and the default colour is that of the text colour within that border. If either of these are what you want for the border then you can leave them out of the CSS rule!
+
+4. !important ignored by IE
+Normally in CSS whichever rule is specified last takes precedence. However if you use !important after a command then this CSS command will take precedence regardless of what appears after it. This is true for all browsers except IE. An example of this would be:
+
+margin-top: 3.5em !important; margin-top: 2em
+So, the top margin will be set to 3.5em for all browsers except IE, which will have a top margin of 2em. This can sometimes come in useful, especially when using relative margins (such as in this example) as these can display slightly differently between IE and other browsers.
+
+(Many of you may also be aware of the CSS child selector, the contents of which IE ignores.)
+
+5. Image replacement technique
+It's always advisable to use regular HTML markup to display text, as opposed to an image. Doing so allows for a faster download speed and has accessibility benefits. However, if you've absolutely got your heart set on using a certain font and your site visitors are unlikely to have that font on their computers, then really you've got no choice but to use an image.
+
+Say for example, you wanted the top heading of each page to be ‘Buy widgets’, as you're a widget seller and you'd like to be found for this phrase in the search engines. You're pretty set on it being an obscure font so you need to use an image:
+
+<h1><img src="widget-image.gif" alt="Buy widgets" /></h1>
+This is OK but there's strong evidence to suggest that search engines don't assign as much importance to alt text as they do real text (because so many webmasters use the alt text to cram in keywords). So, an alternative would be:
+
+<h1><span>Buy widgets</span></h1>
+Now, this obviously won't use your obscure font. To fix this problem place these commands in your CSS document:
+
+h1
+{
+background: url(widget-image.gif) no-repeat;
+}
+
+h1 span
+{
+position: absolute;
+left:-2000px
+} 
+The image, with your fancy font, will now display and the regular text will be safely out of the way, positioned 2000px to the left of the screen thanks to our CSS rule.
+
+6. CSS box model hack alternative
+The box model hack is used to fix a rendering problem in pre-IE 6 browsers, where by the border and padding are included in the width of an element, as opposed to added on. For example, when specifying the dimensions of a container you might use the following CSS rule:
+
+.box
+{
+width: 100px
+border: 5px
+padding: 20px
+} 
+This CSS rule would be applied to:
+
+<div id="box">...</div>
+This means that the total width of the box is 150px (100px width + two 5px borders + two 20px paddings) in all browsers except pre-IE 6 versions. In these browsers the total width would be just 100px, with the padding and border widths being incorporated into this width. The box model hack can be used to fix this, but this can get really messy.
+
+A simple alternative is to use this CSS:
+
+.box
+{
+width: 150px
+}
+
+.box div {
+border: 5px
+padding: 20px
+} 
+And the new HTML would be:
+
+<div id="box"><div>...</div></div>
+Perfect! Now the box width will always be 150px, regardless of the browser!
+
+7. Centre aligning a block element
+Say you wanted to have a fixed width layout website, and the content floated in the middle of the screen. You can use the following CSS command:
+
+#content
+{
+width: 700px
+margin: 0 auto
+}
+You would then enclose <div class="content"> around every item in the body of the HTML document and it'll be given an automatic margin on both its left and right, ensuring that it's always placed in the centre of the screen. Simple... well not quite - we've still got the pre-IE 6 versions to worry about, as these browsers won't centre align the element with this CSS command. You'll have to change the CSS rules:
+
+body
+{
+text-align: center
+}
+
+#content
+{
+text-align: left
+width: 700px
+margin: 0 auto;
+} 
+This will then centre align the main content, but it'll also centre align the text! To offset the second, probably undesired, effect we inserted text-align: left into the content div.
+
+8. Vertically aligning with CSS
+Vertically aligning with tables was a doddle. To make cell content line up in the middle of a cell you would use vertical-align: middle. This doesn't really work with a CSS layout. Say you have a navigation menu item whose height is assigned 2em and you insert this vertical align command into the CSS rule. It basically won't make a difference and the text will be pushed to the top of the box.
+
+Hmmm... not the desired effect. The solution? Specify the line height to be the same as the height of the box itself in the CSS. In this instance, the box is 2em high, so we would insert line-height: 2em into the CSS rule and the text now floats in the middle of the box - perfect!
+
+9. CSS positioning within a container
+One of the best things about CSS is that you can position an object absolutely anywhere you want in the document. It's also possible (and often desirable) to position objects within a container. It's simple to do too. Simply assign the following CSS rule to the container:
+
+#container
+{
+position: relative
+}
+Now any element within this container will be positioned relative to it. Say you had this HTML structure:
+
+<div id="container"><div id="navigation">...</div></div>
+To position the navigation exactly 30px from the left and 5px from the top of the container box, you could use these CSS commands:
+
+#navigation
+{
+position: absolute;
+left: 30px;
+top: 5px
+} 
+Perfect! In this particular example, you could of course also use margin: 5px 0 0 30px, but there are some cases where it's preferable to use positioning.
+
+10. Background colour running to the screen bottom
+One of the disadvantages of CSS is its inability to be controlled vertically, causing one particular problem which a table layout doesn't suffer from. Say you have a column running down the left side of the page, which contains site navigation. The page has a white background, but you want this left column to have a blue background. Simple, you assign it the appropriate CSS rule:
+
+#navigation
+{
+background: blue
+width: 150px
+} 
+Just one problem though: Because the navigation items don't continue all the way to the bottom of the screen, neither does the background colour. The blue background colour is being cut off half way down the page, ruining your great design. What can you do!?
+
+Unfortunately the only solution to this is to cheat, and assign the body a background image of exactly the same colour and width as the left column. You would use this CSS command:
+
+body
+{
+background: url(blue-image.gif) 0 0 repeat-y
+}
+This image that you place in the background should be exactly 150px wide and the same blue colour as the background of the left column. The disadvantage of using this method is that you can't express the left column in terms of em, as if the user resizes text and the column expands, it's background colour won't.
+
+At the time of writing though, this is the only solution to this particular problem so the left column will have to be expressed in px if you want it to have a different background colour to the rest of the page.
+

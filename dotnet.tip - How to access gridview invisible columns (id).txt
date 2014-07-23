@@ -1,0 +1,113 @@
+URL=http://www.gridviewguy.com/ArticleDetails.aspx?articleID=178
+
+Access GridView Invisible Columns
+By AzamSharp 
+Introduction: 
+
+I have been getting a lot of emails in which I was being asked to demonstrate that how one can retrieve the value of an invisible column of the GridView control. In this article I will show you two ways that you can use to retrieve the value from an invisible column.
+
+Why Invisible Column?  
+
+One might ask that why should I use an invisible column in the first place. There are many reasons of making the column invisible. You might want to use a column as the primary key which retrieves the value from the database and display it using the GridView control. Since, primary key is a confidential data you want might to hide it from the users. Another reason of making the column invisible is that you might want to have some additional information to save an extra trip to the database. Please note that the second scenario should not be used to display many columns as this will increase the View State and thus the size of the page large.  
+
+Using the DataKeys Property:
+
+The simplest way to access the primary key is by using DataKeys property of the GridView control. DataKeys property represents the column which is to be used as the primary key. In this article I will use my custom database "Tasks" and display the columns "Title", "Description", "DateCreated" in the GridView control. Apart from the columns from the database the GridView also contains a CheckBox Template Column which is used to check the tasks which are completed. Take a look at the HTML below to have a clear idea. 
+
+<asp:GridView ID="gvInComplete" runat="server" AutoGenerateColumns="False" CellPadding="4"
+ForeColor="#333333" GridLines="None" DataKeyNames="TaskID">
+
+<FooterStyle BackColor="#990000" Font-Bold="True" ForeColor="White" />
+
+<Columns> 
+
+<asp:BoundField DataField="Title" HeaderText="Title" />
+
+<asp:BoundField DataField="Description" HeaderText="Description" />
+
+<asp:BoundField DataField="DateCreated" HeaderText = "Date Created" />
+
+<asp:TemplateField HeaderText="Select">
+
+<ItemTemplate>
+
+<asp:CheckBox ID="chkSelect" runat="server" /> 
+
+</ItemTemplate>
+
+</asp:TemplateField>
+
+</Columns>
+
+</asp:GridView>
+
+ 
+ 
+
+As, you can see in the code above the DataKeyNames property is set to "TaskID" which, is the primary key in the table. Now, let's see how we can access all the TaskID of the rows which are checked using the CheckBoxes. 
+
+DataKey key;
+foreach (GridViewRow row in gvInComplete.Rows)
+
+{
+
+bool result = ((CheckBox)row.FindControl("chkSelect")).Checked;
+
+if (result)
+
+{
+
+key = gvInComplete.DataKeys[row.RowIndex];
+
+Response.Write((int)key.Value);
+
+}
+
+} 
+ 
+
+In the code above I am iterating through all the rows in the GridView control. If I find a row that is checked then I gets the primary key of the row using the GridView DataKeys collection. The Row class property RowIndex will contain the index of the current row.
+
+This is pretty simple right! But what if I want to access another column which is not a primary key. This can be done by using a Template Column inside the GridView control. 
+
+Accessing Invisible Column Using Template Field:
+
+To access the invisible column using Template Field is very straight forward. All you need to do is to make the Template Field invisible and use the control inside the Template Field to access the values. Check out the following HTML code: 
+
+<asp:TemplateField Visible="False"> 
+<ItemTemplate>
+
+<asp:Label ID="lblTaskID" runat="server" Text='<%# Eval("TaskID") %>' /> 
+
+</ItemTemplate> 
+
+</asp:TemplateField> 
+ 
+
+In the above HTML code I have simply defined a Label control inside the ItemTemplate property of the Template Field. The Template Field is made invisible so, the user will not see it on when it is bound to the GridView control. You can access the TaskID using the following code: 
+
+int taskID = 0;
+Task task = new Task(); 
+
+foreach (GridViewRow row in gvInComplete.Rows)
+
+{
+
+bool result = ((CheckBox) row.FindControl("chkSelect")).Checked;
+
+if (result)
+
+{
+
+taskID = Convert.ToInt32(((Label)row.FindControl("lblTaskID")).Text);
+
+task.UpdateTask(taskID);
+
+}
+
+}
+ 
+
+In the above code I am simply iterating through the GridView rows and when I find that the checkbox is checked then I get the value from the Label control which in this case is TaskID. After, I get the TaskID I can perform any function on it in my case UpdateTask. 
+
+I hope you liked the article, happy coding!

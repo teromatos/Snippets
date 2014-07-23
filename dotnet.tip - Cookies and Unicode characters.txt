@@ -1,0 +1,32 @@
+URL=http://blog.madskristensen.dk/post/Cookies-and-Unicode-characters.aspx
+
+Cookies and Unicode characters
+by Mads Kristensen 9. September 2007 
+I’ve been having some issues with storing Unicode characters in cookies today. Whenever a cookie is set and the value filled with Unicode characters, the same characters cannot be retrieved from the cookie again. When they are retrieved from the requesting browser, they are changed into something totally unreadable. 
+
+Background
+The cookie is set when a visitor enters some text into a textbox and submits the form. When the same visitor returns to that page I wanted to pre-fill the textbox with the value submitted earlier. Very easy and simple and not before someone noticed the strange behaviour with Unicode characters I thought it worked just fine. 
+
+Because the value was displayed in a textbox I thought that maybe HTML encoding could solve the issue. Don’t ever HTML encode a cookie in ASP.NET! It results in a yellow screen of death and an exception stating that the cookie contains dangerous characters. The dangerous character it was referring to was a HTML encoded representation of a Unicode character and looked something like this "#248;". The only thing to do is to delete your cookies in order to view that page again. 
+
+The solution
+It took me a while to figure it out, but all you need to do is to URL encode the cookie value. It works no matter what encoding you use for the page. The example below illustrates the very simple solution: 
+
+private void SetCookie()
+{
+  HttpCookie cookie = new HttpCookie("cookiename");
+  cookie.Expires = DateTime.Now.AddMonths(24);
+  cookie.Values.Add("name", Server.UrlEncode(txtName.Text));
+  Response.Cookies.Add(cookie);
+} 
+
+private void GetCookie()
+{
+  HttpCookie cookie = Request.Cookies["cookiename"];
+  if (cookie != null)
+  {
+    txtName.Text = Server.UrlDecode(cookie.Values["name"]);
+  }
+} 
+
+It is so simple but caused me a lot of time investigating and clearing cookies from the browser. 

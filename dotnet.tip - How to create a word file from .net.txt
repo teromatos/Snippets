@@ -1,0 +1,74 @@
+        Dim WordApp As New Microsoft.Office.Interop.Word.ApplicationClass
+
+        Dim myfilename As Object = "c:\temp\mydoc.doc"
+
+        Dim missing As Object = System.Reflection.Missing.Value
+        Dim fileName As Object = "normal.dot"
+        Dim newTemplate As Object = False
+        Dim docType As Object = 0
+        Dim isVisible As Object = True
+
+        '// Create document object based on normal.dot template
+        Dim aDoc As Word.Document = WordApp.Documents.Add(fileName, newTemplate, docType, isVisible)
+
+        '// Activate document
+        aDoc.Activate()
+
+        '// Set font name and size for document
+        WordApp.Selection.Font.Name = "Verdana"
+        WordApp.Selection.Font.Size = 10
+
+        '// Set 0.5 inch margins
+        aDoc.PageSetup.TopMargin = 36
+        aDoc.PageSetup.BottomMargin = 36
+        aDoc.PageSetup.LeftMargin = 36
+        aDoc.PageSetup.RightMargin = 36
+
+        '// Add page numbers to document
+        WordApp.Selection.Sections.Item(1).Footers.Item(Word.WdHeaderFooterIndex.wdHeaderFooterPrimary).PageNumbers.Add(Word.WdPageNumberAlignment.wdAlignPageNumberRight, True)
+
+        '// Modify page number font and size
+        If WordApp.ActiveWindow.View.SplitSpecial <> Word.WdSpecialPane.wdPaneNone Then
+            WordApp.ActiveWindow.Panes.Item(2).Close()
+        End If
+
+        If WordApp.ActiveWindow.ActivePane.View.Type = Word.WdViewType.wdNormalView OrElse _
+           WordApp.ActiveWindow.ActivePane.View.Type = Word.WdViewType.wdOutlineView Then
+            WordApp.ActiveWindow.ActivePane.View.Type = Word.WdViewType.wdPrintView
+        End If
+
+        WordApp.ActiveWindow.ActivePane.View.SeekView = Word.WdSeekView.wdSeekCurrentPageHeader
+        WordApp.ActiveWindow.ActivePane.View.SeekView = Word.WdSeekView.wdSeekCurrentPageFooter
+
+        WordApp.Selection.WholeStory()
+        WordApp.Selection.Font.Name = "Verdana"
+        WordApp.Selection.Font.Size = 10
+        WordApp.ActiveWindow.ActivePane.View.SeekView = Word.WdSeekView.wdSeekMainDocument
+
+        '// Set bold font for current text
+        WordApp.Selection.Font.Bold = -1
+        '// Type text
+        WordApp.Selection.TypeText("hello world bolded")
+        '// New paragraph
+        WordApp.Selection.TypeParagraph()
+
+        '// New paragraph
+        WordApp.Selection.TypeParagraph()
+        '// Set non-bold font for current text
+        WordApp.Selection.Font.Bold = 0
+        '// Type text
+        WordApp.Selection.TypeText("hello world unbolded")
+
+        '// Delete any previous file
+        If System.IO.File.Exists(myfilename.ToString) Then System.IO.File.Delete(myfilename.ToString)
+
+        '// Save current document to file
+        aDoc.SaveAs(myfilename)
+
+        '-- close document
+        aDoc.Close()
+        aDoc = Nothing
+
+        WordApp.Quit()
+
+        MessageBox.Show("All done.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information)

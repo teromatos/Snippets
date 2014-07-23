@@ -1,0 +1,11 @@
+    Private Function IsAnAssembly(ByVal filename As String) As Boolean
+
+        Try
+            Using asmParser As New BearCanyon.AssemblyParser(filename)
+                Return asmParser.IsAssembly
+            End Using
+        Catch ex As Exception
+            Return False
+        End Try
+
+    End Function

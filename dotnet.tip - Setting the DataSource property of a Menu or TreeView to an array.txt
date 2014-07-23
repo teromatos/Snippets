@@ -1,0 +1,22 @@
+URL=http://weblogs.asp.net/dannychen/archive/2005/12/05/432382.aspx
+
+Setting the DataSource property of a Menu or TreeView to an array 
+Here is a neat "trick" you can do with the Data controls.  If you have an array of data you want to format, you can just 
+directly assign it to the Datasource property kind of like this:
+
+ <%@ Page Language="VB" %> <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"> <script runat="server">    Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)       DataList1.DataSource = New String() {"one", "two", "three"}       DataList1.DataBind()    End Sub </script> <html xmlns="http://www.w3.org/1999/xhtml" >    <head runat="server">       <title>Untitled Page</title>    </head> <body> <form id="form1" runat="server"> <div>    <asp:DataList ID="DataList1" runat="server">       <ItemTemplate>          <%# Container.DataItem %>       </ItemTemplate>    </asp:DataList> </div> </form> </body> </html>
+However, if you've ever tried this with the Menu or Treeview, you'd quickly figure out it doesn't work.  This is 
+because the HierarchicalDataSourceView requires a new type called a IHierarchicalEnumerable which enumerates 
+a type called IHierarchyData.  The solution would be to implement these two interfaces as minimally as possible.
+
+ 
+
+ Public Class HierarchicalData    Implements IHierarchicalEnumerable    Private data As ArrayList    Public Sub New(ByVal values() As String)       data = New ArrayList()       For Each value As String In values          data.Add(New HierarchicalDataElement(value))       Next    End Sub     Public Function GetEnumerator() As System.Collections.IEnumerator Implements System.Collections.IEnumerable.GetEnumerator       Return data.GetEnumerator()    End Function    Public Function GetHierarchyData(ByVal enumeratedItem As Object) As System.Web.UI.IHierarchyData Implements System.Web.UI.IHierarchicalEnumerable.GetHierarchyData       Return CType(enumeratedItem, HierarchicalDataElement)    End Function End Class
+ Public Class HierarchicalDataElement    Implements IHierarchyData       Public _data As String    Public Sub New(ByVal data As String)       _data = data    End Sub    Public Function GetChildren() As System.Web.UI.IHierarchicalEnumerable Implements System.Web.UI.IHierarchyData.GetChildren       Return Nothing    End Function    Public Function GetParent() As System.Web.UI.IHierarchyData Implements System.Web.UI.IHierarchyData.GetParent       Return Nothing    End Function    Public ReadOnly Property HasChildren() As Boolean Implements System.Web.UI.IHierarchyData.HasChildren    Get       Return False    End Get    End Property    Public ReadOnly Property Item() As Object Implements System.Web.UI.IHierarchyData.Item    Get       Return _data    End Get    End Property    Public ReadOnly Property Path() As String Implements System.Web.UI.IHierarchyData.Path    Get       Return _data    End Get    End Property    Public ReadOnly Property Type() As String Implements System.Web.UI.IHierarchyData.Type    Get       Return _data.GetType().ToString()    End Get    End Property       Public Overrides Function ToString() As String       Return _data    End Function End Class
+ 
+And to use it, declare a Menu on your form and just add the following code.  There is no need to bind to 
+Container.DataItem in a template because the MenuItems get their text value from the IHierarchyData.ToString() overload.  
+
+ 
+
+<script runat="server">   Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs)      Menu1.DataSource = New HierarchicalData(New String() {"one", "two", "three"})      Menu1.DataBind()   End Sub</script>

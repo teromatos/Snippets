@@ -1,0 +1,27 @@
+          InstalledFontCollection ifc = new InstalledFontCollection();
+                  FontFamily[] ffs = ifc.Families;
+                  Font f;
+                  richTextBox1.Clear();
+                  foreach(FontFamily ff in ffs)
+                  {
+                        if (ff.IsStyleAvailable(System.Drawing.FontStyle.Regular))  
+                        f = new Font(ff.GetName(1),12,System.Drawing.FontStyle.Regular); 
+
+                        else if(ff.IsStyleAvailable(System.Drawing.FontStyle.Bold)) 
+
+                   f = new Font(ff.GetName(1),12, System.Drawing.FontStyle.Bold);
+                   else if (ff.IsStyleAvailable(System.Drawing.FontStyle.Italic))
+                  f = new Font(ff.GetName(1),12, System.Drawing.FontStyle.Italic);
+                  else
+               f = new Font(ff.GetName(1),12, System.Drawing.FontStyle.Underline);
+                        richTextBox1.SelectionFont=f;
+                        richTextBox1.AppendText(ff.GetName(1)+"\r\n");
+                        richTextBox1.SelectionFont=f;
+                        richTextBox1.AppendText("abcdefghijklmnopqrstuvwxyz\r\n");
+                        richTextBox1.SelectionFont=f;
+                        richTextBox1.AppendText("ABCDEFGHIJKLMNOPQRSTUVWXYZ\r\n");
+                       richTextBox1.AppendText("===================================================\r\n"); 
+
+                  } 
+
+                  MessageBox.Show("finished adding fonts to window","DisplayFonts"); 

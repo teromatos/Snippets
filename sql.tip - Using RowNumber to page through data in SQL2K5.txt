@@ -1,0 +1,14 @@
+Easy way to page data in Sql Server
+
+SELECT *, Row_Number() over (ORDER BY FirstName) AS RowNumber 
+FROM Customer
+WHERE RowNumber > 1000 AND RowNumber < 1051
+ORDER BY FirstName
+
+
+So then, use a WITH statement to construct a CTE: 
+WITH __actualSet 
+( 
+SELECT C.*, ROW_NUMBER() OVER (ORDER BY CompanyName ASC) AS RowNumber FROM Customers C 
+ORDER BY RowNumber ASC 
+) SELECT * FROM __actualSet WHERE RowNumber BETWEEN 1 AND 10

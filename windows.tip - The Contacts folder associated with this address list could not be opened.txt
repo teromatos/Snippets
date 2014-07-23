@@ -1,0 +1,36 @@
+Outlook 2002 - Missing address book when creating a new message
+The information in this article applies to: 
+
+Microsoft Outlook 2002 
+This article was previously published under Q319901
+
+SYMPTOMS
+If you attempt to address a new message from your Contacts, you may receive the following error message: 
+
+The address list could not be displayed. The Contacts folder associated with this address list could not be opened; it may have been moved or deleted, or you do not have permissions. For information on how to remove this folder from the Outlook Address Book, see Microsoft Outlook Help. 
+
+CAUSE
+This behavior can occur if the Microsoft Outlook Address Book is damaged.
+
+RESOLUTION
+To resolve this issue, remove and reinstall the Outlook Address Book. To do this:
+
+Start Outlook. 
+On the Tools menu, click E-mail Accounts. 
+Click View or change existing directories or address books, and then click Next. 
+Click Outlook Address Book, and then click Remove. 
+Click Yes when you receive the prompt to confirm the removal. 
+Click Add. 
+Click Additional Address Books, and then click Next. 
+Click Outlook Address Book, and then click Next. 
+Click OK when you receive the message to restart Outlook. 
+Click Finish. 
+Click Exit on the File menu to quit Outlook. 
+Restart Outlook. 
+In the Folder list, right-click the folder that you want to use with the Address Book (for example, right-click Contacts), and then click Properties. 
+Click the Outlook Address Book tab. 
+Click to select the Show this folder as an e-mail Address Book check box (if it is not already selected), and then click OK. 
+
+MORE INFORMATION
+For additional information about how to troubleshoot the Address Book in Outlook, click the article number below to view the article in the Microsoft Knowledge Base: 287563 Contact Information Does Not Appear in Address Book For additional information about user profiles and information services in Outlook, click the article number below to view the article in the Microsoft Knowledge Base: 289467 OL2002: User Profiles and Information Services
+

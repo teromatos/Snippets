@@ -1,0 +1,19 @@
+URL=http://weblogs.asp.net/jgalloway/archive/2005/12/02/432062.aspx
+
+localhost vs. (local) in SQL Server connection strings 
+Sample code with SQL Server connection strings often use localhost and (local) interchangeably. They're different. 
+
+Server=(local);Database=DotNetNuke;Trusted_Connection=True
+Uses named pipes
+
+Server=localhost;Database=DotNetNuke;Trusted_Connection=True
+Uses a TCP port negotiated on port 1434 udp, which defaults to 1433
+
+There are many differences between TCP and Named Pipe connection, but if you're on localhost you're mostly concerned with simple access. 
+
+The default ASPNET account generally has an easier time with TCP, since the  ASPNET user doesn't have access to named pipes by default (http://support.microsoft.com/Default.aspx?id=315159). 
+If you're using impersonation, Named Pipes is usually simpler. If you're using impersonation with no username specified, you're running under the IIS Authenticating user. This defaults to IUSR_MACHINENAME if you're allowing annonymous access, which generally has access to the IPC$ share required for named pipe communications.  
+As mentioned in a comment on Peter Van Ooijen's blog a while ago, the easiest setup is to avoid either local or localhost and just use the machine name (e.g.  Server=COMPY386;Database=DotNetNuke;Trusted_Connection=True). Note that this will use TCP/IP rather than named pipes. This isn't always practical in a group development situation where each developer is running a SQL Server instance since each machine will have a unique name.
+
+Info on troubleshooting SQL Server 2000 connectivity here.
+Also check out this great info on ASPNET connectivity to SQL Server by RupW in the GDN message boards.

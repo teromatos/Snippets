@@ -1,0 +1,47 @@
+    Sub ModifySLNFile(ByVal slnFile As String, ByVal newSlnFile As String, ByVal slnName As String)
+
+        If File.Exists(newSlnFile) = True Then
+            Throw New Exception("File exists (" & newSlnFile & ").")
+        End If
+
+        Dim sr As New StreamReader(slnFile)
+        Dim sw As New StreamWriter(newSlnFile)
+        Dim line As String
+        Dim line2 As String
+        Dim lineCount As Integer
+
+        Do While sr.Peek <> -1
+            line = sr.ReadLine
+            lineCount += 1
+
+            If lineCount = 2 Then
+
+                Dim posComma1 As Integer
+                Dim posComma2 As Integer
+
+                'Project("{F184B08F-C81C-45F6-A57F-5ABD9991F28F}") = "AInfo", "AInfo.vbproj", "{77DC86C2-FB02-4D54-B4EE-E3A3769D11BD}"
+
+                posComma1 = line.IndexOf(","c, 0)
+                If posComma1 < 0 Then
+                    Throw New Exception("Unable to locate comma 1" & vbCrLf & vbCrLf & line)
+                End If
+
+                posComma2 = line.IndexOf(","c, posComma1 + 1)
+                If posComma2 < 0 Then
+                    Throw New Exception("Unable to locate comma 2" & vbCrLf & vbCrLf & line)
+                End If
+
+                line2 = line.Substring(0, posComma1 + 1)
+                line2 = line2 & " " & Chr(34) & slnName & "\" & slnName & ".vbproj" & Chr(34)
+                line2 = line2 & line.Substring(posComma2)
+
+                line = line2
+            End If
+
+            sw.WriteLine(line)
+        Loop
+
+        sr.Close()
+        sw.Close()
+
+    End Sub

@@ -1,0 +1,4 @@
+rename all "%USERPROFILE%\Application Data\Microsoft\Outlook\*.nk2 files or delete them
+
+
+http://support.microsoft.com/?kbid=287623

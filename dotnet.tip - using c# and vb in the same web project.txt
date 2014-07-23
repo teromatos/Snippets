@@ -1,0 +1,76 @@
+URL = http://timheuer.com/blog/archive/2007/02/28/14002.aspx
+
+      using c# and vb in the same web project
+       | posted @ Wednesday, February 28, 2007 12:51 PM | 2 Comments
+
+      every once in a while i get asked if you can have both c# and visual basic in the same web site project.  my gut response is always to ask "why would you want to" as i always assume it is a new project, etc.  to me, it simply wouldn't make sense from a new project standpoint, code reviews, coding standards, continuity, project maintenance, etc.
+
+      however, people still ask.  to-date i never really tried (and that's been my answer).  i was presented with a usable scenario of why you may need (not want, need) to do this, so i finally tried it.  the answer: yes...kinda...sometimes.
+
+      let's assume we have a web site structure like this:
+
+      sshot-9
+
+      we have the App_Code folder and a .cs and a .vb file in the same projects (separated into sub-folders).  note that the project sees them as folders (yellow folder icon) in the special folder.  each class within there basically has a "hello world" function only, like this in the c# file:
+
+         1:  public string SayHelloCS()
+
+         2:  {
+
+         3:      return "Hello from CS";
+
+         4:  }
+
+
+      and the visual basic file has a similar function emitting "Hello from VB."
+
+      now, if you run default.aspx in this structure, this is what you will see:
+
+          The files '/WebSite5/App_Code/VBCode/Class2.vb' and '/WebSite5/App_Code/CSCode/Class1.cs' use a different language, which is not allowed since they need to be compiled together.
+
+      interesting?  probably not, but it makes sense...so how do we overcome.  we use a configuration option called codeSubDirectories.  here's what we need to add to our <compilation> node in our web.config:
+
+         1:        <compilation debug="false">
+
+         2:          <codeSubDirectories>
+
+         3:            <add directoryName="VBCode"/>
+
+         4:            <add directoryName="CSCode"/>
+
+         5:          </codeSubDirectories>        
+
+         6:        </compilation>
+
+
+      once we add those codeSubDirectory nodes, let's "look" at what the project structure looks like now:
+
+      sshot-10
+
+      as you can see the code folders are now "special" in the eyes of visual studio.  now if we browse default.aspx we will see:
+
+          Hello world from CS. Hello world from VB
+
+      and we're done.  so if you have some legacy code (let's say a provider) that is in visual basic and your new project is c# (and you've already had the long heated debates with your team on why you are choosing a language over the other), you can implement this option of using codeSubDirectories.
+
+      now, you can also have multiple pages that have different code-beside languages and that works in this model.  however, if you are using the web application project model, this will not work.  the multiple code files only works inherently (along with codeSubDirectories) with the web site model.
+
+      hope this helps.
+      tags: asp.net, aspnet, csharp, c sharp, c#, visual basic, vb, web site, visual studio express, visual studio, code, codeSubDirectories, web.config, web configuration
+
+      Wednesday, February 28, 2007 12:51 PM
+      PostTypeIcon
+
+Comments.
+
+    *
+      abdullah said:
+      # re: using c# and vb in the same web project
+
+      nice... but what if your app_code is subdivided into folders already, and in one of those folders you want both .cs and .vb
+      3/8/2007 12:41 PM
+    *
+      timheuer said:
+      # re: using c# and vb in the same web project
+
+      Good question...only directories immediately under the App_Code folder can have this special attribution...another level deep cannot.

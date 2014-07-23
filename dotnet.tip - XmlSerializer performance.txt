@@ -1,0 +1,7 @@
+http://weblogs.asp.net/cazzu/archive/2004/10/21/XGenToolRelease.aspx
+
+The XmlSerializer has a farily well-known problem: the first time you use it, it will generate a class to read instances of the received type, compile it, and then load it. Of course, this can take considerable time, directly related to the complexity of the type and all its members and member types.
+
+Unlike common wisdom, this is something that can be avoided and I have explained (albeit rather confusingly) in a previous post. The usage was not great, though, as it was a command-line tool: ouch!
+
+So, the Mvp.Xml project debuts with a new package: Mvp.Xml.Design. Now, in order to get a design-time version of a custom XmlSerializer for a type, you just assign the Mvp.Xml.XGen (renamed from the old SGen name that could be confused with a Whidbey tool of the same name), and you'll get a class to perform serialization of the type. The custom tool will take the first type in the file if multiple classes exist in it.

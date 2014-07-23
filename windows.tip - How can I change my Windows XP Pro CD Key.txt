@@ -1,0 +1,55 @@
+How can I change my Windows XP CD-ROM key? 
+A. To change your XP CD-ROM key, perform the following steps: 
+
+Create a system restore checkpoint, in case you encounter a problem. 
+Start a registry editor (e.g., regedit.exe). 
+Navigate to the HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\WPAEvents registry subkey. 
+Edit the OOBETimer value, modify any one character, then click OK. 
+Start the CD-ROM key Activation Wizard--click Start, Run and type 
+\%systemroot%\system32\oobe\msoobe.exe /a
+Select the "Activate by Phone" option. 
+At the product key screen, enter your new key, then click Update. 
+If the wizard returns you to the previous window, click "Remind me later," then restart the machine. 
+Repeat Step 5. XP will display the message "Windows is already activated. Click OK to exit." 
+
+You can also use the following script that Microsoft provides to change the CD-ROM key: 
+
+  ' 
+  ' Windows Management Instrumentation (WMI) Script - ChangeVLKey.vbs
+  '
+  ' This script changes the product key on the computer. Service Pack 1
+  ' must be installed.
+  '
+  '********************************************************************
+
+  ON ERROR RESUME NEXT
+
+  if Wscript.arguments.count<1 then
+  Wscript.echo "Script can't run without VolumeProductKey argument"
+  Wscript.echo "Correct usage: Cscript ChangeVLKey.vbs ABCDE-FGHIJ-
+  KLMNO-PRSTU-WYQZX"
+  Wscript.quit
+  end if
+
+  Dim VOL_PROD_KEY
+  VOL_PROD_KEY = Wscript.arguments.Item(0)
+  VOL_PROD_KEY = Replace(VOL_PROD_KEY,"-","") 'remove hyphens if any
+
+  for each Obj in
+  GetObject("winmgmts:{impersonationLevel=impersonate}").InstancesOf
+  ("win32_WindowsProductActivation")
+
+  result = Obj.SetProductKey (VOL_PROD_KEY)
+
+  if err <> 0 then
+  WScript.Echo Err.Description, "0x" & Hex(Err.Number)
+  Err.Clear
+  end if
+
+  Next
+
+To use this script, go to the command prompt and run
+
+changevlkey.vbs <new key>
+where <new key> is the name of the new key that you want to activate (e.g., ab123-ab123-ab123-ab123-ab123).
+ 

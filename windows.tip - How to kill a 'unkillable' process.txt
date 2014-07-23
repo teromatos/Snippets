@@ -1,0 +1,19 @@
+A short update and a cool process killing trick 
+Yes. I am still alive. 
+Meanwhile some things have taken place:
+ 
+1. I celebrated my 29th birthday. Yey!
+ 
+2. For my birthday - we got a ThinkPad T41p with 2GB RAM. that should be enough to run those longhorn demos in the coming future, I hope :)
+ 
+3. I've been to a most amazing debugging lecture over at the visual C# users group. Some pretty amazing stuff in there. I should write about that some other time. meanwhile I learned a cool trick:
+How to kill a process that wouldn't die through the TaskList dialog
+1. Locate the process ID (make the "PID" column visible in the task list
+2. open a command prompt
+3. type "ntsd -p [PID]" without the quotes
+4. You've just entered a low level debugger and you'll notice that you are now inside a breakpoint on that process that wouldn't die.
+5. type "q" and ENTER to quit the debugger and the process will die along with it.
+6. this works for services too. 
+ 
+I know I've been away and I can't promise that I'm back in full throttle, but I'll try to keep up with the blog until I can find more time. I'm not happy about not being able to invest time in something that has b\done me so good so I'm in the process of finding ways to make more time available either through work or some other ways. It will not be on family time however. I've also been getting a little out of touch with the community (blogger dinners, TDD workshops etc..). I promise to get back to that ASAP.
+I'll get that working

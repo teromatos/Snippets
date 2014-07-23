@@ -1,0 +1,2 @@
+select table_name, column_name, data_type, character_maximum_length, is_nullable from information_schema.columns where table_name in (select name from sysobjects where xtype='U') order by table_name
+

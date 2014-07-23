@@ -1,0 +1,77 @@
+http://groups.google.com/groups?hl=en&lr=&ie=UTF-8&oe=UTF-8&threadm=9au7XNdPCHA.880%40cpmsftngxa08&rnum=1&prev=/groups%3Fq%3Dipx%2Bc%2523%26hl%3Den%26lr%3D%26ie%3DUTF-8%26oe%3DUTF-8%26selm%3D9au7XNdPCHA.880%2540cpmsftngxa08%26rnum%3D1
+
+
+All messages from thread 
+Message 1 in thread 
+From: rzm (zm_r@hotmail.com)
+Subject: how to communicate with ipx/spx in c#.net? 
+ 
+  
+View this article only 
+Newsgroups: microsoft.public.dotnet.languages.csharp
+Date: 2002-08-05 05:04:57 PST 
+ 
+
+how to communicate with ipx/spx in c#.net?
+thanks.
+Message 2 in thread 
+From: Lion Shi (lionshi@online.microsoft.com)
+Subject: RE: how to communicate with ipx/spx in c#.net? 
+ 
+  
+View this article only 
+Newsgroups: microsoft.public.dotnet.languages.csharp
+Date: 2002-08-06 22:42:36 PST 
+ 
+
+Hello,
+
+You may use the System.Net.Sockets.Socket class and specify AddressFamily 
+and ProtocolType to Ipx:
+
+Socket s = new Socket(AddressFamily.Ipx, SocketType.Stream, ProtocolType.Ipx);
+
+You may refer links below to get more detailed information:
+
+http://msdn.microsoft.com/library/en-us/cpref/html/frlrfSystemNetSocketsSocketClassTopic.asp
+
+http://msdn.microsoft.com/library/en-us/cpref/html/frlrfSystemNetSocketsProtocolTypeClassTopic.asp
+
+http://msdn.microsoft.com/library/en-us/cpref/html/frlrfSystemNetSocketsAddressFamilyClassTopic.asp
+
+Hope it helps.
+
+Best regards, 
+
+Lion Shi, MCSE, MCSD
+Microsoft Support Engineer
+
+This posting is provided "AS IS" with no warranties, and confers no rights. 
+You assume all risk for your use.  2001 Microsoft Corporation. All rights 
+reserved. 
+--------------------
+    From: zm_r@hotmail.com (rzm)
+    Newsgroups: microsoft.public.dotnet.languages.csharp
+    Subject: how to communicate with ipx/spx in c#.net?
+    Date: 5 Aug 2002 05:04:56 -0700
+    Organization: http://groups.google.com/
+    Lines: 2
+    Message-ID: <4d14bd3d.0208050404.380697d3@posting.google.com>
+    NNTP-Posting-Host: 210.21.93.29
+    Content-Type: text/plain; charset=ISO-8859-1
+    Content-Transfer-Encoding: 8bit
+    X-Trace: posting.google.com 1028549096 16454 127.0.0.1 (5 Aug 2002 
+12:04:56 GMT)
+    X-Complaints-To: groups-abuse@google.com
+    NNTP-Posting-Date: 5 Aug 2002 12:04:56 GMT
+    Path: 
+cpmsftngxa08!cppssbbsa01.microsoft.com!news-out.cwix.com!newsfeed.cwix.com!n
+ntp1.roc.gblx.net!nntp.gblx.net!nntp.gblx.net!newspump.sol.net!206.55.64.81.
+MISMATCH!newsfeeds.sol.net!209.251.2.10.MISMATCH!newshosting.com!news-xfer1.
+newshosting.com!easynews!sn-xit-02!sn-xit-01!sn-xit-06!sn-xit-04!supernews.c
+om!postnews1.google.com!not-for-mail
+    Xref: cpmsftngxa08 microsoft.public.dotnet.languages.csharp:81577
+    X-Tomcat-NG: microsoft.public.dotnet.languages.csharp
+    
+    how to communicate with ipx/spx in c#.net?
+    thanks.

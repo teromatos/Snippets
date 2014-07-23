@@ -1,0 +1,102 @@
+
+    ''' -----------------------------------------------------------------------------
+    ''' <summary>
+    '''     Serialize the treeview object to a file on the user's machine
+    '''     Filling the treeview can be a slow process so cache the values for next time
+    ''' </summary>
+    ''' <remarks>
+    ''' </remarks>
+    ''' <history>
+    ''' 	[Enigma]	2/26/2005	Created
+    ''' </history>
+    ''' -----------------------------------------------------------------------------
+    Private Sub SerializeTreeview()
+
+        Dim directoryname As String
+        '-- Make sure the directory where the serialization files will be created
+        '-- exists and does not contain any serialized files
+        directoryname = Path.Combine(s.TreeViewSerializedDirectory, VersionName)
+        If Not Directory.Exists(directoryname) Then
+            Directory.CreateDirectory(directoryname)
+        Else
+            Dim binFiles As String()
+            Dim binfile As String
+            binFiles = Directory.GetFiles(directoryname, "*.bin")
+            If binFiles.Length > 0 Then
+                For Each binfile In binFiles
+                    File.Delete(binfile)
+                Next
+            End If
+        End If
+
+        '-- Serialize each top node in the tree view object to a file
+        Dim i As Integer
+        Dim node As TreeNode
+
+        For Each node In Me.tvwDrugs.Nodes
+            i += 1
+            Dim fs As New FileStream(Path.Combine(directoryname, "node" & i.ToString("0000") & ".bin"), FileMode.Create)
+
+            Dim formatter As New BinaryFormatter
+            formatter.Serialize(fs, node)
+            fs.Close()
+        Next
+
+    End Sub
+
+    ''' -----------------------------------------------------------------------------
+    ''' <summary>
+    '''     Retrieve the treeview nodes which were previously serialized
+    ''' </summary>
+    ''' <returns></returns>
+    ''' <remarks>
+    ''' </remarks>
+    ''' <history>
+    ''' 	[Enigma]	2/26/2005	Created
+    ''' </history>
+    ''' -----------------------------------------------------------------------------
+    Private Function DeSerializeTreeview() As Boolean
+
+        Dim directoryName As String
+
+        '-- Make sure the directory where the serialization files will be created
+        '-- exists and it does contain any serialized files
+        directoryName = Path.Combine(s.TreeViewSerializedDirectory, Me.VersionName)
+        If Not Directory.Exists(directoryName) Then Return False
+
+        Dim binFiles As String()
+        binFiles = Directory.GetFiles(directoryName, "*.bin")
+        If binFiles.Length = 0 Then Return False
+
+        '-- Make sure current number of therapeutic codes matches 
+        '-- the number of serialized treeview nodes
+        Dim tcc As USPFormulary.DbService.TherapeuticCategoryCollection
+        tcc = dbh.GetTherapeuticCategories(String.Empty)
+        If binFiles.Length <> tcc.Count Then Return False
+
+
+        Dim node As TreeNode
+        Dim binfile As String
+
+        '-- Sort the list of files so they are added the correct order
+        Array.Sort(binFiles)
+
+        '-- Add serialized nodes to the treeview
+        Me.tvwDrugs.BeginUpdate()
+        For Each binfile In binFiles
+            Dim fs As New FileStream(binfile, FileMode.Open)
+            Dim formatter As New BinaryFormatter
+
+            '-- Deserialize the node from the file and 
+            '-- add it to the treeview
+            node = DirectCast(formatter.Deserialize(fs), TreeNode)
+            Me.tvwDrugs.Nodes.Add(node)
+            fs.Close()
+
+        Next
+        Me.tvwDrugs.EndUpdate()
+
+        '-- Return succcess
+        Return True
+
+    End Function

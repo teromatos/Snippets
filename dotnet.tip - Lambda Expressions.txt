@@ -1,0 +1,4 @@
+url=http://weblogs.asp.net/okloeten/archive/2006/07/07/Three-Lines-About-Lambda-Expressions.aspx
+
+myObject.ITakeACharReturningDelegate(delegate(int i, string s) { return s[i]; });
+myObject.ITakeACharReturningDelegate((i, s) => s[i]);

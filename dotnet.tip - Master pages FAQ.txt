@@ -1,0 +1,53 @@
+URL=http://codebetter.com/blogs/eric.wise/archive/2006/08/02/147882.aspx
+
+Basics: Master Page FAQ 
+  I lurk around some of the joel and microsoft forums from time to time and every once in a while I pop up to the surface to answer some .net questions.  I've been meaning for a while to compile some of the basic questions I see pop up frequently about master pages.
+
+How can my page talk to my master page?
+
+Couple ways to do this.  Page.Master will give you a loose reference to whatever the master page is, and then you can use FindControl() to locate and manipulate whatever controls you need to.  Personally, I do not like this method because FindControl is prone to typos, and won't raise a compiler error if someone takes that control out or renames it. It also makes the page responsible for controls in the master, I think the master should be in charge of that.
+
+The better way to accomplish this is to get a strong reference to your master page, and then call public methods to set and query values.  There are two ways to go about this.  In method one, in your .aspx page below the <% page %> directives you can put the following directive:
+
+<%@ MasterType VirtualPath="~/MyMaster.master" %>
+
+Now when you type Page.Master. intellisense will fire up all the methods in your master page that you have made available.  You can also cast Page.Master yourself as follows:
+
+((MyMaster)Page.Master).Foo()
+
+ 
+
+Can I dynamically set a master page at runtime?
+
+Certainly!  Use the page_preinit event:
+
+void BasePage_PreInit(object sender, EventArgs e)
+{
+     MasterPageFile = "~/MyMaster.master";
+}
+
+ 
+
+What the hell is up with order of events with master pages?
+
+Maybe you should ask Scott Guthrie.  Just remember to watch out for Page_Load and Page_Init.  If you expose a Page_Load in the master and content, the content will fire first.  For Page_Init, the master will fire first.  Init bubbles from the inside out, and it's a common mistake by newbie asp .net developers to think that because the master page visually "wraps" content that it is outside.  In reality during execution the master page is on the inside.  =)
+
+ 
+
+My control names are all messed up!
+
+Because you can have multiple content names and .net needs to ensure that all IDs are unique, you'll find that controls inside the content page will be prepended with some goo that makes them unique.  This can cause issues if you are using javascript which references controls.  The solution to this is to use the ClientId property of your server controls.  Here's an example of showing and hiding a server side <div> element with javascript:
+
+<script type="text/javascript" language="javascript">
+            function showDIV()
+            {
+              document.getElementById("<%=dvMyDiv.ClientID %>").style.display="";
+            }
+            
+            function hideDIV()
+            {
+              document.getElementById("<%=dvMyDiv.ClientID %>").style.display="none";
+            }
+
+</script>
+

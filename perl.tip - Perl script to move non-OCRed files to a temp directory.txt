@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+
+# move non-ocred files to a directory
+# change variables below, you need a base dir (like /home/joe/), and a sourcedirectory and output
+# direcotry (e.g books and tempdir)
+# move all your pdfs to the sourcedirectory
+
+use warnings;
+use strict;
+
+# need to install these modules with CPAN or your distros installer (e.g. apt-get)
+use CAM::PDF;
+use File::Find;
+use File::Basename;
+use File::Copy;
+
+#use PDF::OCR2;
+#$PDF::OCR2::CHECK_PDF   = 1;
+#$PDF::OCR2::REPAIR_XREF = 1;
+
+my $basedir = '/your/base/directory';
+my $sourcedirectory  = $basedir.'/books/';
+my @exts       = qw(.pdf);
+my $count      = 0;
+my $outputroot = $basedir.'/tempdir/';
+open( WRITE, >>$basedir.'/errors.txt' );
+
+#check file
+#my $pdf = PDF::OCR2->new($basedir.'/tempfile.pdf');
+#print $pdf->page(10)->text;
+
+
+
+find(
+    {
+        wanted => \&process_file,
+
+        #       no_chdir => 1
+    },
+    $sourcedirectory
+);
+close(WRITE);
+
+sub process_file {
+    #must be a file
+    if ( -f $_ ) {
+        my $file = $_;
+        #must be a pdf
+        my ( $dir, $name, $ext ) = fileparse( $_, @exts );
+        if ( $ext eq '.pdf' ) {
+            #check if pdf is ocred
+            my $command = "pdffonts \'$file\'";
+            my $output  = `$command`;
+            if ( !( $output =~ /yes/ || $output =~ /no/ ) ) {
+                #print "$file - Not OCRed\n";
+                my $currentdir = $File::Find::dir;
+                if ( $currentdir =~ /$sourcedirectory(.+)/ ) {
+                    #if directory doesn't exist, create
+                    unless(-d $outputroot.$1){
+                    system("mkdir -p $outputroot$1");
+                    }
+                    #copy over file
+                    my $fromfile = "$currentdir/$file";
+                    my $tofile = "$outputroot$1/$file";
+                    print "copy from: $fromfile\n";
+                    print "copy to: $tofile\n";
+                    copy($fromfile, $tofile) or die "Copy failed: $!";
+#                       `touch $outputroot$1/\'$file\'`;
+                }
+            }
+
+        }
+
+    }
+}

@@ -1,0 +1,38 @@
+In this quick FAQ, I am going to show how to use the Singleton design pattern to create a form that has only one instance of itself. For the theory behind the pattern, see the link above. 
+
+The first thing you want to do is make your constructor of the form private. This is to ensure programmers don't create instances of the form, but use the one that already exists. 
+
+Just change the public to private: 
+
+Code:Private Sub New() 
+    MyBase.New() 
+
+    'This call is required by the Windows Form Designer. 
+    InitializeComponent() 
+
+    'Add any initialization after the InitializeComponent() call 
+
+End Sub
+
+Next, we are going to add a method to the form that will return the current instance of the form. We also add a class level variable to hold the form instance. 
+
+Code:Private Shared _Instance As form1 = Nothing 
+
+Public Shared Function Instance() As form1 
+    If _Instance Is Nothing OrElse _Instance.IsDisposed = True Then 
+        _Instance = New form1 
+    End If 
+    _Instance.BringToFront() 
+    Return _Instance 
+End Function
+
+This method checks to see if an instance of the form is already open, and if so shows it. 
+
+To call the form from other MDI windows or forms, you do the following: 
+
+Code:Dim MyForm As form1 
+MyForm = form1.Instance 'Decare our variable = to the existing instance of the form 
+MyForm.MdiParent = Me 'if we have an mdi parent window 
+MyForm.Show() 'this shows the current instance of the form
+
+As you can see it's simple to use the Singleton pattern to create one instance forms. This pattern can also be used for any object you want to have a single instance of.

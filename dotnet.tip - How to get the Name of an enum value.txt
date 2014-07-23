@@ -1,0 +1,16 @@
+'Lets say we have an enum to show User Rights. 
+Public Enum UserRights 
+    Guest = 0 
+    User = 1 
+    Moderator = 2 
+    NotQuiteAdmin = 3 
+    Administrator = 4 
+End Enum 
+
+'Now lets say that a user is loged in.. You would like to tell them they are NotQuiteAdmin but when you.... 
+MsgBox(UserRights.NotQuiteAdmin) 
+'you will get a message box with only the number 3 in it.. no text... 
+
+'If you want the name of the enum value you do the following... 
+MsgBox(System.Enum.GetName(GetType(UserRights), UserRights.NotQuiteAdmin)) 
+'This will pop up a message box with "NotQuiteAdmin" as the text.

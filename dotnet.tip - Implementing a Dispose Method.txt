@@ -1,0 +1,305 @@
+.NET Framework Developer's Guide 	 
+Implementing a Dispose Method
+
+A type's Dispose method should release all the resources that it owns. It should also release all resources owned by its base types by calling its parent type's Dispose method. The parent type's Dispose method should release all resources that it owns and in turn call its parent type's Dispose method, propagating this pattern through the hierarchy of base types. To ensure that resources are always cleaned up appropriately, a Dispose method should be callable multiple times without throwing an exception.
+
+A Dispose method should call the GC.SuppressFinalize method for the object it is disposing. If the object is currently on the finalization queue, GC.SuppressFinalize prevents its Finalize method from being called. Remember that executing a Finalize method is costly to performance. If your Dispose method has already done the work to clean up the object, then it is not necessary for the garbage collector to call the object's Finalize method.
+
+The purpose of the following code example is to illustrate one possible design pattern for implementing a Dispose method for classes that encapsulate unmanaged resources. You might find this pattern convenient to use because it is implemented throughout the .NET Framework. However, this is not the only possible implementation of a Dispose method.
+
+Resource classes are typically derived from complex native classes or APIs and must be customized accordingly. Use this code pattern as a starting point for creating a resource class and provide the necessary customization based on the resources you are encapsulating. You cannot compile this sample and use it directly in an application.
+
+In this example, the base class BaseResource implements a public Dispose method that can be called by users of the class. It in turn calls the method virtual Dispose(bool disposing) (virtual Dispose(disposing As Boolean) in Visual Basic). Either true or false is passed depending upon the identity of the caller. The appropriate cleanup code for the object is executed in the virtual Dispose method.
+
+Dispose(bool disposing) executes in two distinct scenarios. If disposing equals true, the method has been called directly or indirectly by a user's code and managed and unmanaged resources can be disposed. If disposing equals false, the method has been called by the runtime from inside the finalizer and only unmanaged resources can be disposed. When an object is executing its finalization code, it should not reference other objects, because finalizers do not execute in any particular order. If an executing finalizer references another object that has already been finalized, the executing finalizer will fail.
+
+The base class provides a Finalize method or destructor as a safeguard in the event that Dispose is not called. The Finalize method calls the Dispose method that takes parameters, passing false. You should not re-create Dispose clean-up code within the Finalize method. Calling Dispose(false) is optimal for code readability and maintainability.
+
+The class MyResourceWrapper illustrates how to derive from a class that implements resource management using Dispose. MyResourceWrapper overrides the virtual Dispose(bool disposing) method and provides clean-up code for the managed and unmanaged resources that it creates. MyResourceWrapper also calls Dispose on its base class BaseResource to make sure that its base gets the opportunity to clean up properly. Note that the derived class MyResourceWrapper does not have a Finalize method or a Dispose method without parameters, because it inherits them from the base class BaseResource.
+
+    Note   The protected Dispose(bool disposing) method in this example does not enforce thread safety because the method cannot be called from a user thread and a finalizer thread at the same time. In addition, a client application using the BaseResource should never allow multiple user threads to call the protected Dispose(bool disposing) method at the same time. An application or class library should be designed to allow only one thread to own the lifetime of a resource and to call Dispose when the resource is no longer needed. Depending on the resource, unsynchronized thread access when disposing of resources can pose a security risk. Developers should carefully review their code to determine the best approach to enforcing thread safety.
+
+[Visual Basic]
+' Design pattern for the base class.
+' By implementing IDisposable, you are announcing that instances
+' of this type allocate scarce resources.
+Public Class BaseResource
+   Implements IDisposable
+   ' Pointer to an external unmanaged resource.
+   Private handle As IntPtr 
+   ' Other managed resource this class uses.
+   Private Components As Component
+   ' Track whether Dispose has been called.
+   Private disposed As Boolean = False
+
+   ' Constructor for the BaseResource Object.
+   Public Sub New()
+      ' Insert appropriate constructor code here.
+   End Sub
+
+   ' Implement IDisposable.
+   ' Do not make this method Overridable.
+   ' A derived class should not be able to override this method.
+   Public Overloads Sub Dispose()Implements IDisposable.Dispose
+      Dispose(true)
+      ' Take yourself off of the finalization queue
+      ' to prevent finalization code for this object
+      ' from executing a second time.
+      GC.SuppressFinalize(Me) 
+   End Sub
+
+' Dispose(disposing As Boolean) executes in two distinct scenarios.
+' If disposing is true, the method has been called directly 
+' or indirectly by a user's code. Managed and unmanaged resources 
+' can be disposed.
+' If disposing equals false, the method has been called by the runtime
+' from inside the finalizer and you should not reference other    
+' objects. Only unmanaged resources can be disposed.
+Protected Overloads Overridable Sub Dispose(disposing As Boolean)
+   ' Check to see if Dispose has already been called.
+   If Not (Me.disposed) Then
+      ' If disposing equals true, dispose all managed 
+      ' and unmanaged resources.
+      If (disposing) Then
+         ' Dispose managed resources.
+         Components.Dispose()
+      End If
+      ' Release unmanaged resources. If disposing is false,
+      ' only the following code is executed.      
+      CloseHandle(handle)
+      handle = IntPtr.Zero
+      ' Note that this is not thread safe.
+      ' Another thread could start disposing the object
+      ' after the managed resources are disposed,
+      ' but before the disposed flag is set to true.
+      ' If thread safety is necessary, it must be
+      ' implemented by the client.
+   End If
+   Me.disposed = true
+End Sub
+
+   ' This Finalize method will run only if the 
+   ' Dispose method does not get called.
+   ' By default, methods are NotOverridable. 
+   ' This prevents a derived class from overriding this method.
+   Protected Overrides Sub Finalize()
+         ' Do not re-create Dispose clean-up code here.
+         ' Calling Dispose(false) is optimal in terms of
+         ' readability and maintainability.
+         Dispose(false)
+   End Sub
+   
+   ' Allow your Dispose method to be called multiple times,
+   ' but throw an exception if the object has been disposed.
+   ' Whenever you do something with this class, 
+   ' check to see if it has been disposed.
+   Public Sub DoSomething()
+      If Me.disposed Then
+         Throw New ObjectDisposedException()
+      End if
+   End Sub
+End Class
+
+' Design pattern for a derived class.
+' Note that this derived class inherently implements the 
+' IDisposable interface because it is implemented in the base class.
+Public Class MyResourceWrapper
+   Inherits BaseResource
+   
+   ' A managed resource that you add in this derived class.
+   private addedManaged As ManagedResource
+   ' A native unmanaged resource that you add in this derived class.
+   private addedNative As NativeResource
+   ' Track whether Dispose has been called.
+   Private disposed As Boolean = False
+
+   ' Constructor for the MyResourceWrapper object.
+   Public Sub New()      
+      MyBase.New()
+      ' Insert appropriate constructor code here for the
+      ' added resources.
+   End Sub
+
+   Protected Overloads Overrides Sub Dispose(disposing As Boolean)
+      If Not (Me.disposed) Then
+         Try
+            If disposing Then
+              ' Release the managed resources you added in
+              ' this derived class here.
+              addedManaged.Dispose()
+            End If
+            ' Release the native unmanaged resources you added
+            ' in this derived class here.
+            CloseHandle(addedNative)
+            Me.disposed = true
+         Finally
+            ' Call Dispose on your base class.
+            MyBase.Dispose(disposing)
+         End Try
+      End If
+   End Sub
+End Class
+' This derived class does not have a Finalize method
+' or a Dispose method without parameters because it 
+' inherits them from the base class.
+
+[C#]
+// Design pattern for the base class.
+// By implementing IDisposable, you are announcing that instances
+// of this type allocate scarce resources.
+public class BaseResource: IDisposable
+{
+   // Pointer to an external unmanaged resource.
+   private IntPtr handle;
+   // Other managed resource this class uses.
+   private Component Components;
+   // Track whether Dispose has been called.
+   private bool disposed = false;
+
+   // Constructor for the BaseResource object.
+   public BaseResource()
+   {
+      // Insert appropriate constructor code here.
+   }
+
+   // Implement IDisposable.
+   // Do not make this method virtual.
+   // A derived class should not be able to override this method.
+   public void Dispose()
+   {
+      Dispose(true);
+      // Take yourself off the Finalization queue 
+      // to prevent finalization code for this object
+      // from executing a second time.
+      GC.SuppressFinalize(this);
+   }
+
+   // Dispose(bool disposing) executes in two distinct scenarios.
+   // If disposing equals true, the method has been called directly
+   // or indirectly by a user's code. Managed and unmanaged resources
+   // can be disposed.
+   // If disposing equals false, the method has been called by the 
+   // runtime from inside the finalizer and you should not reference 
+   // other objects. Only unmanaged resources can be disposed.
+   protected virtual void Dispose(bool disposing)
+   {
+      // Check to see if Dispose has already been called.
+      if(!this.disposed)
+      {
+         // If disposing equals true, dispose all managed 
+         // and unmanaged resources.
+         if(disposing)
+         {
+            // Dispose managed resources.
+            Components.Dispose();
+         }
+         // Release unmanaged resources. If disposing is false, 
+         // only the following code is executed.
+         CloseHandle(handle);
+         handle = IntPtr.Zero;
+         // Note that this is not thread safe.
+         // Another thread could start disposing the object
+         // after the managed resources are disposed,
+         // but before the disposed flag is set to true.
+         // If thread safety is necessary, it must be
+         // implemented by the client.
+
+      }
+      disposed = true;         
+   }
+
+   // Use C# destructor syntax for finalization code.
+   // This destructor will run only if the Dispose method 
+   // does not get called.
+   // It gives your base class the opportunity to finalize.
+   // Do not provide destructors in types derived from this class.
+   ~BaseResource()      
+   {
+      // Do not re-create Dispose clean-up code here.
+      // Calling Dispose(false) is optimal in terms of
+      // readability and maintainability.
+      Dispose(false);
+   }
+
+   // Allow your Dispose method to be called multiple times,
+   // but throw an exception if the object has been disposed.
+   // Whenever you do something with this class, 
+   // check to see if it has been disposed.
+   public void DoSomething()
+   {
+      if(this.disposed)
+      {
+         throw new ObjectDisposedException();
+      }
+   }
+}
+
+// Design pattern for a derived class.
+// Note that this derived class inherently implements the 
+// IDisposable interface because it is implemented in the base class.
+public class MyResourceWrapper: BaseResource
+{
+   // A managed resource that you add in this derived class.
+   private ManagedResource addedManaged;
+   // A native unmanaged resource that you add in this derived class.
+   private NativeResource addedNative;
+   private bool disposed = false;
+
+  // Constructor for this object.
+   public MyResourceWrapper()
+   {
+      // Insert appropriate constructor code here.
+   }
+
+   protected override void Dispose(bool disposing)
+   {
+      if(!this.disposed)
+      {
+         try
+         {
+            if(disposing)
+            {
+               // Release the managed resources you added in
+               // this derived class here.
+               addedManaged.Dispose();         
+            }
+            // Release the native unmanaged resources you added
+            // in this derived class here.
+            CloseHandle(addedNative);
+            this.disposed = true;
+         }
+         finally
+         {
+            // Call Dispose on your base class.
+            base.Dispose(disposing);
+         }
+      }
+   }
+}
+
+// This derived class does not have a Finalize method
+// or a Dispose method without parameters because it inherits 
+// them from the base class.
+
+Implementing a Close Method
+
+For types where calling a Close method is more natural than calling a Dispose method, add a public Close method to the base type. The Close method in turn calls the Dispose method without parameters, which performs the proper cleanup operations. The following code example illustrates a Close method.
+
+[Visual Basic]
+' Do not make this method Overridable.
+' A derived class should not be allowed
+' to override this method.
+Public Sub Close()
+   ' Calls the Dispose method without parameters.
+   Dispose()
+End Sub
+
+[C#]
+// Do not make this method virtual.
+// A derived class should not be allowed
+// to override this method.
+public void Close()
+{
+   // Calls the Dispose method without parameters.
+   Dispose();
+}

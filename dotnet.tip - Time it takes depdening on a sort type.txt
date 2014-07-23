@@ -1,0 +1,5 @@
+Sort Times
+
+radix		 14 seconds
+shear	     1m	20 seconds
+quicksort	 0 seconds

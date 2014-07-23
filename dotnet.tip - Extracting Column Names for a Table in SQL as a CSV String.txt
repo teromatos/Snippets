@@ -1,0 +1,8 @@
+Extracting Column Names for a Table in SQL as a CSV String 
+I had a need (creating CSV BCP files) that required knowing the column names of a MS SQL table in the order they were created. Some inspiration from Mark Clerget and a little fooling around with SQL Query Analyzer resulted in the following.
+
+DECLARE @c varchar(4000), @t varchar(128)SET @c = ''SET @t='authors'SELECT @c = @c + c.name + ', ' FROM syscolumns c INNER JOIN sysobjects o ON o.id = c.id WHERE o.name = @t ORDER BY colidSELECT Substring(@c, 1, Datalength(@c) - 2)
+Which gives the following result:
+
+au_id, au_lname, au_fname, phone, address, city, state, zip, contract
+Perfect. Note the use of @c = @c + c.name in the select clause to colapse 9 rows into 1 row. I've used this technique many times in the past to generate a single string from multiple rows without resorting to cursors.

@@ -1,0 +1,21 @@
+2005 VERSION
+
+SELECT  SERVERPROPERTY('productversion'), SERVERPROPERTY ('productlevel'), SERVERPROPERTY ('edition')
+
+Release	Sqlservr.exe
+RTM	2005.90.1399
+SQL Server 2005 Service Pack 1	2005.90.2047
+SQL Server 2005 Service Pack 2	2005.90.3042
+
+2000 VERSION
+
+SELECT  SERVERPROPERTY('productversion'), SERVERPROPERTY ('productlevel'), SERVERPROPERTY ('edition')
+
+
+Release	Sqlservr.exe
+RTM	2000.80.194.0
+SQL Server 2000 SP1	2000.80.384.0
+SQL Server 2000 SP2	2000.80.534.0
+SQL Server 2000 SP3	2000.80.760.0
+SQL Server 2000 SP3a	2000.80.760.0
+SQL Server 2000 SP4	2000.8.00.2039

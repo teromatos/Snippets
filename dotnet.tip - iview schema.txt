@@ -1,0 +1,11 @@
+controller/presenter
+=+> IView
+
+Page: IPostEditView:IView
+=+> Controller
+
+Iview.Load()
+  Controller will capture IView.Load event and handle it.
+  
+Page implements IView
+Raises onload event, which eventually will be handled by the controller

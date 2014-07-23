@@ -1,0 +1,11 @@
+URL= http://www.experts-exchange.com/Databases/Microsoft_SQL_Server/Q_20412715.html
+
+
+select *
+into <other table name>
+from <tablename>
+where ...
+
+to achieve this you have to make sure that th option 'select into/bulkinsert is enabled.  Which you can do like this:
+
+exec sp_dboption <databasename>, 'select into/bulkcopy', true

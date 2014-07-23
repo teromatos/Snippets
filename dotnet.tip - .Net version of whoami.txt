@@ -1,0 +1,44 @@
+URL= http://spaces.msn.com/members/staceyw/  (sept 29, 2005)
+
+//Here is cool little .Net version of whoami. It will also show you your current group memberships: 
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Threading;
+using System.Security.Principal;
+
+namespace WhoAmI 
+{ 
+	class Program 
+	{ 
+		static void Main(string[] args) 
+		{ 
+			AppDomain myDomain = Thread.GetDomain(); 
+			myDomain.SetPrincipalPolicy(PrincipalPolicy.WindowsPrincipal); 
+			WindowsPrincipal myP = (WindowsPrincipal)Thread.CurrentPrincipal; 
+			List groups = GetWindowsGroups((WindowsIdentity)myP.Identity); 
+			Console.WriteLine(myP.Identity.Name); 
+			Console.WriteLine(); 
+			Console.WriteLine("Member of:"); 
+			Console.WriteLine("-----------------------------"); 
+			
+			foreach ( string name in groups ) 
+			{ 
+				Console.WriteLine(name); 
+			} 
+		} 
+		
+		private static List GetWindowsGroups(WindowsIdentity id) 
+		{ 
+			List groups = new List(); 
+			IdentityReferenceCollection irc = id.Groups; 
+			foreach ( IdentityReference ir in irc ) 
+			{ 
+				NTAccount acc = (NTAccount)ir.Translate(typeof(NTAccount)); 
+				groups.Add(acc.Value); 
+			} 
+			
+			return groups; 
+		} 
+	}
+}

@@ -1,0 +1,14 @@
+The following example works for me,  
+  
+but does anyone have any suggestion for improvement?  
+  
+dgv.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.AllCells;  
+  
+// set CellStyle  
+  
+DataGridViewCellStyle cellStyle = new DataGridViewCellStyle();  
+  
+cellStyle.WrapMode = DataGridViewTriState.True;  
+  
+dgv.Columns["LongText"].DefaultCellStyle = cellStyle;  
+  

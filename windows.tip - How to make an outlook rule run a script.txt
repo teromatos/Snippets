@@ -1,0 +1,38 @@
+' Make sure the security is set to medium.
+' If set to high, the script must be signed.
+
+Public Sub RunAScriptRuleRoutine(MyMail As MailItem)
+    
+    MsgBox "test", vbOKOnly + vbInformation, "test"
+    
+'    Dim strID As String
+'    Dim olNS As Outlook.NameSpace
+'    Dim olMail As Outlook.MailItem
+'
+'    Dim action As String
+'    Dim body As String
+'    Dim char As String
+'    Dim i As Integer
+'
+'    strID = MyMail.EntryID
+'    Set olNS = Application.GetNamespace("MAPI")
+'    Set olMail = olNS.GetItemFromID(strID)
+'    ' do stuff with olMail, e.g.
+'
+'    body = olMail.body
+'    For i = 1 To Len(body)
+'        char = Mid(body, i, 1)
+'        Select Case Asc(char)
+'            Case 10, 13
+'            Case Else
+'                action = action & char
+'        End Select
+'    Next
+'
+'    MsgBox action
+'    Shell "c:\windows\notepad.exe " & Chr(34) & action & Chr(34), vbNormalFocus
+'
+'    Set olMail = Nothing
+'    Set olNS = Nothing
+
+End Sub

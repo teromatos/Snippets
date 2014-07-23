@@ -1,0 +1,310 @@
+This article lists five of the "worst offenders" of misconfigurations of application security that are universally problematic for all ASP.NET Web-based applications. Part two of this article will list an additional five misconfigurations that are specifically applicable to ASP.NET sites that use Web Forms authentication. So without further ado, let's get started!
+
+1. Custom Errors Disabled
+When you disable custom errors as shown below, ASP.NET provides a detailed error message to clients by default.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<customErrors mode="Off">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<customErrors mode="RemoteOnly">
+
+In itself, knowing the source of an error may not seem like a risk to application security, but consider this: the more information a hacker can gather about a Web site, the more likely it is that he will be able to successfully attack it. An error message can be a gold mine of information to an attacker. A default ASP.NET error message lists the specific versions of ASP.NET and the .NET framework which are being used by the Web server, as well as the type of exception that was thrown. Just knowing which Web-based applications are used (in this case ASP.NET) compromises application security by telling the attacker that the server is running a relatively recent version of Microsoft Windows and that Microsoft Internet Information Server (IIS) 6.0 or later is being used as the Web server. The type of exception thrown may also help the attacker to profile Web-based applications; for example, if a "SqlException" is thrown, then the attacker knows that the application is using some version of Microsoft SQL Server.
+
+You can build up application security to prevent such information leakage by modifying the mode attribute of the <customErrors> element to "On" or "RemoteOnly." This setting instructs Web-based applications to display a nondescript, generic error message when an unhandled exception is generated. Another way to circumvent this application security issue is to redirect the user to a new page when errors occur by setting the "defaultRedirect" attribute of the <customErrors> element. This approach can provide even better application security because the default generic error page still gives away too much information about the system (namely, that it's using a Web.config file, which reveals that the server is running ASP.NET).
+
+2. Leaving Tracing Enabled in Web-Based Applications
+The trace feature of ASP.NET is one of the most useful tools that you can use to ensure application security by debugging and profiling your Web-based applications. Unfortunately, it is also one of the most useful tools that a hacker can use to attack your Web-based applications if it is left enabled in a production environment.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<trace enabled="true" localOnly="false">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<trace enabled="false" localOnly="true">
+
+When the <trace> element is enabled for remote users of Web-based applications (localOnly="false"), any user can view an incredibly detailed list of recent requests to the application simply by browsing to the page "trace.axd." If a detailed exception message is like a gold mine to a hacker looking to circumvent application security, a trace log is like Fort Knox! A trace log presents a wealth of information: the .NET and ASP.NET versions that the server is running; a complete trace of all the page methods that the request caused, including their times of execution; the session state and application state keys; the request and response cookies; the complete set of request headers, form variables, and QueryString variables; and finally the complete set of server variables.
+
+A hacker looking for a way around application security would obviously find the form variable histories useful because these might include email addresses that could be harvested and sold to spammers, IDs and passwords that could be used to impersonate the user, or credit card and bank account numbers. Even the most innocent-looking piece of data in the trace collection can be dangerous in the wrong hands. For example, the "APPL_PHYSICAL_PATH" server variable, which contains the physical path of Web-based applications on the server, could help an attacker perform directory traversal attacks against the system.
+
+The best way to prevent a hacker from obtaining trace data from Web-based applications is to disable the trace viewer completely by setting the "enabled" attribute of the <trace> element to "false." If you have to have the trace viewer enabled, either to debug or to profile your application, then be sure to set the "localOnly" attribute of the <trace> element to "true." That allows users to access the trace viewer only from the Web server and disables viewing it from any remote machine, increasing your application security.
+
+3. Debugging Enabled
+Deploying Web-based applications in debug mode is a very common mistake. Virtually all Web-based applications require some debugging. Visual Studio 2005 will even automatically modify the Web.config file to allow debugging when you start to debug your application. And, since deploying ASP.NET applications is as simple as copying the files from the development folder into the deployment folder, it's easy to see how development configuration settings can accidentally make it into production, compromising application security.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<compilation debug="true">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<compilation debug="false">
+
+Like the first two application security vulnerabilities described in this list, leaving debugging enabled is dangerous because you are providing inside information to end users who shouldn't have access to it, and who may use it to attack your Web-based applications. For example, if you have enabled debugging and disabled custom errors in your application, then any error message displayed to an end user of your Web-based applications will include not only the server information, a detailed exception message, and a stack trace, but also the actual source code of the page where the error occurred.
+
+Unfortunately, this configuration setting isn't the only way that source code might be displayed to the user. Here's a story that illustrates why developers shouldn't concentrate solely on one type of configuration setting to improve application security. In early versions of Microsoft's ASP.NET AJAX framework, some controls would return a stack trace with source code to the client browser whenever exceptions occurred. This behavior happened whenever debugging was enabled, regardless of the custom error setting in the configuration. So, even if you properly configured your Web-based applications to display non-descriptive messages when errors occurred, you could still have unexpectedly revealed your source code to your end users if you forgot to disable debugging.
+
+To disable debugging, set the value of the "debug" attribute of the <compilation> element to "false." This is the default value of the setting, but as we will see in part two of this article, it's safer to explicitly set the desired value rather than relying on the defaults to protect application security.
+
+4. Cookies Accessible through Client-Side Script
+In Internet Explorer 6.0, Microsoft introduced a new cookie property called "HttpOnly." While you can set the property programmatically on a per-cookie basis, you also can set it globally in the site configuration.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<httpCookies httpOnlyCookies="false">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<httpCookies httpOnlyCookies="true">
+
+Any cookie marked with this property will be accessible only from server-side code, and not to any client-side scripting code like JavaScript or VBScript. This shielding of cookies from the client helps to protect Web-based applications from Cross-Site Scripting attacks. A hacker initiates a Cross-Site Scripting (also called CSS or XSS) attack by attempting to insert his own script code into the Web page to get around any application security in place. Any page that accepts input from a user and echoes that input back is potentially vulnerable. For example, a login page that prompts for a user name and password and then displays "Welcome back, <username>" on a successful login may be susceptible to an XSS attack.
+
+Message boards, forums, and wikis are also often vulnerable to application security issues. In these sites, legitimate users post their thoughts or opinions, which are then visible to all other visitors to the site. But an attacker, rather than posting about the current topic, will instead post a message such as "<script>alert(document.cookie);</script>". The message board now includes the attacker's script code in its page code-and the browser then interprets and executes it for future site visitors. Usually attackers use such script code to try to obtain the user's authentication token (usually stored in a cookie), which they could then use to impersonate the user. When cookies are marked with the "HttpOnly" property, their values are hidden from the client, so this attack will fail.
+
+As mentioned earlier, it is possible to enable "HttpOnly" programmatically on any individual cookie by setting the "HttpOnly" property of the "HttpCookie" object to "true." However, it is easier and more reliable to configure the application to automatically enable "HttpOnly" for all cookies. To do this, set the "httpOnlyCookies" attribute of the <httpCookies> element to "true."
+
+5. Cookieless Session State Enabled
+In the initial 1.0 release of ASP.NET, you had no choice about how to transmit the session token between requests when your Web application needed to maintain session state: it was always stored in a cookie. Unfortunately, this meant that users who would not accept cookies could not use your application. So, in ASP.NET 1.1, Microsoft added support for cookieless session tokens via use of the "cookieless" setting.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<sessionState cookieless="UseUri">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<sessionState cookieless="UseCookies">
+
+Web applications configured to use cookieless session state now stored the session token in the page URLs rather than a cookie. For example, the page URL might change from http://myserver/MyApplication/default.aspx to http://myserver/MyApplication/(123456789ABCDEFG)/default.aspx. In this case, "123456789ABCDEFG" represents the current user's session token. A different user browsing the site at the same time would receive a completely different session token, resulting in a different URL, such as http://myserver/MyApplication/(ZYXWVU987654321)/default.aspx.
+
+While adding support for cookieless session state did improve the usability of ASP.NET Web applications for users who would not accept cookies, it also had the side effect of making those applications much more vulnerable to session hijacking attacks. Session hijacking is basically a form of identity theft wherein a hacker impersonates a legitimate user by stealing his session token. When the session token is transmitted in a cookie, and the request is made on a secure channel (that is, it uses SSL), the token is secure. However, when the session token is included as part of the URL, it is much easier for a hacker to find and steal it. By using a network monitoring tool (also known as a "sniffer") or by obtaining a recent request log, hijacking the user's session becomes a simple matter of browsing to the URL containing the stolen unique session token. The Web application has no way of knowing that this new request with session token "123456789ABCDEFG" is not coming from the original, legitimate user. It happily loads the corresponding session state and returns the response back to the hacker, who has now effectively impersonated the user.
+
+The most effective way to prevent these session hijacking attacks is to force your Web application to use cookies to store the session token. This is accomplished by setting the "cookieless" attribute of the <sessionState> element to "UseCookies" or "false." But what about the users who do not accept cookies? Do you have to choose between making your application available to all users versus ensuring that it operates securely for all users? A compromise between the two is possible in ASP.NET 2.0. By setting the "cookieless" attribute to "AutoDetect," the application will store the session token in a cookie for users who accept them and in the URL for those who won't. This means that only the users who use cookieless tokens will still be vulnerable to session hijacking. That's often acceptable, given the alternative-that users who deny cookies wouldn't be able to use the application at all. It is ironic that many users disable cookies because of privacy concerns when doing so can actually make them more prone to attack.
+
+Intermission
+
+These first five Web.config vulnerabilities that we've discussed in this article have been applicable to all ASP.NET Web applications regardless of their methods of authentication, or even whether they use authentication at all. Part two of this article details an additional five vulnerabilities that apply only to applications using Forms authentication. These misconfigurations can be even more dangerous than the first five, giving intruders the ability to access supposedly secure areas of your Web site. Finally, we will also discuss some methods of locking down your configuration files so that they can't be modified unintentionally. 
+
+6. Cookieless Authentication Enabled
+
+Just as in the "Cookieless Session State Enabled" vulnerability discussed in part one, enabling cookieless authentication in your Web-based applications can lead to session hijacking and problems with application security.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms cookieless="UseUri">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms cookieless="UseCookies">
+
+When a session or authentication token appears in the request URL rather than in a secure cookie, an attacker with a network monitoring tool can get around application security, easily take over that session, and effectively impersonate a legitimate user. However, session hijacking has far more serious consequences for application security after a user has been authenticated. For example, online shopping sites generally utilize Web-based applications that allow users to browse without having to provide an ID and password. But when users are ready to make a purchase, or when they want to view their order status, they have to login and be authenticated by the system. After logging in, sites provide access to more sensitive data, such as a user's order history, billing address, and credit card number. Attackers hijacking this user's session before authentication can't usually obtain much useful information. But if the attacker hijacks the session after authentication, all that sensitive information could be compromised.
+
+The best way to prevent session hijacking with Web-based applications is to disable cookieless authentication and force the use of cookies for storing authentication tokens. This application security measure is added by changing the cookieless attribute of the forms element to the value UseCookies.
+
+7. Failure to Require SSL for Authentication Cookies
+
+Web-based applications use the Secure Sockets Layer (SSL) protocol to encrypt data passed between the Web server and the client. Using SSL for application security means that attackers using network sniffers will not be able to interpret the exchanged data. Rather than seeing plaintext requests and responses, they will see only an indecipherable jumble of meaningless characters.
+
+You can require the forms authentication cookie from your Web-based applications to use SSL by setting the requireSSL attribute of the forms element to true.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms requireSSL="false">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms requireSSL="true">
+
+The previous section discussed the importance of transmitting the authentication token in a cookie, rather than embedding it in the request URL. However, disabling cookieless authentication is just the first step towards securing the authentication token. Unless requests made to the Web server are encrypted, a network sniffer will still be able to read the authentication token from the request cookie. An attacker would still be able to hijack the user's session.
+
+At this point, you might be wondering why it is necessary with application security to disable cookieless authentication, since it is very inconvenient for users who won't accept cookies, and seeing as how the request still has to be sent over SSL. The answer is that the request URL is often persisted regardless of whether or not it was sent via SSL. Most major browsers save the complete URL in the browser history cache. If the history cache were to be compromised, the user's login credentials would be as well. Therefore, to truly secure the authentication token, you must require the authentication token to be stored in a cookie, and use SSL to ensure that the cookie be transmitted securely.
+
+By setting the requireSSL attribute of the forms element to true, ASP.NET Web-based applications will use a secure connection when transmitting the authentication cookie to the Web server. Note that IIS requires additional configuration steps to support SSL. You can find instructions to configure SSL for IIS on MSDN (http://www.microsoft.com/technet/prodtechnol/WindowsServer2003/Library/IIS/56bdf977-14f8-4867-9c51-34c346d48b04.mspx?mfr=true).
+
+8. Sliding Expiration Used
+
+All authenticated ASP.NET sessions have a timeout interval to protect the application security. The default timeout value is 30 minutes. So, 30 minutes after a user first logs into any of these Web-based applications, he will automatically be logged out and forced to re-authenticate his credentials.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms slidingExpiration="true">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms slidingExpiration="false">
+
+The slidingExpiration setting is an application security measure used to reduce risk to Web-based applications in case the authentication token is stolen. When set to false, the specified timeout interval becomes a fixed period of time from the initial login, rather than a period of inactivity. Attackers using a stolen authentication token have, at maximum, only the specified length of time to impersonate the user before the session times out. Because typical attackers of these Web-based applications have only the token, and don't really know the user's credentials, they can't log back in as the legitimate user, so the stolen authentication token is now useless and the application security threat is mitigated. When sliding expiration is enabled, as long as an attacker makes at least one request to the system every 15 minutes (or half of the timeout interval), the session will remain open indefinitely. This gives attackers more opportunities to steal information and cause other mischief in Web-based applications.
+
+To avoid this application security issue altogether, you can disable sliding expiration by setting the slidingExpiration attribute of the forms element to false.
+
+9. Non-Unique Authentication Cookie Used
+
+Over the last few sections, I hope I have successfully demonstrated the importance of application security and of storing your application's authentication token in a secure cookie value. But a cookie is more than just a value; it is a name-value pair. As strange as it seems, an improperly chosen cookie name can create an application security vulnerability just as dangerous as an improperly chosen storage location.
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms name=".ASPXAUTH">
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms name="{abcd1234…}">
+
+The default value for the name of the authentication cookie is .ASPXAUTH. If you have only one Web-based application on your server, then .ASPXAUTH is a perfectly secure choice for the cookie name. In fact, any choice would be secure. But, when your server runs multiple ASP.NET Web-based applications, it becomes critical to assign a unique authentication cookie name to each application. If the names are not unique, then users logging into any of the Web-based applications might inadvertently gain access to all of them. For example, a user logging into the online shopping site to view his order history might find that he is now able to access the administration application on the same site and change the prices of the items in his shopping cart.
+
+The best way to ensure that all Web-based applications on your server have their own set of authorized users is to change the authentication cookie name to a unique value. Globally Unique Identifiers (GUIDs) are excellent choices for application security since they are guaranteed to be unique. Microsoft Visual Studio helpfully includes a tool that will automatically generate a GUID for you. You can find this tool in the Tools menu with the command name "Create GUID". Copy the generated GUID into the name attribute of the forms element in the configuration file.
+
+10. Hardcoded Credentials Used
+
+Vulnerable configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms>
+
+<credentials>
+
+...
+
+</credentials>
+
+</forms>
+
+Secure configuration:
+
+<configuration>
+
+<system.web>
+
+<authentication mode="Forms">
+
+<forms>
+
+</forms>
+
+A fundamental difficulty of creating software is that the environment in which the application will be deployed is usually not the same environment in which it is created. In a production environment, the operating system may be different, the hardware on which the application runs may be more or less powerful, and test databases are replaced with live databases. This is an issue for creating Web-based applications that require authentication because developers and administrators often use test credentials to test the application security. This begs the question: Where do the test credentials come from?
+
+For convenience, to avoid forcing developers from spending time on creating a credential store used solely for test purposes (and which would subsequently be discarded when the application went to production), Microsoft added a section to the Web.config file that you can use to quickly add test users to Web-based applications. For each test user, the developer adds an element to the configuration file with the desired user ID and password as shown below:
+
+<authentication mode="Forms">
+
+<forms>
+
+<credentials>
+
+<user name="bob" password="bob"/>
+
+<user name="jane" password="Elvis"/>
+
+</credentials>
+
+</forms>
+
+</authentication>
+
+While undeniably convenient for development purposes, this was never intended for use in a production environment. Storing login credentials in plaintext in a configuration file is simply not secure. Anyone with read access to the Web.config file could access the authenticated Web application. It is possible to store the SHA-1 or MD5 hash of the password value, rather than storing the password in plaintext. This is somewhat better, but it is still not a secure solution. Using this method, the user name is still not encrypted. First, providing a known user name to a potential attacker makes it easier to perform a brute force attack against the system. Second, there are many reverse-lookup databases of SHA-1 and MD5 hash values available on the Internet. If the password is simple, such as a word found in a dictionary, then it is almost guaranteed to be found in one of these hash dictionaries.
+
+The most secure way to store login credentials is to not store them in the configuration file. Remove the credentials element from your Web.config files in production applications.
+
+You're Not Out of the Woods Yet
+
+Now that you've finished reading the top-ten list, and you've checked your configuration settings, your applications are secure forever, right? Not just yet. Web.config files operate in a hierarchical inheritance manner. Every Web.config file inherits values from any Web.config file in a parent directory. That Web.config file in turn inherits values from any Web.config file in its parent directory, and so on. All Web.config files on the system inherit from the global configuration file called Machine.config located in the .NET framework directory. The effect of this is that the runtime behavior of your application can be altered simply by modifying a configuration file in a higher directory.
+
+This can sometimes have unexpected consequences. A system administrator might make a change in a configuration file in response to a problem with a completely separate application, but that change might create a security vulnerability in your application. For example, a user might report that he is not able to access the application without enabling cookies in his browser. The administrator, trying to be helpful, modifies the global configuration file to allow cookieless authentication for all applications.
+
+To keep your application-specific settings from being unexpectedly modified, the solution is to never rely on default setting values. For example, debugging is disabled by default in configuration files. If you're examining the configuration file for your application and you notice that the debug attribute is blank, you might assume that debugging is disabled. But it may or may not be disabled--the applied value depends on the value in parent configuration settings on the system. The safest choice is to always explicitly set security-related values in your application's configuration.
+
+Ultimately, securing a Web application requires the efforts and diligence of many different groups, from quality assurance to security operations. However, the developer who codes the application itself has an inherent responsibility to instill security into the application from the beginning of the development process. By making security-conscious decisions from the beginning, developers can create applications that users can trust with their confidential information and that are capable of withstanding attacks launched by hackers. As I've tried to show here, sometimes that process can be as simple as making the right decisions when configuring your application. 

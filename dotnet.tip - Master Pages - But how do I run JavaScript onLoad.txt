@@ -1,0 +1,153 @@
+URL=http://blogs.claritycon.com/blogs/steve_holstad/archive/2005/12/22/128.aspx
+
+ASP.NET 2.0 Master Pages - But how do I run JavaScript onLoad?
+Great question.  I hit this problem 5 minutes into developing my first Master Pages website.  Inside the Master Page, you can define the usual JavaScript class file, or include in-page functions within the page header.  The problem is that these functions will be included for all pages served, creating unnecesary bloat.  I prefer to only include global functions within the Master Page script.
+
+The easy solution here is to include any page-specific scripting within the content page, or in a small .js external file.  After a cursory look at the content page, you'll see where the problem lies...as a content page doesn't define an entire HTML document, you won't have your usual <body> tag to wire the onLoad event to.  And I'll bet you aren't interested in having the same onLoad event fire for every page, which wiring to the Master Page's body onLoad event would do.
+
+Here's a method around the problem:  In the content page where the onLoad event is needed, hook into the Page_Load event in the code-behind class, and create a textual script function.  Then we can register the script using the ClientScript.RegisterStartupScript method.  This will register the script you create and run as if the page's onLoad event was called separately...a pretty nifty way around, I think.
+
+Protected Sub Page_Load(ByVal sender As Object, ByVal e As System.EventArgs) Handles Me.Load 
+' Initialize a stringbuilder object, much faster than string concatenation 
+Dim onloadScript As New System.Text.StringBuilder() 
+onloadScript.Append("<script type='text/javascript'>") 
+onloadScript.Append(vbCrLf) 
+onloadScript.Append("alert('This script is registered and run at the second page startup. Perfect!');") 
+onloadScript.Append(vbCrLf) 
+onloadScript.Append("</script>") 
+' Register script with page 
+Me.ClientScript.RegisterStartupScript(Me.GetType(), "onLoadCall", onloadScript.ToString()) 
+End Sub 
+See it in action here.  It is interesting to note that your newly registered function will fire before the Master Page's onLoad, but both functions will still fire.  
+
+One more suggestion:  I've seen a lot of people use StringBuilders to increase performance, but then include normal string concatenation within the Append call:  (like this:  myStringBuilder.Append("All your base" + " are belong to us.")  This is defeating the point: using the concatenation operator will cause a new string to be created and the value copied over...you've lost the benefit of the StringBuilder.  It's better practice to call .Append twice to create the desired value.
+
+Share this post: Email it! | bookmark it! | digg it! | reddit!
+
+Filed Under: ASP.NET, Dev Community, VS 2005, .NET 2.0 Framework, ASP.NET 2.0 
+Comments 
+# re: ASP.NET 2.0 Master Pages - But how do I run JavaScript onLoad? 
+Friday, January 27, 2006 10:03 AM by TC 
+I have an external js file that I want to include only in a few pages. 
+
+How can I apply that to specific content pages? Normally I'd add a link rel="stylesheet" with an href to the js file. 
+
+Your example shows how to run a specific script that is typed out on the page load. How can I do it referencing a js file rather than retyping it? 
+# Alternatives to rewrite 
+Thursday, February 02, 2006 11:22 PM by sholstad 
+TC, 
+
+Keep in mind that only the script you need to fire during the onLoad event need to be injected to the page in this manner, any other page or control events can be included with the page as normal script. If you are looking for quicker methods than retyping the load script, have you thought about pulling the script string from an external file using a StreamReader? (Here's a useful link: http://aspalliance.com/544) It's not the prettiest solution, but would allow you to pass the string directly inot the ClientScript.RegisterStartupScript method. 
+# re: ASP.NET 2.0 Master Pages - But how do I run JavaScript onLoad? 
+Tuesday, March 14, 2006 3:14 PM by Bret Williams 
+Thanks a ton! This worked like a charm. 
+# re: ASP.NET 2.0 Master Pages - But how do I run JavaScript onLoad? 
+Wednesday, March 29, 2006 10:08 AM by IR 
+Thanks for addressing this issue! We are converting from ASP.NET 1.1 to 2.0 and after the joy of having true Master pages came the panic – what do we do with all the client script we have. 
+After reading the post and TC’s question, of course I’ve got a multitude of new questions. So I played with the posted solution trying to tailor it to my specific existing (1.1) pages. I found another simple solution, which works OK, at least for some situations. In case somebody wants to try it: to add an external js file to a content page, simply add between the <asp:Content></asp:Content> tags the following: 
+<script type="text/javascript" language="javascript" src="FileName.js"> 
+</script> 
+
+Here is my test page and js file (I have some extra stuff on it, trying to figure out how to do first client validation before posting back and some other things, so just ignore the extra lines): 
+
+Content page: 
+<%@ Page Language="VB" MasterPageFile="~/Master1.master" AutoEventWireup="false" CodeFile="Default4.aspx.vb" Inherits="Default4" title="Untitled Page" %> 
+<asp:Content ID="Content1" ContentPlaceHolderID="ContentPlaceHolder1" Runat="Server"> 
+<!-- Add 'link' to an external js file 
+the file has 2 functions executed when page is loaded and in responce to 
+a control call. 
+--> 
+<script type="text/javascript" language="javascript" src="JS2.js"> 
+</script> 
+<!-- Add 'inline' BLOCKED SCRIPT 
+1. to execute js when page is loading immediately from this location 
+and from an external file; 
+2. to have a function called by a control event; 
+--> 
+<script type='text/javascript'> 
+alert('This script is run at the content page startup.'); 
+callFromContent(); 
+function he(esrc){alert('he');return true;} 
+function autocall(){alert('loading');} 
+autocall(); 
+</script> 
+<div style="height: 100%"> 
+<table border="0" cellpadding="0" cellspacing="0" style="width: 100%; height: 100%"> 
+<tr> 
+<td style="height: 10%"> 
+Content4 
+</td> 
+</tr> 
+<tr> 
+<td style="height: 90%"> 
+<input type="submit" id="Button1" value="Button1" /> 
+<input type="button" id="Button2" value="button2" class='clsbtn' onclick='callFromContent(); hello();'/> 
+</td> 
+</tr> 
+</table> 
+</div> 
+</asp:Content> 
+
+
+JS file: 
+// JScript File 
+/* execute automatically - on page startup 
+and from a control event */ 
+function callFromContent() 
+{ 
+alert("I am JS2 and called from Content"); 
+} 
+
+/* execute on some control event */ 
+function hello() 
+{ 
+alert('hello again'); 
+} 
+
+# re: ASP.NET 2.0 Master Pages - But how do I run JavaScript onLoad? 
+Friday, May 05, 2006 4:39 AM by Sore_ron 
+Even easier ! 
+
+All code goes into a .js file inside a load function. 
+Get the name of the content page that you want the script to run in and call a subfunction in the original .js file ie 
+Original .js file is called index.js inside of which is :- 
+function load(){ 
+var myName=FileName() 
+if (myName == 'Default.aspx') 
+{ 
+alert('My name is "'+Namer+'"'); 
+subLoad(); 
+} 
+else 
+{ 
+alert('My name is DUNNO'); 
+} 
+
+
+All the code you want to run on the default.aspx content page goes into a function called subLoad().......works a treat! 
+
+Remember also the master page has 
+<body onload="load()" > 
+To finf the filename use:- 
+function FileName() 
+{ 
+if (location.href.lastIndexOf('/') !=-1) 
+// Check whether '/' exists. 
+{ 
+// If it does then we ... 
+firstpos=location.href.lastIndexOf('/')+1; 
+
+// Find the first position (the file starts after this) 
+lastpos=location.href.length; 
+/* Normally, the last position of the filename will be at the end of the complete URL - although it could have a # and a name at the end!*/ 
+Namer=location.href.substring(firstpos,lastpos); 
+// We extract the string (the file's name). 
+// alert('My name is "'+Namer+'"'); 
+// And reveal all to the clicker! 
+} 
+return Namer 
+} 
+
+Author of the Filename function 
+
+http://www.trans4mind.com/personal_development/JavaScript2/lastIndexOf.htm 

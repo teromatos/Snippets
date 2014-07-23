@@ -1,0 +1,21 @@
+Module Module1
+
+
+    '//Within the application properties, under Build, set the Custom Constant, eg: MyFlag=True, so the foo method is executed
+
+
+    Sub Main()
+
+        Console.WriteLine("Boo")
+        foo()
+        Console.Read()
+
+        Console.ReadLine()
+    End Sub
+
+    <System.Diagnostics.Conditional("MyFlag")> _
+    Private Sub foo()
+        Console.WriteLine("Foo")
+    End Sub
+
+End Module

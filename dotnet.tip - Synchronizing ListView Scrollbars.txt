@@ -1,0 +1,16 @@
+Synchronizing ListView Scrollbars 
+
+What a pain! One would think that this would be a simple exercise, right? You just trap WM_VSCROLL and WM_HSCROLL and pass them on to the other ListView, surely. No such luck. Whilst that approach does work for most of the scrolling, it doesn't work when using the scroll thumb. I've managed to hack together a solution for vertical scrolling using
+LVM_ENSUREVISIBLE. However, I cannot get the horizontal scrolling working with the
+SB_THUMBTRACK and
+SB_THUMBPOSITION messages.
+
+So if anyone has any ideas, please let me know. I'm at my wits end here.
+
+posted by Sean Hederman at 5:31 PM    
+
+1 Comments:
+Anonymous said... 
+You could subclass and pick up on the LVN_ODCACHEHINT notification which fires when the client area changes in any way. Then send a LVM_SCROLL message to scroll the other listbox... The LVM_SCROLL works a little diffrently with a list box in "listview" mode by scrolling rows and columns as opposed to pixels. I have tried you're approach with rich text boxes one time and it about drove me crazy!! Thoses methods dont seem to work so well. Hope this helps.
+Mike
+mob@mike-obrien.net

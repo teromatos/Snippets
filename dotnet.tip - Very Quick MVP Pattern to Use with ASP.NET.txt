@@ -1,0 +1,89 @@
+url=http://weblogs.asp.net/scottcate/archive/2007/04/12/very-quick-mvp-pattern-to-use-with-asp-net.aspx
+
+Very Quick MVP Pattern to Use with ASP.NET
+
+The MVP is used for a lot of reasons, but mainly it does a **VERY** nice job of separating business logic from the UI.
+
+M. = Model
+
+V. = View
+
+P. = Presenter
+
+UX. = User Experience ( Web Form in this case)
+
+In this implementation of MVP, Model will not be used. Only V and P with UX. The Model is where your data activity, and other "stuff" goes. This example is just meant to show how to get business logic out of your UX code.
+
+Here is a basic Contact Us Web Form that we'll build with the MVP Pattern.
+
+The first step of MVP is to create a contract. We're going to use a .Net Interface for that. Create a file called IContactUs.cs and use this code. This is our VIEW in the MVP.
+
+public interface IReaderContactUs
+{
+    string Name { get; }
+    string Email { get; }
+    string PhoneNumber { get; }
+    string Message { get; }
+    string Result { set; }
+}
+
+The interface is like a blue print to a house. No implementation, just directions. This interface says that we have to be able to "GET" Name, Email, PhoneNumber, and Message. And that we have to be able to "SET" a Result string.
+
+Next we need a Presenter. The presenter is the worker bee. The presenter actually does the work. Interestingly, the Presenter knows **NOTHING** about the UX. Repeat **NOTHING**. The presenter is usually in a different class library, and only referenced from the UX code. In order to enforce out contract (the .net interface we just created) we want to only be able to create a presenter, with an instance of the Interface. To do this, notice that our only constructor takes a single param that is the interface. Here is the code for our presenter; named ContactUsPresenter.cs
+
+public class ContactUsPresenter
+{
+    private readonly IReaderContactUs view;
+
+    public ContactUsPresenter(IReaderContactUs view)
+    {
+        this.view = view;
+    }
+
+    public void ProcessForm()
+    {
+        //do something - save it, send it, process it
+        //in this case, just modify the UI, so we
+        //know it's running. 
+        //This is where you would normally make a call into the model
+
+        StringBuilder sb = new StringBuilder();
+        sb.Append(string.Format("Name : {0}<br />", view.Name));
+        sb.Append(string.Format("Email : {0}<br />", view.Email));
+        sb.Append(string.Format("Phone : {0}<br />", view.PhoneNumber));
+        sb.Append(string.Format("Message : {0}<br />", view.Message));
+        view.Result = string.Format("<h1>Success</h1>{0}<hr />", sb);
+    }
+}
+
+Finally we get to the code behind of our Web Form. Our web form Implements the Interface. All this means is that our web form has to be able to "GET" Name, Email, PhoneNumber, and Message. And that we have to be able to "SET" a Result string. Notice the appropriate Get / Set routines that wrap around the asp.net server controls.
+
+Notice that we have a private ContactUsPresenter, that doesn't get instantiated until the OnInit event. This is because we have to send in an instance of the interface, which is the this keyword. Then when the button is clicked, the presenter.ProcessForm(); is called to do the work.
+
+public partial class ContactUs : UserControl, IReaderContactUs
+{
+    private ContactUsPresenter presenter;
+
+    public string Name { get { return NameTextBox.Text; } }
+    public string Email { get { return EmailTextBox.Text; } } 
+    public string PhoneNumber { get { return PhoneTextBox.Text; } }
+    public string Message { get { return MessageTextBox.Text; } }
+    public string Result { set { ResultLabel.Text = value; } }
+    
+    protected override void OnInit(EventArgs e)
+    {
+        base.OnInit(e);
+        presenter = new ContactUsPresenter(this);
+    }
+
+    protected void Page_Load(object sender, EventArgs e)
+    {
+    }
+
+    protected void SubmitContactButton_Click(object sender, EventArgs e)
+    {
+        presenter.ProcessForm();
+    }
+}
+
+I hope this is helpful, and is a good starting point for the pattern.

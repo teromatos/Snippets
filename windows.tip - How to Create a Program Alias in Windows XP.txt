@@ -1,0 +1,21 @@
+How to Create a Program Alias in Windows XP
+
+Sometimes the file-name and extension of a program is so long that you can't remember. What's more, you want to launch it by a customized abbreviation, such as "cmd" stands for "Command Line Prompt". This article will guide you to Create a Program Alias in Windows XP.
+
+For example, how to create a new program alias named cmp that stands for Computer Management.
+
+   1. Open the Start menu and select Run. Type regedit in the Run dialog box and click OK.
+      Create a Program Alias in Windows XP
+      Create a Program Alias in Windows XP
+   2. Take creating the cmp.exe as an example. The Registry Editor appears. Create a sub-key named cmp.exe under the following key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths.
+      Creating a Program Alias
+      Creating a Program Alias
+   3. In the right pane, right-click on the Default value and select Modify.
+      Creating a Program Alias
+      Creating a Program Alias
+      Creating a Program Alias
+      Creating a Program Alias
+   4. Type C:\Windows\system32\compmgmt.msc in the Value data text field and click OK to complete the operation.
+      Creating a Program Alias
+      Creating a Program Alias
+   5. Open the Start menu and select Run. Type cmp in the Run dialog box and press Enter. Because the  cmp is the program alias that stands for Computer Management, so you can open the Computer Management.

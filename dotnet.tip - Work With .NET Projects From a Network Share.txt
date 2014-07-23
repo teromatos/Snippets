@@ -1,0 +1,11 @@
+URL: http://weblogs.asp.net/rmclaws/archive/2007/03/22/work-with-net-projects-from-a-network-share.aspx
+
+URL mentioned: http://support.microsoft.com/kb/320268/
+
+
+
+I've tried a couple different methods from a bunch of different websites, and none of them worked. The only thing that worked for me was this post from the Microsoft Knowledge Base. It is the only place on the internet that gives the proper caspol command for issuing Full Trust to a network share. It is:
+
+    Drive:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\caspol.exe -m -ag 1 -url "file:////\\computername\sharename\*" FullTrust -exclusive on
+
+Note the 4 slashes after the "file" and then the 2 backslashes for the full network path. Trust me, it will save you a lot of headaches.

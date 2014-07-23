@@ -1,0 +1,69 @@
+[Visual Basic]
+Option Explicit On 
+Option Strict On
+Imports System
+Imports System.IO
+Class MyStream
+    Private Const FILE_NAME As String = "Test.data"
+    Public Shared Sub Main()
+        ' Create the new, empty data file.
+        If File.Exists(FILE_NAME) Then
+            Console.WriteLine("{0} already exists!", FILE_NAME)
+            Return
+        End If
+        Dim fs As New FileStream(FILE_NAME, FileMode.CreateNew)
+        ' Create the writer for data.
+        Dim w As New BinaryWriter(fs)
+        ' Write data to Test.data.
+        Dim i As Integer
+        For i = 0 To 10
+            w.Write(CInt(i))
+        Next i
+        w.Close()
+        fs.Close()
+        ' Create the reader for data.
+        fs = New FileStream(FILE_NAME, FileMode.Open, FileAccess.Read)
+        Dim r As New BinaryReader(fs)
+        ' Read data from Test.data.
+        For i = 0 To 10
+            Console.WriteLine(r.ReadInt32())
+        Next i
+    w.Close()
+    End Sub
+End Class
+
+[C#]
+using System;
+using System.IO;
+class MyStream 
+{
+    private const string FILE_NAME = "Test.data";
+    public static void Main(String[] args) 
+    {
+        // Create the new, empty data file.
+        if (File.Exists(FILE_NAME)) 
+        {
+            Console.WriteLine("{0} already exists!", FILE_NAME);
+            return;
+        }
+        FileStream fs = new FileStream(FILE_NAME, FileMode.CreateNew);
+        // Create the writer for data.
+        BinaryWriter w = new BinaryWriter(fs);
+        // Write data to Test.data.
+        for (int i = 0; i < 11; i++) 
+        {
+            w.Write( (int) i);
+        }
+        w.Close();
+        fs.Close();
+        // Create the reader for data.
+        fs = new FileStream(FILE_NAME, FileMode.Open, FileAccess.Read);
+        BinaryReader r = new BinaryReader(fs);
+        // Read data from Test.data.
+        for (int i = 0; i < 11; i++) 
+        {
+            Console.WriteLine(r.ReadInt32());
+        }
+        w.Close();
+    }
+}

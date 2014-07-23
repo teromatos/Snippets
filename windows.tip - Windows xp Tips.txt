@@ -1,0 +1,1121 @@
+Windows xp Tips - Part 1
+
+1) Cracking Windows XP Login Password
+
+download the nice and easy Nt/2k/xp password cracker from
+http://www.astalavista.com/
+
+or other way is
+
+
+
+if u get acess to the computer then go to Start>Run and type
+
+“control userpasswords2” without Quotes and a new pop up windows will
+open and u will reach
+
+to user account properties.
+
+Here u can Reset the Administrator and any Users password so anytime
+when u Want to use the
+
+Computer start it in safemode pressing F8 at Booting get into the xp as
+u have Administrator password and go to Controlpanel>Useraccounts and
+create a New Account .Start Computer
+
+Normally and get into WinXP with ur newely made account and do ur job.
+
+(Don’t forget to Delete ur newely made account Otherwise u will be in
+trouble)
+
+Delete ur account again starting the computer in Safemode as
+Administrator and Delete ur
+
+Account.
+
+
+
+
+
+
+
+
+
+2)Disable XP Boot Logo
+
+
+
+It is possible to disable the XP splash screen, which will slightly
+speed up the overall boot process.  Be aware that removing the splash
+screen will also cause you not to see any boot-up messages that might
+come up (chkdsk, convert ...  ), but if your system runs without any
+problems then it should not matter.
+
+
+
+Edit boot.ini.
+
+Add " /noguiboot" right after "/fastdetect".
+
+Upon restarting, the splash screen will be gone.  It can be re-enabled
+by removing the new switch.
+
+
+
+
+
+3)Turn Off Indexing to Speed Up XP
+
+
+
+Windows XP keeps a record of all files on the hard disk so when you do a
+search on the hard drive it is faster.  There is a downside to this and
+because the computer has to index all files, it will slow down normal
+file commands like open, close, etc.  If you do not do a whole lot of
+searches on your hard drive then you may want to turn this feature off:
+
+
+
+Open My Computer.
+
+Right-click your hard drive icon and select Properties.
+
+At the bottom of the window you'll see "Allow indexing service to index
+this disk for faster searches," uncheck this and click ok.
+
+A new window will pop up and select Apply to all folders and subfolders.
+
+It will take a minute or two for the changes to take affect but then you
+should enjoy slightly faster performance.
+
+
+
+
+
+4)Clean Your Prefetch to Improve Performance
+
+
+
+This is a unique technique for WinXP.  We know that it is necessary to
+scrub registry and TEMP files for Win9X/ME/2000 periodically.  Prefetch
+is a new and very useful technique in Windows XP.  However, after using
+XP some time, the prefetch directory can get full of junk and obsolete
+links in the Prefetch catalog, which can slow down your computer
+noticeably.
+
+
+
+Open C(system drive):/windows/prefetch, delete those junk and obsolete
+files, reboot.  It is recommended that you do this every month.
+
+
+
+
+
+
+
+5)Performance Increase Through My Computer
+
+
+
+Easy enough tweak to usually find out about it on your own, but still,
+some of us still don't find it right away.  So here it is:
+
+
+
+Start > right-click on My Computer and select Properties.
+
+Click on the "Advanced" tab.
+
+See the "Performance" section?  Click "Settings".
+
+Disable the following:
+
+
+
+Fade or slide menus into view
+
+Fade or slide ToolTips into view
+
+Fade out menu items after clicking
+
+Show Shadows under menus
+
+Slide open combo boxes
+
+Slide taskbar buttons
+
+Use a background image for each folder type
+
+Use common tasks in folders
+
+There, now Windows will still look nice and perform faster.
+
+
+
+
+
+
+
+6)Reduce 10 Second Scandisk Wait Time
+
+
+
+Start MS Dos Prompt (Start run CMD), and type:  CHKNTFS /T:4
+
+where 4 is the amount of wait time.
+
+
+
+CHKNTFS /?
+
+for more info.
+
+
+
+
+
+
+
+7)DMA Mode on IDE Devices
+
+
+
+Just like Windows 2000, Windows XP still fails to set the DMA mode
+correctly for the IDE device designated as the slaves on the primary IDE
+and secondary IDE channels.  Most CD-ROMS are capable of supporting DMA
+mode, but the default in XP is still PIO.  Setting it to DMA won't make
+your CD-ROM faster, but it will consume less CPU cycles.  Here's how:
+
+
+
+Open the Device Manager.  One way to do that is to right-click on "My
+Computer", select the Hardware tab, and select Device Manager.
+
+Expand "IDE ATA/ATAPI Controllers" and double-click on "Primary IDE
+Channel".
+
+Under the "Advanced Settings" tab, check the "Device 1" setting.  More
+than likely, your current transfer mode is set to PIO.
+
+Set it to "DMA if available".
+
+Repeat the step for the "Secondary IDE Channel" if you have devices
+attached to it.  Reboot.
+
+
+
+
+
+8)Load Internet Explorer the Fastest Way Possible
+
+
+
+Edit your link to start Internet Explorer to have -nohome after it.  For
+Example:  "C:\Program Files\Internet Explorer\IEXPLORE.EXE" -nohome
+
+This will load internet explorer very fast because it does not load a
+web page while it is loading.  If you want to go to your homepage after
+it is loaded, just click on the home button.
+
+
+
+
+
+
+
+9)Easy Way to Adjust LargeSystemCache
+
+
+
+Normally, the tweak I've seen asks you to go into
+HKLM\System\CurrentControlSet\Control\Session Manager\Memory Management
+and change the value to either O or 1 to the adjustment the
+LargeSystemCache.
+
+
+
+However, in Windows XP, all you have to do is:
+
+
+
+Right-click My Computer.
+
+Select Properties.
+
+Click Advanced.
+
+Choose Performance.
+
+Click Advanced again.
+
+Select either Programs or System Cache under Memory Usage.
+
+Programs = 0 for the registry tweak equivalent
+
+System Cache = 1 for the registry tweak equivalent
+
+
+
+
+
+10)Shutdown XP Faster
+
+
+
+Like previous versions of windows, it takes long time to restart or
+shutdown windows XP when the "Exit Windows" sound is enabled.  To solve
+this problem you must disable this useless sound.
+
+
+
+Click Start button.
+
+Go to settings > Control Panel > Sound, Speech and Audio devices >
+Sounds and Audio Devices > Sounds.
+
+Then under program events and windows menu click on "Exit Windows"
+sub-menu and highlight it.  Now from sounds you can select, choose
+"none" and then click Apply and OK.
+
+Now you should see some improvements when shutting down your system.
+
+
+
+
+
+
+
+11)Easily Disable Messenger
+
+
+
+Go into:  C:/Program Files/Messenger.  Rename the Messenger folder to
+"MessengerOFF".
+
+This does not slow down Outlook Express or hinder system performance.
+
+
+
+
+
+
+
+
+
+12)Turn Off Autoplay for Program CDs
+
+
+
+How can you stop Windows XP from launching program CDs?
+
+
+
+Click Start, click Run, type GPEDIT.MSC to open Group Policy in the
+Microsoft Management Console.
+
+Double-click Computer Configuration, double-click Administrative
+templates, double-click System, and then click Turn off autoplay.
+
+The instructions on your screen describe how to configure this setting.
+Click Properties to display the setting dialog.
+
+Click Enabled, and choose CD-ROM drives, then click OK, to stop CD
+autoplay.
+
+This setting does not prevent Autoplay for music CDs.
+
+
+
+
+
+
+
+13)Synchronize Your Computer Clock with an Internet Time Server
+
+
+
+Does your computer have the right time?  If your computer is not part of
+a domain, you can synchronize your computer clock with an Internet time
+server.  To do so:
+
+
+
+Double–click the time on your task bar.
+
+Click the Internet Time tab.
+
+Select the time server you want to use and make sure to select the
+Automatically synchronize with an Internet time
+
+server check box.
+
+
+
+
+
+
+
+
+
+14)Win XP Won’t Completely Shutdown
+
+
+
+Go to Control Panel, then go to Power Options.
+
+Click on the APM tab, then check the "Enable Advanced Power Management
+support."
+
+Shut down your PC.
+
+It should now successfully complete the Shut Down process.
+
+
+
+
+
+
+
+15)Adjust Various Visual Effects
+
+
+
+Open up the Control Panel.
+
+Go under System and click on the Advanced tab.
+
+Click settings under Performance options.
+
+You can now change various graphical effects (mainly animations and
+shadows).
+
+
+
+
+
+
+
+
+
+16)Disable Error Reporting
+
+
+
+Open Control Panel.
+
+Click on Performance and Maintenance.
+
+Click on System.
+
+Then click on the Advanced tab.
+
+Click on the error-reporting button on the bottom of the windows.
+
+Select Disable error reporting.
+
+Click OK.  Click OK.
+
+
+
+
+
+
+
+17)Increase Your Cable Modem or DSL Speed in XP
+
+
+
+This tweak is for broad band cable connections on stand alone machines
+with WinXP professional version - might work on Home version also.  It
+may also work with networked machines as well.
+
+
+
+This tweak assumes that you have let WinXP create a connection on
+install for your cable modem/NIC combination and that your connection
+has tcp/ip - QoS - file and print sharing - and client for Microsoft
+networks , only, installed.  It also assumes that WinXP will detect your
+NIC and has in-box drivers for it.  If it doesn't do not try this.
+
+
+
+In the "My Network Places" properties (right-click on the desktop icon
+and choose properties), highlight the connection
+
+then at the menu bar choose "Advanced" then "Advanced Settings".
+Uncheck the two boxes in the lower half for the
+
+bindings for File and Printer sharing and Client for MS networks.  Click
+OK.
+
+18)Stop Jerkey Graphics
+
+
+
+If you are connected to a LAN and have problems with jerkey graphics,
+this might be the solution:
+
+
+
+Right-click "MyComputer".
+
+Select "Manage".
+
+Click on "Device Manager".
+
+Double-click on your NIC under "Network Adapters".
+
+In the new window, select the "Advanced" tab.
+
+Select "Connection Type" and manually set the value of your NIC.  (Not
+"Auto Sense" which is default.).
+
+You should reboot.
+
+
+
+
+
+
+
+
+
+19)Speeding Up Your Old Shit Pentium by 50%
+
+
+
+We all know that you really shouldn't try to run Windows XP on anything
+less that about a Pentium 3 of some sort if you are out for speedy
+operations and amazing reaction times, but for those of us with the good
+old Pentium 2's who want to see just how well we can run XP, we have to
+tweak as much as we can where-ever we can.  A real killer to the
+system's performance is Windows Media Player.  Although it may look
+desirable and fancy with it's rounded off edges and 3rd-Dimensional
+appearance, the truth is, it takes up a large amount of that precious
+processing power.  All of these troubles however, lead to one thing in
+particular with this 'new-look' over-rated music and video player...the
+Visualizations.  The look-great I'll admit but like a lot of software
+these days, it has no purpose.  If you run the task manager, and click
+the Performance tab along the top, you'll see that when Windows Media
+Player is running and nothing else is active, it takes up around 50% of
+the processors power.  Once these visualizations are turned off, it
+barely takes up 2-3% of the processors power, which leaves much more
+room for other applications to work efficiently.
+
+
+
+Here's how to disable the feature:
+
+
+
+Open Media Player.
+
+Make sure the Now Playing tab on the left is selected.
+
+Click the View menu along the top.
+
+Go down to Now Playing Tools
+
+
+
+
+
+
+
+20) Turn Off System Restore to Save Space
+
+
+
+By default, Windows XP keeps a backup of system files in the System
+Volume Information folder.  This can eat up valuable space on your hard
+drive.  If you don't want Windows to back up your system files:
+
+
+
+Open the Control Panel.
+
+
+
+Double-click on System.
+
+
+
+Click the System Restore tab.
+
+
+
+Check "Turn off System Restore on all drives".
+
+
+
+Hit Apply.
+
+
+
+You may now delete the System Volume Information folder.
+
+
+Windows xp Tips - Part 2
+
+
+
+1) Shutdown Button on Desktop
+
+Right click on ur Desktop and create new Shortcut and type
+“C:\WINDOWS\SYSTEM32\Shutdown.exe –s” without quotes in the popup box
+which will appear asking for a path of shortcut . Now when u will double
+click this shortcut it will give u shutdown message and ur computer will
+shutdown after some seconds.  U can customize ur shutdown button with
+same icon which original shutdown have Just go to the properties of ur
+shortcut and click change icon tab select any icon u like and click
+apply.
+
+Similarly u can also put restart button on ur desktop just replace –s in
+above line by –r
+
+If u don’t want shutdown button on ur desktop u can the go to start >run
+and type
+
+Shutdown –s or –r they will do the same job.  If someone tries to
+shutdown u remotely on the net then u can stop shutdown process but
+typing shutdown –a in Run.
+
+Shutdown –s = Shutdown & restart
+
+Shutdown –r = Restart
+
+Shutdown –a = To abort shutdown
+
+
+
+2) Cracking windows xp admin and user passwords.
+
+I hope u guys liked tip given for resetting passwords in first part.  If
+u have guest or limited user account on PC than that control
+userpasswords2 tip does not help u much.  Windows will still ask u admin
+password for resetting users passwords .
+
+Ok go and Download a tool called CIA COMMANDER this is just what we
+want.  This tool will create a copy protected bootable floppy which will
+allow u to boot any computer and also help u to get into any NTFS
+partition .First select floppy as first bootable device from BIOS.  CIA
+shows u every thing to u in GUI.
+
+After booting CIA will allow u to reset any user password even
+administrator’s password.  It also includes a file manager, registry
+editor and a text/hex editor.  Present version of CIA does not support
+FAT partitions but sooner its new version will even support FAT
+partition based system.
+
+I have read on some tutorials about a tool called NTFS Pro which looks
+almost like CIA .
+
+3).  Correcting System Hang at Startup
+
+
+
+If your system hangs about 2 or 3 minutes at startup, where you can't
+access the Start
+
+button or theTaskbar, it may be due to one specific service (Background
+Intelligent
+
+Transfer) running in the background.  Microsoft put out a patch for this
+but it didn't
+
+work for me.  Here's what you do
+
+Click on Start/Run, type 'msconfig', then click 'OK'.
+
+Go to the 'Services' tab, find the 'Background Intelligent Transfer'
+service.
+
+Disable it, apply the changes & reboot.
+
+
+
+
+
+4) Editing explorer in windows xp
+
+Editing explore in windows xp is very easy with available tools its not
+as difficult like old dos based tedious method here u need just one tool
+called RESOURCE HACKER
+
+It is a resource viewer it will show u Resources in any 32bit Windows
+95/98/ME/NT/2000 executable files (including exe’s, dll’s, ocx’s and
+cpl’s) . ok go in to ur windows directory and find explorer.exe and make
+its two copies name them
+
+As explorer_1 and explorer_2 .exe respectively and keep them in windows
+folder only.  We will edit explorer_1 and will keep explorer_2 as backup
+copy if anything goes wrong.  Open explorer_1.exe in resource hacker and
+go to String table and edit whatever u want to even u can change start
+button by ur name or anything else
+
+After editing even a single word do not forget to click the COMPILE
+button.  Change icon or u can change animated message such as when u
+install a new programs so when u go to all programs a animated message
+comes “New Program Installed” u can change it by ur sentence etc. now we
+have edited the explore_1 now go To File menu in Resource hacker and
+save it as explorer_1.exe it will ask u that explorer_1.exe is already
+present do u want to replace it, click YES.  Now we have our edited
+explorer.
+
+Now restart ur computer in safe mode with command prompt by pressing F8
+during booting process . Now we will copy explorer_1.exe on explorer.exe
+by typing command Copy C:\windows\explorer_1.exe C:\windows\explorer.exe
+
+Now restart ur computer and what u will seeing that u r working with ur
+edited explorer.  If anything goes wrong than just copy explorer_2.exe
+on explorer.exe by same process.
+
+
+
+
+
+
+
+5) Speed Up Detailed View in Explorer
+
+
+
+If you like to view your files in Windows Explorer using the "Details"
+view here is a tweak to speed up the listing of file attributes:
+
+
+
+Viewing files in Windows Explorer using the "Details" mode shows various
+attributes associated with each file shown.  Some of these must be
+retrieved from the individual files when you click on the directory for
+viewing.  For a directory with numerous and relatively large files (such
+as a folder in which one stores media, eg:  *.mp3's, *.avi's etc.),
+Windows Explorer lags as it reads through each one.  Here's how to
+disable viewing of unwanted attributes and speed up file browsing:
+
+
+
+Open Windows Explorer.
+
+Navigate to the folder which you wish to optimize.
+
+In "Details" mode right-click the bar at the top which displays the
+names of the attribute columns.
+
+Uncheck any that are unwanted/unneeded.
+
+Explorer will apply your preferences immediately, and longs lists of
+unnecessary attributes will not be displayed.
+
+Likewise, one may choose to display any information which is regarded as
+needed, getting more out of Explorer.
+
+
+
+
+
+
+
+6) Remove Hibernation File
+
+
+
+If you do not use hibernation, make sure you do not have it enabled,
+which reserves disk space equal to your RAM.  If you have a hidden file
+on the root directory of your C-drive called hiberfil.sys, hibernation
+is enabled.  To remove that file:
+
+
+
+Go to Control Panel, select Performance and Maintenance, Power Options,
+Hibernate tab, and uncheck the Enable hibernation box.
+
+
+
+
+
+
+
+7) Change Drive Letters in Windows XP
+
+
+
+When you add drives to your computer, such as an extra hard drive, a CD
+drive, or a storage device that corresponds to a drive, Windows
+automatically assigns letters to the drives.  However, this assignment
+might not suit your system; for example, you might have mapped a network
+drive to the same letter that Windows assigns to a new drive.  When you
+want to change drive letters, follow these steps:
+
+
+
+Right-click My Computer, and then click Manage.
+
+Under Computer Management, click Disk Management.  In the right pane,
+you’ll see your drives listed.  CD-ROM drives are listed at the bottom
+of the pane.
+
+Right-click the drive or device you want to change, and then click
+Change Drive Letter and Paths.
+
+Click Change, click Assign the following drive letter, click the drive
+letter you want to assign, and then click OK.
+
+
+
+
+
+
+
+8) Do Not Highlight Newly Installed Programs
+
+
+
+Tired of that annoying little window that pops up to tell you that new
+software is installed?  If it gets in the way when you’re logging off,
+turn it off completely.  To do this:
+
+
+
+Click Start, right-click at the top of the Start menu where your name is
+displayed, and then click Properties.
+
+In the Taskbar and Start Menu Properties dialog box, on the Start Menu
+tab, click Customize.
+
+Click the Advanced tab, and then clear the Highlight newly installed
+programs check box.
+
+Click OK, and then click OK again.
+
+
+
+
+
+
+
+9) Change the Default Opening Folder in Windows Explorer
+
+
+
+By default, Windows Explorer opens showing the My Documents folder.  To
+change the default setting so that all top–level drives and folders are
+shown, follow these steps:
+
+
+
+Click Start > Programs > Accessories, then right–click Windows Explorer,
+and click Properties.
+
+Under Target field, which reads %SystemRoot%\explorer.exe, add to make
+the line read:
+
+
+
+%SystemRoot%\explorer.exe /n, /e, /select, C:\
+
+
+
+Click OK.
+
+
+
+
+
+10) Identify a 16-bit Program
+
+
+
+Use Windows Explorer to open the folder that contains the program's
+executable (.exe) file.
+
+Right-click the .exe file, and then click Properties.
+
+A 16-bit program does not have a Version tab in this dialog box.
+
+
+
+
+
+
+
+
+
+
+
+11) Use the Desktop Cleanup Wizard in Windows XP
+
+
+
+To start the Desktop Cleanup Wizard:
+
+
+
+Click Start , and then click Control Panel.
+
+In Control Panel, click Appearance and Themes under Pick a category.
+
+Under or pick a Control Panel icon , click Display.  The Display
+Properties dialog box is displayed.
+
+In the Display Properties dialog box, click the Desktop tab, and then
+click Customize Desktop.  The Desktop Items dialog box is displayed.
+
+Under Desktop cleanup , click to clear the Run Desktop Cleanup Wizard
+every 60 days check box if you do not want the Desktop Cleanup Wizard to
+automatically start every 60 days.
+
+
+
+Click Clean Desktop Now.  The Desktop Cleanup Wizard starts.
+
+
+
+
+
+
+
+12) Remove Unwanted Shortcuts
+
+
+
+In the Welcome to the Desktop Cleanup Wizard dialog box, click Next.
+
+In the Shortcuts dialog box, a list of shortcuts are displayed in the
+Shortcut to Clean Up list.  The shortcuts that you click are removed
+from the desktop and placed in the Unused Desktop Shortcuts folder on
+the Windows desktop.
+
+
+
+If you do not want a shortcut to be removed from the desktop, click to
+clear the check box for that shortcut, and then click Next when you are
+finished.
+
+
+
+In the Completing the Desktop Cleanup Wizard dialog box, view the items
+in the Shortcuts box to confirm that you want them removed from the
+desktop, and then click Finish.
+
+The Desktop Cleanup Wizard moves the selected shortcuts to the Unused
+Desktop Shortcuts folder and then quits.
+
+
+
+
+
+
+
+13) Restore Shortcuts
+
+
+
+If a shortcut that you want is removed, follow these steps to restore
+the shortcut:
+
+
+
+On the Desktop, double-click the Unused Desktop Shortcuts folder.  The
+Unused Desktop Shortcuts dialog box is displayed.  Note:  If the Unused
+Desktop Shortcuts dialog box is maximized, click the Restore Down button
+(appears to the left of the red Close button).
+
+
+
+Drag the shortcut that you want to the Windows desktop.
+
+Close the Unused Desktop Shortcuts dialog box.
+
+
+
+
+
+14) How to Turn On Automatic Updates
+
+
+
+Click Start , click Control Panel , and then double-click System.
+
+Click the Automatic Updates tab, and then click one of the following
+options:
+
+
+
+- Download the updates automatically and notify me when they are ready
+to be installed.  (This is the default setting.)
+
+- Notify me before downloading any updates and notify me again before
+installing them on my computer.
+
+
+
+
+
+15) How to Turn Off Automatic Updates
+
+
+
+Click Start , click Control Panel , and then double-click System.
+
+Click the Automatic Updates tab, and then click Turn off automatic
+updating.  I want to update my computer manually.
+
+
+
+
+
+16) How to Update Your Files Manually by Using Windows Update
+
+
+
+If you choose not to use automatic updating, you can still install
+specific updates from the Windows Update Web site.  Windows Update is a
+catalog of items such as drivers, security fixes, critical updates, the
+latest Help files, and Internet products that you can download to keep
+your computer up-to-date.
+
+
+
+Click Windows Update in Help and Support Center.
+
+On the Windows Update home page, click Scan for updates.
+
+Click Yes when you are prompted to install any required software or
+device drivers.
+
+
+
+
+
+
+
+17) How to Have Windows Remind You About Pending Updates
+
+
+
+Click Remind Me Later in the Automatic Updates dialog box before you
+download or install the update.
+
+In the Reminder dialog box, you can specify the amount of time Windows
+should wait before reminding you.
+
+If the reminder is for downloading, Windows reminds you only when you
+are connected to the Internet.
+
+If the reminder is for installing, Windows reminds you according to the
+schedule that you specify.
+
+
+
+
+
+
+
+18) How to Download Available Updates
+
+
+
+If you configured automatic updating to notify you before downloading
+any updates, an icon is displayed in the notification area each time new
+updates are found.
+
+
+
+Double-click the icon in the notification area.
+
+Do either of the following steps:
+
+
+
+If you want Windows to download an update, make sure that the check box
+beside it is selected.
+
+-or-
+
+If you do not want Windows to download an update, click to clear the
+check box beside it.
+
+Your selected updates are downloaded in the background; this behavior
+allows you to continue working uninterrupted.  Downloading does not
+interfere with or slow down other network activity, such as Internet
+browsing.
+
+
+
+When downloading is finished, the icon is displayed in the notification
+area to notify you that updates are ready to be installed.
+
+
+
+
+
+
+
+19) How to Pause or Resume Downloading
+
+
+
+After the download process has started, you can pause or resume
+downloading at any time.  If you close your Internet connection or
+restart your computer after pausing a download process, Windows
+automatically resumes the download process the next time you are
+connected to the Internet.
+
+
+
+During the download process, click the icon that is displayed in the
+notification area, and then click Pause.
+
+When you are ready for Windows to start downloading again, click the
+Automatic updating icon, and then click
+
+Resume.
+
+
+
+Restore an Update that You Previously Declined
+
+
+
+If you decide not to download a specific update, you can prompt Windows
+Update to offer that update again.
+
+
+
+Click Start , click Control Panel, and then double-click System.
+
+Click the Automatic Updates tab, and then click Restore Declined
+Updates.
+
+
+
+
+
+
+
+20) Using the Ultimate Configuration Tool (Professional Edition Only)
+
+
+
+One of the most full featured Windows XP configuration tools available
+is hidden right there in your system, but most people don't even know it
+exists.  It's called the Local Group Policy Editor, or gpedit for short.
+It just like old Poledit.exe.
+
+
+
+To start this editor:
+
+
+
+Select Start and then Run, then type the following:
+
+
+
+gpedit.msc
+
+After you hit Enter, you'll be greeted by gpedit, which lets you modify
+almost every feature in Windows XP without having to go to regedit.
+

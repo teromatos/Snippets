@@ -1,0 +1,59 @@
+URL:http://www.altdevblogaday.com/2012/05/16/sql-server-high-performance-inserts/
+
+Revision Four: Table Parameters
+You can see that the above approach really saved us a ton of time. However, to insert 10,000 records into the database we’re still contacting the database 10,000 times. In fact, each call to “cmd.ExecuteNonQuery” generates a roundtrip message from your client application to the database. What if there was a way that we could insert all ten thousand records, but only contact the database server once?
+
+The good news is that SQL Server 2008 introduced an incredible new capability called “Table Parameters”. Table Parameters work by grouping tons of records together into a single parameter into a stored procedure or SQL statement. This essentially converts overhead performance penalties from O(number of records) to O(number of times you batch insert). Additionally, by reducing the number of SQL commands being executed, you dramatically reduce database contention and improve performance for other programs.
+
+Here’s the final insert code including table parameters. You may notice that I’ve removed the BeginTransaction() and Commit() calls – those only boost our performance when we’re doing more than one ExecuteNonQuery() command at a time. So here goes:
+
+CREATE TYPE item_drop_bulk_table_rev4 AS TABLE (
+    item_id BIGINT,
+    monster_class_id INT,
+    zone_id INT,
+    xpos REAL,
+    ypos REAL,
+    kill_time datetime
+)
+ 
+CREATE PROCEDURE insert_item_drops_rev4
+    @mytable item_drop_bulk_table_rev4 READONLY
+AS
+ 
+INSERT INTO item_drops_rev4 
+    (item_id, monster_class_id, zone_id, xpos, ypos, kill_time)
+SELECT 
+    item_id, monster_class_id, zone_id, xpos, ypos, kill_time 
+FROM 
+    @mytable
+
+    
+    DataTable dt = new DataTable();
+dt.Columns.Add(new DataColumn("item_id", typeof(Int64)));
+dt.Columns.Add(new DataColumn("monster_class_id", typeof(int)));
+dt.Columns.Add(new DataColumn("zone_id", typeof(int)));
+dt.Columns.Add(new DataColumn("xpos", typeof(float)));
+dt.Columns.Add(new DataColumn("ypos", typeof(float)));
+dt.Columns.Add(new DataColumn("timestamp", typeof(DateTime)));
+ 
+for (int i = 0; i < MY_INSERT_SIZE; i++) {
+    dt.Rows.Add(new object[] { item_id, monster_class_id, zone_id, xpos, ypos, DateTime.Now });
+}
+ 
+// Now we&#039;re going to do all the work with one connection!
+using (SqlConnection conn = new SqlConnection(my_connection_string)) {
+    conn.Open();
+    using (SqlCommand cmd = new SqlCommand("insert_item_drops_rev4", conn)) {
+        cmd.CommandType = CommandType.StoredProcedure;
+ 
+        // Adding a "structured" parameter allows you to insert tons of data with low overhead
+        SqlParameter param = new SqlParameter("@mytable", SqlDbType.Structured);
+        param.Value = dt;
+        cmd.Parameters.Add(param);
+        cmd.ExecuteNonQuery();
+    }
+}
+
+
+
+I would just add the option to use an IEnumerable<SqlDataRecord> instead of a DataTable. It is much faster and preserves client side memory.

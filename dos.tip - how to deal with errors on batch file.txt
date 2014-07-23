@@ -1,0 +1,12 @@
+For example, create this .cmd file:
+
+@echo off
+
+echo Starting very complicated batch file...
+ping -invalid-arg || goto :error
+echo OH noes, this shouldn't have succeeded.
+goto :EOF
+
+:error
+echo Failed with error #%errorlevel%.
+exit /b %errorlevel%

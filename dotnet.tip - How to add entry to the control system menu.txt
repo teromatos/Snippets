@@ -1,0 +1,56 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+
+using System.Runtime.InteropServices;
+
+namespace WindowsApplication2
+{
+	public partial class Form1 : Form
+	{
+
+		public Form1()
+		{
+			InitializeComponent();
+			SetupSystemMenu();
+		}
+
+		[DllImport("user32.dll")]
+		private static extern int GetSystemMenu(int hwnd, int bRevert);
+
+		[DllImport("user32.dll")]
+		private static extern int AppendMenu(
+		  int hMenu, int Flagsw, int IDNewItem, string lpNewItem);
+
+		private void SetupSystemMenu()
+		{
+			// get handle to system menu
+			int menu = GetSystemMenu(this.Handle.ToInt32(), 0);
+			// add a separator
+			AppendMenu(menu, 0xA00, 0, null);
+			// add an item with a unique ID
+			AppendMenu(menu, 0, 1234, "About SiteWatcher");
+		}
+
+		protected override void WndProc(ref Message m)
+		{
+			base.WndProc(ref m);
+			// WM_SYSCOMMAND is 0x112
+			if (m.Msg == 0x112)
+			{
+				// check for my new menu item ID
+				System.Diagnostics.Debug.WriteLine(m.WParam.ToInt32());
+
+				if (m.WParam.ToInt32() == 1234)
+				{
+					// show About box here...
+					MessageBox.Show("hello from user menu.", Application.ProductName, MessageBoxButtons.OK, MessageBoxIcon.Information);
+				}
+			}
+		}
+	}
+}

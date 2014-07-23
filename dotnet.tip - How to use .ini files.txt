@@ -1,0 +1,20 @@
+<DllImport("kernel32")> _
+Private Shared Function GetPrivateProfileString(ByVal section As String, ByVal key As String, ByVal def As String, ByVal retVal As StringBuilder, ByVal size As Integer, ByVal filePath As String) As Integer
+End Function
+
+ 
+<DllImport("kernel32")> _
+Private Shared Function WritePrivateProfileString(ByVal section As String, ByVal key As String, ByVal val As String, ByVal filePath As String) As Long
+End Function
+
+ 
+Public Function IniReadValue(ByVal section As String, ByVal key As String) As String
+      Dim builder1 As StringBuilder = New StringBuilder(255)
+      IniFile.GetPrivateProfileString(section, key, "", builder1, 255, Me.path)
+      Return builder1.ToString
+End Function
+
+ 
+Public Sub IniWriteValue(ByVal section As String, ByVal key As String, ByVal iniValue As String)
+      IniFile.WritePrivateProfileString(section, key, iniValue, Me.path)
+End Sub

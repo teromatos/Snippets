@@ -1,0 +1,7 @@
+
+Version	Worker Process		Identity
+
+IIS5	aspnet_wp.exe		ASPNET
+IIS6	w3wp.exe		LocalNetwork
+
+IIS5, when impersonation = true, Identity is IUSER_WebServer

@@ -1,0 +1,16 @@
+Use the Strong Name Tool (Sn.exe) to create a public/private key pair file. 
+This file has a .snk extension. 
+
+Delete from your project the COM reference that is generating the error. 
+From the Windows Start menu, point to Programs, point to Microsoft Visual Studio .NET 2003, point to Visual Studio .NET Tools, and then click Visual Studio .NET Command Prompt. 
+Move to the directory where you want to place your assembly wrapper. 
+Type the following: 
+tlbimp <path to COM reference file> /out:<output assembly name> /keyfile:<path to .snk file>
+For example: 
+
+tlbimp c:\windows\system32\msi.dll /out:Interop.WindowsInstaller.dll /keyfile:"c:\documents and settings\mykey.snk"
+Be sure to use quotes if a path or file contains spaces. 
+
+in Visual Studio .NET, add a .NET Assembly reference to the file you just created. 
+
+C:\WORK\VB.NET\App\SQLDocumenter\Current\obj\Interop.SQLDMO.dll

@@ -1,0 +1,17 @@
+Scenario: I have 2 tables.
+
+1st Table - "SystemRoles" has 2 columns, Name and Description. Name is the Prim. Key.
+2nd Table - "SystemUserRoles" has 2 columns also. UserName and RoleName. Together those 2 columns make up a composite Prim. Key. This table's data keep track of users and the roles they are members of.
+
+I want to write a query that will return a result set with 3 columns. Name and Description from SystemRoles and a "MemberCount" column that, for each role, tells me the number of users in that role as found in the SystemUserRoles table. The tricky part is that I need a zero in the MemberCount column of the result set if no users are currently a member for any given role. So I think a simple inner join is out of the question based on that requirement.
+
+
+SELECT 
+r.Name, r.Description, COUNT(u.RoleName) 
+FROM 
+SystemRoles r 
+LEFT JOIN 
+SystemUserRoles u 
+ON r.Name = u.RoleName 
+GROUP BY 
+r.Name, r.Description 

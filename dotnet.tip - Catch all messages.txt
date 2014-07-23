@@ -1,0 +1,17 @@
+overriding WndProc will catch only messages for the form, not for contained controls. This will catch all messages for all forms and controls in your application:
+
+    partial class Form1 : Form, IMessageFilter {
+        public Form1() {
+            InitializeComponent();
+        }
+
+        private void Form1_Load(object sender, EventArgs e) {
+            Application.AddMessageFilter(this);
+        }
+
+        public bool PreFilterMessage(ref Message m) {
+            Control sender = Control.FromHandle(m.HWnd);
+           
+            return false; // true to discard the message
+        }
+    }

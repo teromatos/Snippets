@@ -1,0 +1,21 @@
+   Private Function xx(ByVal filename As String)
+
+
+        Dim fs As New System.IO.FileStream(filename, FileMode.Open, FileAccess.Read)
+        Dim r As New BinaryReader(fs)
+        ' Read data from Test.data.
+
+        If fs.Length > Integer.MaxValue Then
+            fs.Close()
+            Throw New Exception("Invalid file size.")
+        End If
+
+        Dim bytes(CType(fs.Length, Integer)) As Byte
+        For i As Long = 0 To fs.Length
+            bytes(Convert.ToInt32(i)) = r.ReadByte()
+        Next i
+        fs.Close()
+
+        Return bytes
+
+    End Function

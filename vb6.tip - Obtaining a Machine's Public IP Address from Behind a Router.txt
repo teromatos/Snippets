@@ -1,0 +1,214 @@
+URL= http://vbnet.mvps.org/index.html?code/internet/getpublicip.htm 
+'Obtaining a Machine's Public IP Address from Behind a Router
+'
+'-----------------------------------------------------------------------------------------
+' Copyright ©1996-2005 VBnet, Randy Birch. All Rights Reserved Worldwide.
+'        Terms of use http://vbnet.mvps.org/terms/pages/terms.htm
+'-----------------------------------------------------------------------------------------
+
+Private Const ERROR_SUCCESS As Long = 0
+Private Const MAX_ADAPTER_NAME_LENGTH As Long = 256
+Private Const MAX_ADAPTER_DESCRIPTION_LENGTH As Long = 128
+Private Const MAX_ADAPTER_ADDRESS_LENGTH As Long = 8
+
+Private Type IP_ADDRESS_STRING
+   IpAddr(0 To 15) As Byte
+End Type
+
+Private Type IP_MASK_STRING
+   IpMask(0 To 15) As Byte
+End Type
+
+Private Type IP_ADDR_STRING
+   dwNext As Long
+   IpAddress As IP_ADDRESS_STRING
+   IpMask As IP_MASK_STRING
+   dwContext As Long
+End Type
+
+Private Type IP_ADAPTER_INFO
+   dwNext As Long
+   ComboIndex As Long  'reserved
+   sAdapterName(0 To (MAX_ADAPTER_NAME_LENGTH + 3)) As Byte
+   sDescription(0 To (MAX_ADAPTER_DESCRIPTION_LENGTH + 3)) As Byte
+   dwAddressLength As Long
+   sIPAddress(0 To (MAX_ADAPTER_ADDRESS_LENGTH - 1)) As Byte
+   dwIndex As Long
+   uType As Long
+   uDhcpEnabled As Long
+   CurrentIpAddress As Long
+   IpAddressList As IP_ADDR_STRING
+   GatewayList As IP_ADDR_STRING
+   DhcpServer As IP_ADDR_STRING
+   bHaveWins As Long
+   PrimaryWinsServer As IP_ADDR_STRING
+   SecondaryWinsServer As IP_ADDR_STRING
+   LeaseObtained As Long
+   LeaseExpires As Long
+End Type
+
+Private Declare Function GetAdaptersInfo Lib "iphlpapi.dll" _
+  (pTcpTable As Any, _
+   pdwSize As Long) As Long
+   
+Private Declare Sub CopyMemory Lib "kernel32" _
+   Alias "RtlMoveMemory" _
+  (dst As Any, _
+   src As Any, _
+   ByVal bcount As Long)
+   
+Private Declare Function URLDownloadToFile Lib "urlmon" _
+   Alias "URLDownloadToFileA" _
+  (ByVal pCaller As Long, _
+   ByVal szURL As String, _
+   ByVal szFileName As String, _
+   ByVal dwReserved As Long, _
+   ByVal lpfnCB As Long) As Long
+   
+Private Declare Function DeleteUrlCacheEntry Lib "Wininet.dll" _
+   Alias "DeleteUrlCacheEntryA" _
+  (ByVal lpszUrlName As String) As Long
+      
+Private Declare Function lstrlenW Lib "kernel32" _
+  (ByVal lpString As Long) As Long
+
+
+
+Private Sub Form_Load()
+
+   Command1.Caption = "Get Public IP"
+   
+   Text1.Text = LocalIPAddress()
+   Text2.Text = ""
+   
+End Sub
+
+
+Private Sub Command1_Click()
+
+   Text2.Text = GetPublicIP()
+   
+End Sub
+
+
+Private Function GetPublicIP()
+
+   Dim sSourceUrl As String
+   Dim sLocalFile As String
+   Dim hfile As Long
+   Dim buff As String
+   Dim pos1 As Long
+   Dim pos2 As Long
+   
+  'site returning IP address
+   sSourceUrl = "http://vbnet.mvps.org/resources/tools/getpublicip.shtml"
+   sLocalFile = "c:\ip.txt"
+   
+  'ensure this file does not exist in the cache
+   Call DeleteUrlCacheEntry(sSourceUrl)
+
+  'download the public IP file,
+  'read into a buffer and delete
+   If DownloadFile(sSourceUrl, sLocalFile) Then
+   
+      hfile = FreeFile
+      Open sLocalFile For Input As #hfile
+         buff = Input$(LOF(hfile), hfile)
+      Close #hfile
+
+
+     'look for the IP line
+      pos1 = InStr(buff, "var ip =")
+   
+     'if found,
+      If pos1 Then
+   
+        'get position of first and last single
+        'quotes around address (e.g. '11.22.33.44')
+         pos1 = InStr(pos1 + 1, buff, "'", vbTextCompare) + 1
+         pos2 = InStr(pos1 + 1, buff, "'", vbTextCompare) '- 1
+      
+        'return the IP address
+         GetPublicIP = Mid$(buff, pos1, pos2 - pos1)
+
+      Else
+      
+         GetPublicIP = "(unable to parse IP)"
+      
+      End If  'pos1
+      
+      Kill sLocalFile
+   
+   Else
+      
+      GetPublicIP = "(unable to access shtml page)"
+      
+   End If  'DownloadFile
+   
+End Function
+
+
+Private Function DownloadFile(ByVal sURL As String, _
+                             ByVal sLocalFile As String) As Boolean
+   
+   DownloadFile = URLDownloadToFile(0, sURL, sLocalFile, 0, 0) = ERROR_SUCCESS
+   
+End Function
+
+
+Private Function LocalIPAddress() As String
+   
+   Dim cbRequired As Long
+   Dim buff() As Byte
+   Dim ptr1 As Long
+   Dim sIPAddr As String
+   Dim Adapter As IP_ADAPTER_INFO
+   
+   Call GetAdaptersInfo(ByVal 0&, cbRequired)
+
+   If cbRequired > 0 Then
+    
+      ReDim buff(0 To cbRequired - 1) As Byte
+      
+      If GetAdaptersInfo(buff(0), cbRequired) = ERROR_SUCCESS Then
+      
+        'get a pointer to the data stored in buff()
+         ptr1 = VarPtr(buff(0))
+
+         Do While (ptr1 <> 0)
+         
+           'copy the data from the pointer to the
+           'first adapter into the IP_ADAPTER_INFO type
+            CopyMemory Adapter, ByVal ptr1, LenB(Adapter)
+         
+            With Adapter
+                       
+              'the DHCP IP address is in the
+              'IpAddress.IpAddr member
+                 
+               sIPAddr = TrimNull(StrConv(.IpAddressList.IpAddress.IpAddr, vbUnicode))
+                  
+               If Len(sIPAddr) > 0 Then Exit Do
+
+               ptr1 = .dwNext
+                              
+            End With  'With Adapter
+            
+        'ptr1 is 0 when (no more adapters)
+         Loop  'Do While (ptr1 <> 0)
+
+      End If  'If GetAdaptersInfo
+   End If  'If cbRequired > 0
+
+  'return any string found
+   LocalIPAddress = sIPAddr
+   
+End Function
+
+
+Private Function TrimNull(startstr As String) As String
+
+   TrimNull = Left$(startstr, lstrlenW(StrPtr(startstr)))
+   
+End Function
+

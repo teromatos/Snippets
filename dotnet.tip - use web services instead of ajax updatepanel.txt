@@ -1,0 +1,24 @@
+URL=http://encosia.com/index.php/2007/07/11/why-aspnet-ajax-updatepanels-are-dangerous/
+
+<asp:ScriptManager ID="ScriptManager1" runat="server" 
+  EnablePageMethods="true" />
+<script language="javascript">
+ function UpdateTime() {
+   PageMethods.GetCurrentDate(OnSucceeded, OnFailed); 
+ }
+ 
+ function OnSucceeded(result, userContext, methodName) {
+   $get('Label1').innerHTML = result; 
+ }
+ 
+ function OnFailed(error, userContext, methodName) {
+   $get('Label1').innerHTML = "An error occured.";
+ }
+</script>
+<asp:Label runat="server" ID="Label1" Text="Update Me!" /><br />
+<input type="button" id="Button2" value="Web Method Update" 
+  onclick="UpdateTime();" />[WebMethod]
+public static string GetCurrentDate()
+{
+  return DateTime.Now.ToLongDateString();
+}

@@ -1,0 +1,30 @@
+I'd like to interact with the Encrypting File System (EFS) from my .NET application, specifically determining what files have been encrypted and then encrypting and decrypting as appropriate. Is any of this functionality exposed to me?
+
+
+
+A In the .NET Framework 2.0 Beta 1, the ability to encrypt and decrypt files is exposed through the File and FileInfo classes. Unfortunately, in the .NET Framework 1.x and later there is no exposed support for EFS, with the exception that the FileAttributes value returned from File.GetFileAttributes will tell you whether a file is encrypted. But as with most of the Win32 API, the magic of P/Invoke allows you to access the rest of EFS's functionality with a minimal amount of work.
+
+In order to encrypt a file, decrypt a file, or determine the status of a file's encryption, there are three functions I can access through platform invoke: EncryptFile, DecryptFile, and FileEncryptionStatus, all of which are exposed from advapi32.dll. My P/Invoke declarations for them are shown here: 
+
+[DllImport("advapi32.dll", CharSet=CharSet.Auto, SetLastError=true)]
+private static extern bool EncryptFile(string lpFilename);
+
+[DllImport("advapi32.dll", CharSet=CharSet.Auto, SetLastError=true)]
+private static extern bool DecryptFile(string lpFilename, int dwReserved);
+
+[DllImport("advapi32.dll", CharSet=CharSet.Auto, SetLastError=true)]
+private static extern bool FileEncryptionStatus(
+    string lpFilename, out int lpStatus);
+
+
+If all I'm concerned about is accessing this functionality, I can simply call these methods through these P/Invoke declarations. However, I almost always prefer to pass around FileInfo objects rather than string paths when working with files, and as such desire methods that can accept FileInfo instances instead of strings. In addition, these methods don't play as nicely with Code Access Security (CAS) as I'd like. Methods exposed through DllImport require the caller to have the UnmanagedCode security permission. Ideally, however, calling these methods would require nothing more and nothing less than the appropriate FilePermission for reading and writing the file in question.
+
+Taking all of this into account, I've created the class shown in Figure 4. The Encrypt and Decrypt static methods accept a FileInfo as an argument and delegate to the unmanaged EncryptFile and DecryptFile methods, passing in the FileInfo's FullName. If the unmanaged methods return false, meaning that an error occurred, an exception is thrown. I've also included an enumeration, EncryptionStatus, which represents the possible lpStatus output values from FileEncryptionStatus. Note that the information provided by FileEncryptionStatus is much more informative that what is accessible through File.GetFileAttributes. GetFileAttributes can only tell you whether the file is encrypted or not, whereas if the file is not encrypted, FileEncryptionStatus can also tell you whether it can be, and if it can't, FileEncryptionStatus can tell you why.
+
+Prior to calling the unmanaged methods, the call is validated. This validation ensures that the code is operating on a Windows NT®-based platform (since EFS is only supported on NTFS) and demands read and write file permissions to the specified file. As a result, I've also attributed the P/Invoke declarations with the SuppressUnmanagedCodeSecurityAttribute so that calls to these methods don't trigger a stack walk, allowing classes that use the Efs class to do so without the UnmanagedCode security permission.
+
+Note that EncryptFile, DecryptFile, and FileEncryptionStatus have all been declared with the SetLastError field set to true, meaning that the runtime will call the SetLastError Win32 API function before returning from the method. As a result, I can use Marshal.GetLastWin32Error, which retrieves the last error code set by a call to the Win32 SetLastError API method. However, since I want to return this information to the caller in the form of an exception, I can take advantage of the Win32Exception's default constructor which looks something like 
+
+public Win32Exception() : this(Marshal.GetLastWin32Error()) {}
+
+This constructor delegates the result of GetLastWin32Error to the constructor that accepts the native error number as a parameter, which means I don't have to call it explicitly.

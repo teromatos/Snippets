@@ -1,0 +1,128 @@
+threads
+
+
+no threads within loops, instead use as thread to call the method containing loop
+
+
+3 ways to make a object thread safe
+
+1- synchronize critical sections within code
+2- make the object immutable
+3- use a thread-safe wrapper
+
+'EXAMPLE FOR # 1
+Class Account
+ 
+    Public Function Withdrawl(amount as double) as boolean
+      SyncLock Me
+      '-- Make sure the user has enough cash
+      '-- Update the account with the new balance
+      '-- Send approval to ATM
+      End SyncLock
+    End Function
+
+End Class
+
+'EXAMPLE FOR # 2
+
+An alternative way to make an object threadsafe is to make the object immutable.
+An immutable object is o ne whose state can't be changed once the object has been
+created. This can be achieved by not allowing any thread to modify the state of 
+the Account object once it is created. In this approach, we separte ou the critical 
+sections that read instance variables from those that write to instance variable.
+The critical section that only read the instance variables are left as they are
+and the critical sections that change the instance variables of the object are changed,
+such that, instead of changeing the state of the current object, a new object that
+emodies the new state is created and a reference to that new object is returned. In
+this approach, we don't need to lock the critical section because no methods (only
+the constructor) of an immutable object actually writes to the object's instances
+variables, thus, an immutable object is by definition therad-safe.
+
+
+'EXAMPLE FOR # 3
+
+  Class AccountWrapper
+    Private _a As Account
+
+    Public Sub New(a As Account)
+      _a = a
+    End Sub
+
+    Public Function Withdrawl(amount as double) as boolean
+      SyncLock Me
+      return _a.Withdrawl(amount)
+      End SyncLock
+    End Function
+
+  End Class
+
+
+The Common Language Infrastructure provides three strategies to
+synchronize access to instance and shared methods and instance fields
+
+1- Synchronized contexts 
+   (note: shared fields and methods are not synchronized, 
+   therefore is does not help with synchronizing specific code regions)
+
+2- Synchronized code regions
+   (note: The readerwriterlock class offers an elegant solution to dealing with
+   read and write access to data by allowing any number of concurrent threads to 
+   read data. It locks the data only when threads are updateing the data. Reader
+   threads can acquire a lock if and only if there are no writer threads holding
+   the lock. Writer threads can acquire the lock if and only if there are no reader
+   or writer threads holding the lock.
+
+3- Manual synchronization
+
+
+'EXAMPLE FOR # 1
+<SYnchronizationAttribute> _
+Public Class Account
+  Inherits COntextBoundObject
+ 
+    Public Function Withdrawl(amount as double) as boolean
+      '-- Make sure the user has enough cash
+      '-- Update the account with the new balance
+      '-- Send approval to ATM
+    End Function
+
+End Class
+
+'EXAMPLE FOR # 2
+Class Account
+ 
+    Public Function Withdrawl(amount as double) as boolean
+     '-- Use Monitor or synclock, exclusively
+      Monitor.Enter
+      SyncLock Me
+      rwl.AcqurireReaderLock()
+      rwl.AcqurireWriterLock()
+      '-- Make sure the user has enough cash
+      '-- Update the account with the new balance
+      '-- Send approval to ATM
+      rwl.ReleaseWriterLock()
+      rwl.ReleaseReaderLock()
+      Monitor.Exit
+      End SyncLock
+     
+    End Function
+
+End Class
+
+
+'EXAMPLE FOR # 3
+
+Dim ManRE as New ManualResetEvent(False) '-- It will wait on the next ManRe.WaitOne
+Dim ManRE as New ManualResetEvent(True)  '-- It will NOT wait on the next ManRe.WaitOne
+
+ManRe.Reset '-- To change the state of the ManualResetEvent to non-signaled (false)
+ManRe.Set   '-- To change the state of the ManualResetEvent to signaled (true)
+
+
+Dim AutoRE as New AutoResetEvent(True)  '-- It will NOT wait on the next AutoRe.WaitOne 
+                                            and it will changed to non-signaled (false)
+                                            the next AutoRe.WaitOne
+
+Dim AutoRE as New AutoResetEvent(False)  '-- It will wait on the next AutoRe.WaitOne 
+                                            and it will changed to signaled (true)
+                                            the next AutoRe.WaitOne

@@ -1,0 +1,21 @@
+		'WARNING!! IN CONSOLE APPS, TRACE MESSAGE WILL GO TO SCREEN
+
+        ' Create a file for output named TestFile.txt.
+        Dim myFile As Stream = File.Create("TestFile.txt")
+
+        ' Create a new text writer using the output stream, and add it to
+        ' the trace listeners. 
+        Dim myTextListener As New TextWriterTraceListener(myFile)
+        Trace.Listeners.Add(myTextListener)
+
+        'Trace.AutoFlush = True
+        ' Write output to the file and to the console screen.
+        Trace.Write("Test output ")
+
+        For i As Integer = 1 To 5
+            Trace.WriteLine(DateTime.Now.ToString)
+            System.Threading.Thread.Sleep(1000)
+        Next
+
+        ' Flush and close the output.
+        Trace.Flush()

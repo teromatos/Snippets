@@ -1,0 +1,363 @@
+[Visual Basic] 
+Imports Microsoft.VisualBasic
+Imports System
+Imports System.IO
+Imports System.Security.Permissions
+
+Public Class Test
+
+    Shared Sub Main()
+
+        ' Load application settings.
+        Dim appSettings As New AppSettings()
+        Console.WriteLine("App settings." & vbcrLf & "Aspect " & _
+            "Ratio: {0}, Lookup directory: {1}," & vbcrLf & "Auto " & _
+            "save time: {2} minutes, Show status bar: {3}" & vbCrLf, _
+            New Object(3){appSettings.AspectRatio.ToString(), _
+            appSettings.LookupDir, _
+            appSettings.AutoSaveTime.ToString(), _
+            appSettings.ShowStatusBar.ToString()})
+
+        ' Change the settings.
+        appSettings.AspectRatio   = 1.250
+        appSettings.LookupDir     = "C:\Temp"
+        appSettings.AutoSaveTime  = 10
+        appSettings.ShowStatusBar = True
+
+        ' Save the new settings.
+        appSettings.Close()
+   
+    End Sub
+End Class
+
+' Store and retrieve application settings.
+Public Class AppSettings
+
+    Const fileName As String = "AppSettings#@@#.dat"
+    Dim aspRatio As Single
+    Dim lkupDir As String
+    Dim saveTime As Integer
+    Dim statusBar As Boolean
+
+    Property AspectRatio As Single
+        Get
+            Return aspRatio
+        End Get
+        Set
+            aspRatio = Value
+        End Set
+    End Property
+   
+    Property LookupDir As String
+        Get
+            Return lkupDir
+        End Get
+        Set
+            lkupDir = Value
+        End Set
+    End Property
+   
+    Property AutoSaveTime As Integer
+        Get
+            Return saveTime
+        End Get
+        Set
+            saveTime = Value
+        End Set
+    End Property
+   
+    Property ShowStatusBar As Boolean
+        Get
+            Return statusBar
+        End Get
+        Set
+            statusBar = Value
+        End Set
+    End Property
+
+    Sub New()
+
+        ' Create default application settings.
+        aspRatio   = 1.3333
+        lkupDir     = "C:\AppDirectory"
+        saveTime  = 30
+        statusBar = False
+
+        If File.Exists(fileName) Then
+            Dim binReader As New BinaryReader( _
+                File.Open(fileName, FileMode.Open))
+            Try
+
+                ' If the file is not empty, 
+                ' read the application settings.
+                If binReader.PeekChar() <> -1 Then
+                    aspRatio   = binReader.ReadSingle()
+                    lkupDir     = binReader.ReadString()
+                    saveTime  = binReader.ReadInt32()
+                    statusBar = binReader.ReadBoolean()
+                    Return
+                End If
+
+            ' If the end of the stream is reached before reading
+            ' the four data values, ignore the error and use the
+            ' default settings for the remaining values.
+            Catch ex As EndOfStreamException
+                Console.WriteLine("{0} caught and ignored. " & _ 
+                    "Using default values.", ex.GetType().Name)
+            Finally
+                binReader.Close()
+            End Try
+        End If
+
+    End Sub
+
+    ' Create a file and store the application settings.
+    Sub Close()
+        Dim binWriter As New BinaryWriter( _
+            File.Open(fileName, FileMode.Create))
+        Try
+            binWriter.Write(aspRatio)
+            binWriter.Write(lkupDir)
+            binWriter.Write(saveTime)
+            binWriter.Write(statusBar)
+        Finally
+            binWriter.Close()
+        End Try
+    End Sub
+
+End Class
+
+[C#] 
+using System;
+using System.IO;
+using System.Security.Permissions;
+
+class Test
+{
+    static void Main()
+    {
+        // Load application settings.
+        AppSettings appSettings = new AppSettings();
+        Console.WriteLine("App settings.\nAspect Ratio: {0}, " +
+            "Lookup directory: {1},\nAuto save time: {2} minutes, " +
+            "Show status bar: {3}\n", 
+            new Object[4]{appSettings.AspectRatio.ToString(), 
+            appSettings.LookupDir, appSettings.AutoSaveTime.ToString(),
+            appSettings.ShowStatusBar.ToString()});
+
+        // Change the settings.
+        appSettings.AspectRatio   = 1.250F;
+        appSettings.LookupDir     = @"C:\Temp";
+        appSettings.AutoSaveTime  = 10;
+        appSettings.ShowStatusBar = true;
+
+        // Save the new settings.
+        appSettings.Close();
+    }
+}
+
+// Store and retrieve application settings.
+class AppSettings
+{
+    const string fileName = "AppSettings#@@#.dat";
+    float  aspectRatio;
+    string lookupDir;
+    int    autoSaveTime;
+    bool   showStatusBar;
+
+    public float AspectRatio
+    {
+        get{ return aspectRatio; }
+        set{ aspectRatio = value; }
+    }
+
+    public string LookupDir
+    {
+        get{ return lookupDir; }
+        set{ lookupDir = value; }
+    }
+
+    public int AutoSaveTime
+    {
+        get{ return autoSaveTime; }
+        set{ autoSaveTime = value; }
+    }
+
+    public bool ShowStatusBar
+    {
+        get{ return showStatusBar; }
+        set{ showStatusBar = value; }
+    }
+
+    public AppSettings()
+    {
+        // Create default application settings.
+        aspectRatio   = 1.3333F;
+        lookupDir     = @"C:\AppDirectory";
+        autoSaveTime  = 30;
+        showStatusBar = false;
+
+        if(File.Exists(fileName))
+        {
+            BinaryReader binReader = 
+                new BinaryReader(File.Open(fileName, FileMode.Open));
+            try
+            {
+                // If the file is not empty, 
+                // read the application settings.
+                if(binReader.PeekChar() != -1)
+                {
+                    aspectRatio   = binReader.ReadSingle();
+                    lookupDir     = binReader.ReadString();
+                    autoSaveTime  = binReader.ReadInt32();
+                    showStatusBar = binReader.ReadBoolean();
+                }
+            }
+
+            // If the end of the stream is reached before reading
+            // the four data values, ignore the error and use the
+            // default settings for the remaining values.
+            catch(EndOfStreamException e)
+            {
+                Console.WriteLine("{0} caught and ignored. " + 
+                    "Using default values.", e.GetType().Name);
+            }
+            finally
+            {
+                binReader.Close();
+            }
+        }
+
+    }
+
+    // Create a file and store the application settings.
+    public void Close()
+    {
+        using(BinaryWriter binWriter = 
+            new BinaryWriter(File.Open(fileName, FileMode.Create)))
+        {
+            binWriter.Write(aspectRatio);
+            binWriter.Write(lookupDir);
+            binWriter.Write(autoSaveTime);
+            binWriter.Write(showStatusBar);
+        }
+    }
+}
+
+[C++] 
+#using <mscorlib.dll>
+using namespace System;
+using namespace System::IO;
+using namespace System::Security::Permissions;
+
+// Store and retrieve application settings.
+__gc class AppSettings
+{
+    static String* fileName = "AppSettings#@@#.dat";
+    float   aspectRatio;
+    String* lookupDir;
+    int     autoSaveTime;
+    Boolean showStatusBar;
+
+public:
+    __property float get_AspectRatio()
+    { return aspectRatio; }
+    __property void set_AspectRatio(float value)
+    { aspectRatio = value; }
+
+    __property String* get_LookupDir()
+    { return lookupDir; }
+    __property void set_LookupDir(String* value)
+    { lookupDir = value; }
+
+    __property int get_AutoSaveTime()
+     { return autoSaveTime; }
+    __property void set_AutoSaveTime(int value)
+    { autoSaveTime = value; }
+
+    __property Boolean get_ShowStatusBar()
+    { return showStatusBar; }
+    __property void set_ShowStatusBar(Boolean value)
+    { showStatusBar = value; }
+
+    AppSettings()
+    {
+        // Create default application settings.
+        aspectRatio   = 1.3333F;
+        lookupDir     = "C:\\AppDirectory";
+        autoSaveTime  = 30;
+        showStatusBar = false;
+
+        if(File::Exists(fileName))
+        {
+            BinaryReader* binReader = 
+                new BinaryReader(File::Open(fileName, FileMode::Open));
+            try
+            {
+                // If the file is not empty, 
+                // read the application settings.
+                if(binReader->PeekChar() != -1)
+                {
+                    aspectRatio   = binReader->ReadSingle();
+                    lookupDir     = binReader->ReadString();
+                    autoSaveTime  = binReader->ReadInt32();
+                    showStatusBar = binReader->ReadBoolean();
+                    return;
+                }
+            }
+
+            // If the end of the stream is reached before reading
+            // the four data values, ignore the error and use the
+            // default settings for the remaining values.
+            catch(EndOfStreamException* e)
+            {
+                Console::WriteLine(S"{0} caught and ignored. "
+                    S"Using default values.", e->GetType()->Name);
+            }
+            __finally
+            {
+                binReader->Close();
+            }
+        }
+    }
+
+    // Create a file and store the application settings.
+    void Close()
+    {
+        BinaryWriter* binWriter = 
+            new BinaryWriter(File::Open(fileName, FileMode::Create));
+        try
+        {
+            binWriter->Write(aspectRatio);
+            binWriter->Write(lookupDir);
+            binWriter->Write(autoSaveTime);
+            binWriter->Write(showStatusBar);
+        }
+        __finally
+        {
+            binWriter->Close();
+        }
+    }
+};
+
+void main()
+{
+    // Load application settings.
+    AppSettings* appSettings = new AppSettings();
+    Object* someObject[] = {appSettings->AspectRatio.ToString(), 
+        appSettings->LookupDir, appSettings->AutoSaveTime.ToString(), 
+        appSettings->ShowStatusBar.ToString()};
+    Console::WriteLine(S"App settings.\nAspect Ratio: {0}, " 
+        S"Lookup directory: {1},\nAuto save time: {2} minutes, " 
+        S"Show status bar: {3}\n", someObject);
+
+    // Change the settings.
+    appSettings->AspectRatio   = 1.250F;
+    appSettings->LookupDir     = "C:\\Temp";
+    appSettings->AutoSaveTime  = 10;
+    appSettings->ShowStatusBar = true;
+
+    // Save the new settings.
+    appSettings->Close();
+}
+

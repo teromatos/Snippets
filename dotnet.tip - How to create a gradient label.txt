@@ -1,0 +1,48 @@
+using System;
+using System.Drawing;
+using System.Drawing.Drawing2D;
+using System.Windows.Forms;
+
+public class GradientLabel : Label
+{
+     private Color startColor = SystemColors.Window;
+     private Color endColor = SystemColors.Control;
+ 
+     public GradientLabel()
+     {
+          ResizeRedraw = true;
+          Text = String.Empty;
+      }
+ 
+     public Color GradientStartColor
+     {
+          get { return this.startColor; }
+          set
+          {
+               this.startColor = value;
+               Invalidate();
+           }
+      }
+ 
+     public Color GradientEndColor
+     {
+          get { return this.endColor; }
+          set
+          {
+               this.endColor = value;
+               Invalidate();
+           }
+      }
+ 
+     protected override void OnPaintBackground(PaintEventArgs pe)
+     {
+          base.OnPaintBackground(pe);
+          Graphics g = pe.Graphics;
+  
+          Brush b = new LinearGradientBrush(new Point(0, 0), new Point(Width, Height),
+              this.startColor, this.endColor);
+  
+          g.FillRectangle(b, new Rectangle(0, 0, Width, Height));
+          b.Dispose();
+      }
+}

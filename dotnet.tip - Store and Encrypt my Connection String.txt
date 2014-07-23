@@ -1,0 +1,51 @@
+URL= http://codebetter.com/blogs/sahil.malik/archive/2004/12/20/37936.aspx
+
+ADO.NET 2.0 - Store and Encrypt my Connection String
+Man this is exciting !! But maybe this isn't just ADO.NET, but certainly .NET 2.0 !!
+
+So where do you store connection strings? Well, one of the places I store them in is the Config File. 
+
+So microsoft reasonably so created a System.Configuration.ConfigurationSettings.ConnectionStrings. The good side of that is that each of the elements is strongly typed and exposes things like “Provider” etc. (I can see value to that).
+
+But the really cool thing now is that you can add a <protectedData/> section to your Config file. What that means is that, now you can Encrypt connection strings without letting out the oh so little fart.
+
+So how does this work?? Well it's easy .. In your config file, add the following two sections --
+
+<connectionStrings>
+   <EncryptedData/>
+</connectionStrings> 
+
+<protectedData>
+   <protectedDataSections>
+      <add name="connectionStrings" provider="RSAProtectedConfigurationProvider" inheritedByChildren="false"></add>
+   </protectedDataSections>
+</protectedData>
+
+You can encrypt either using RSAProtectedConfigurationProvider, or DataProtectionConfigurationProvider. 
+
+That's it !! (Seriously, that IS IT !!). Now all u gotta do is, create a new connection string via a test console app, 
+
+<connectionStrings>
+  <EncryptedData Type="http://www.w3.org/2001/04/xmlenc#Element"
+   xmlns="http://www.w3.org/2001/04/xmlenc#">
+   <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#tripledes-cbc" />
+   <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+    <EncryptedKey xmlns="http://www.w3.org/2001/04/xmlenc#">
+     <EncryptionMethod Algorithm="http://www.w3.org/2001/04/xmlenc#rsa-1_5" />
+     <KeyInfo xmlns="http://www.w3.org/2000/09/xmldsig#">
+      <KeyName>RSA Key</KeyName>
+     </KeyInfo>
+     <CipherData>
+      <CipherValue>puttingactualcipherherebreaksmyblog</CipherValue>
+     </CipherData>
+    </EncryptedKey>
+   </KeyInfo>
+   <CipherData>
+
+<CipherValue>puttingactualcipherherebreaksmyblog</CipherValue>
+   </CipherData>
+  </EncryptedData>
+</connectionStrings>
+
+Now for the bad part - this won't work in Beta1 !! BOOHOO !!! Another good thing - config files are writable now !! :-)
+

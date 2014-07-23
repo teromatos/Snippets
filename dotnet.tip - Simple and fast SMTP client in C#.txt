@@ -1,0 +1,447 @@
+Simple and fast SMTP client in C#
+
+Here is a super easy way to send mail in 2 lines of c#.  Does not require CDO or other.  Just create an instance of the Smtp class with your ISP's (or local server) SMTP server name and tcp port number and call Send.  Send has two overloads.  First is below that allows you to set TO, FROM, Subject, BODY, and one Attachment directly.  This is a bit more direct then creating a .Net MailMessage class first.  This also allows you to send a byte[] attachment directly without going to a file first which can be handy.  The second overload takes a MailMessage like the framework class does.  The MailMessage class is just used to hold all the parameters in one place.  Using the MailMessage overload also allows multiple file attachments as normal.  Framework 2.0 will include a native SMTP client class.  Until then, you can use this.
+
+// How to use.
+byte[] ba = Encoding.UTF8.GetBytes("This is the attachment.");
+Smtp smtpClient = new Smtp("mail.myserver.com.", 25);
+smtpClient.Send("user@domain.com", "me@mydomain.com", "subject", "Here is the file...", "attach.txt", ba);
+
+//
+// Smtp.cs
+//
+using System;
+using System.Text;
+using System.IO;
+using System.Net.Sockets;
+using System.Net;
+using System.Web.Mail;
+
+namespace SendMail
+{
+ /// <summary>
+ /// Sends email directly to SMTP server.  Does not use CDO or other, but instead
+    /// is stand alone SMTP client.
+ /// </summary>
+ public sealed class Smtp
+ {
+  private string smtpServer;
+  private int smtpPort = 25;
+  private readonly StringBuilder tsb = new StringBuilder();
+        private bool trace;
+
+        public Smtp()
+        {
+        }
+
+        public Smtp(string smtpServer) : this(smtpServer, 25)
+        {
+        }
+
+        public Smtp(string smtpServer, int smtpPort)
+        {
+            SmtpServer = smtpServer;
+            SmtpPort = smtpPort;
+        }
+
+        /// <summary>
+        /// Gets or sets the SMTP server DNS name or IP address.
+        /// </summary>
+  public string SmtpServer
+  {
+   get { return smtpServer; }
+   set
+   {
+    if ( value == null )
+     throw new ArgumentNullException("SmtpServer");
+    string tmp = value.Trim();
+
+    if ( tmp.Length == 0 )
+     throw new ArgumentNullException("SmtpServer");
+    smtpServer = tmp;
+   }
+  }
+
+        /// <summary>
+        /// Gets or sets the trace value.  If true, SMTP tracing will be turned on.
+        /// </summary>
+        public bool Trace
+        {
+            get { return this.trace; }
+            set { this.trace = value;  }
+        }
+
+        /// <summary>
+        /// Gets or sets the TCP port of the SMTP server.
+        /// </summary>
+  public int SmtpPort
+  {
+   get { return smtpPort; }
+   set
+   {
+    if ( value < IPEndPoint.MinPort || value > IPEndPoint.MaxPort )
+     throw new ArgumentOutOfRangeException("SmtpPort", "Invalid port number.");
+    smtpPort = value;
+   }
+  }
+
+        /// <summary>
+        /// Gets the trace output string if Trace was set to true.
+        /// </summary>
+  public string TraceOutput
+  {
+   get { return tsb.ToString(); }
+  }
+
+  private enum SMTPResponse: int
+  {
+   CONNECT_SUCCESS = 220,
+   GENERIC_SUCCESS = 250,
+   DATA_SUCCESS = 354,
+   QUIT_SUCCESS = 221,
+  }
+
+        /// <summary>
+        /// Send mail using parameters.
+        /// </summary>
+        /// <param name="to">To address(es).  If multiple, seperate with ';'.</param>
+        /// <param name="from">From address (i.e. joe@domain.com)</param>
+        /// <param name="subject">Subject for message.</param>
+        /// <param name="body">Body of message.</param>
+        /// <param name="fileName">Filename of attachment or null if none.</param>
+        /// <param name="attachment">byte[] of attachment or null if none.</param>
+        public void Send(string to, string from, string subject, string body, string fileName, byte[] attachment)
+        {
+            if (this.smtpServer == null)
+                throw new Exception("SmtpServer must be set.");
+            if (to == null)
+                throw new ArgumentNullException("to");
+            if (from == null)
+                from = "";
+            if (subject == null)
+                subject = "";
+            if (body == null)
+                body = "";
+            if (attachment != null && fileName == null)
+                throw new ArgumentNullException("fileName must be supplied if attachment supplied.");
+            if (fileName == null)
+                fileName = "";
+            fileName = fileName.Trim();
+           
+            TcpClient client = null;
+            StreamReader sr = null;
+            StreamWriter sw = null;
+
+            try
+            {
+                IPAddress[] ips = Dns.GetHostAddresses(SmtpServer);
+                IPEndPoint rep = new IPEndPoint(ips[0], SmtpPort);
+                client = new TcpClient();
+                client.Connect(rep);
+                sr = new StreamReader(client.GetStream(), Encoding.ASCII);
+                sw = new StreamWriter(client.GetStream(), Encoding.ASCII);
+
+                // Check Connect reply.
+                CheckReply(sr, SMTPResponse.CONNECT_SUCCESS);
+
+                // HELO Msg.
+                SendData(sw, string.Format("HELO {0}\r\n", Dns.GetHostName()));
+                CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+
+                // MAIL From:
+                SendData(sw, string.Format("MAIL From: <{0}>\r\n", from));
+                CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+
+                // RCPT To:
+                string _To = to;
+                string[] Tos = _To.Split(new char[]{';'});
+                foreach (string To in Tos)
+                {
+                    SendData(sw, string.Format("RCPT TO: <{0}>\r\n", To));
+                    CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+                }
+
+                // From:
+                StringBuilder Header = new StringBuilder();
+                Header.AppendFormat("From: {0}\r\n", from);
+
+                // To:
+                Tos = to.Split(new char[]{';'});
+                Header.Append("To: ");
+                for (int i = 0; i < Tos.Length; i++)
+                {
+                    Header.Append(i > 0 ? "," : "");
+                    Header.AppendFormat("<{0}>", Tos[i]);
+                }
+                Header.Append("\r\n");
+
+                // Subject:
+                Header.Append("Subject: " + subject + "\r\n");
+
+                // Date:
+                Header.Append("Date: ");
+                Header.Append(DateTime.Now.ToString("ddd, d MMM yyyy H:m:s zz00"));
+                Header.Append("\r\n");
+
+                // X-Mailer:
+                Header.Append("X-Mailer: SendMail\r\n");
+
+                // Body.
+                string msgBody = body;
+                if (msgBody == null)
+                    msgBody = "";
+                if (!msgBody.EndsWith("\r\n"))
+                    msgBody += "\r\n";
+
+                // Attachment.
+                if ( attachment != null )
+                {
+                    string b64String = Convert.ToBase64String(attachment);
+                    Header.Append("MIME-Version: 1.0\r\n");
+                    Header.Append("Content-Type: multipart/mixed; boundary=unique-boundary-1\r\n");
+                    Header.Append("\r\n");
+                    Header.Append("This is a multi-part message in MIME format.\r\n");
+                    StringBuilder sb = new StringBuilder();
+                    sb.Append("--unique-boundary-1\r\n");
+                    sb.Append("Content-Type: text/plain\r\n");
+                    sb.Append("Content-Transfer-Encoding: 7Bit\r\n");
+                    sb.Append("\r\n");
+                    sb.Append(msgBody + "\r\n");
+                    sb.Append("\r\n");
+                    sb.Append("--unique-boundary-1\r\n");
+                    sb.Append("Content-Type: application/octet-stream; file=" + fileName + "\r\n");
+                    sb.Append("Content-Transfer-Encoding: base64\r\n");
+                    sb.Append("Content-Disposition: attachment; filename=" + fileName + "\r\n");
+                    sb.Append("\r\n");
+
+                    for (int i = 0; i < b64String.Length; )
+                    {
+                        int nextchunk = 100;
+                        if (b64String.Length - (i + nextchunk) < 0)
+                            nextchunk = b64String.Length - i;
+                        sb.Append(b64String.Substring(i, nextchunk));
+                        sb.Append("\r\n");
+                        i += nextchunk;
+                    }
+                    sb.Append("\r\n");
+                    msgBody = sb.ToString();
+                }
+
+                SendData(sw, ("DATA\r\n"));
+                CheckReply(sr, SMTPResponse.DATA_SUCCESS);
+
+                Header.Append("\r\n");
+                Header.Append(msgBody);
+                Header.Append(".\r\n");
+                Header.Append("\r\n");
+                Header.Append("\r\n");
+                SendData(sw, Header.ToString());
+                CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+
+                SendData(sw, "QUIT\r\n");
+                CheckReply(sr, SMTPResponse.QUIT_SUCCESS);
+            }
+            finally
+            {
+                if (sw != null)
+                    sw.Close();
+                if (sr != null)
+                    sr.Close();
+                if (client != null)
+                    client.Close();
+            }
+        }
+
+        /// <summary>
+        /// Send mail message using parameters set in the MailMessage class.
+        /// </summary>
+        /// <param name="message">MailMessage instance.</param>
+  public void Send(MailMessage message)
+  {
+            if (this.smtpServer == null)
+                throw new Exception("SmtpServer must be set.");
+
+   TcpClient client = null;
+   StreamReader sr = null;
+   StreamWriter sw = null;
+
+   try
+   {
+    IPAddress[] ips = Dns.GetHostAddresses(SmtpServer);
+    IPEndPoint rep = new IPEndPoint(ips[0], SmtpPort);
+    client = new TcpClient();
+    client.Connect(rep);
+    sr = new StreamReader(client.GetStream(), Encoding.ASCII);
+    sw = new StreamWriter(client.GetStream(), Encoding.ASCII);
+
+    // Connect reply.
+    CheckReply(sr, SMTPResponse.CONNECT_SUCCESS);
+
+    // HELO
+    SendData(sw, string.Format("HELO {0}\r\n", Dns.GetHostName()));
+    CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+
+    // MAIL From:
+    SendData(sw, string.Format("MAIL From: <{0}>\r\n", message.From ));
+    CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+
+    // RCPT TO:
+    string _To = message.To;
+    string[] Tos = _To.Split(new char[] {';'});
+    foreach(string To in Tos)
+    {
+     SendData(sw, string.Format("RCPT TO: <{0}>\r\n", To));
+     CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+    }
+
+    // RCPT TO: (CC)
+    if( message.Cc != null )
+    {
+     Tos = message.Cc.Split(new char[] {';'});
+     foreach (string To in Tos)
+     {
+      SendData(sw, string.Format("RCPT TO: {0}\r\n", To));
+      CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+     }
+    }
+
+    // From:
+    StringBuilder Header = new StringBuilder();
+    Header.AppendFormat("From: {0}\r\n", message.From);
+   
+    // To:
+    Tos = message.To.Split(new char[] {';'});
+    Header.Append("To: ");
+    for( int i=0; i < Tos.Length; i++)
+    {
+     Header.Append( i > 0 ? "," : "" );
+     Header.AppendFormat("<{0}>", Tos[i]);
+    }
+    Header.Append("\r\n");
+
+    // CC:
+    if( message.Cc != null )
+    {
+     Tos = message.Cc.Split(new char[] {';'});
+     Header.Append("Cc: ");
+     for( int i=0; i< Tos.Length; i++)
+     {
+      Header.Append( i > 0 ? "," : "" );
+      Header.Append(Tos[i]);
+     }
+     Header.Append("\r\n");
+    }
+
+    // Subject:
+    Header.Append("Subject: " + message.Subject+ "\r\n");
+
+    // Date:
+    Header.Append("Date: ");
+    Header.Append(DateTime.Now.ToString("ddd, d MMM yyyy H:m:s zz00" ));
+    Header.Append("\r\n");
+
+    // X-Mailer:
+    Header.Append( "X-Mailer: SendMail\r\n" );
+
+    // Body.
+    string msgBody = message.Body;
+    if ( msgBody == null )
+     msgBody = "";
+    if( ! msgBody.EndsWith("\r\n") )
+     msgBody += "\r\n";
+   
+    // Attachment(s).
+    if( message.Attachments.Count > 0 )
+    {
+     Header.Append( "MIME-Version: 1.0\r\n" );
+     Header.Append( "Content-Type: multipart/mixed; boundary=unique-boundary-1\r\n" );
+     Header.Append("\r\n");
+     Header.Append( "This is a multi-part message in MIME format.\r\n" );
+     StringBuilder sb = new StringBuilder();
+     sb.Append("--unique-boundary-1\r\n");
+     sb.Append("Content-Type: text/plain\r\n");
+     sb.Append("Content-Transfer-Encoding: 7Bit\r\n");
+     sb.Append("\r\n");
+     sb.Append(msgBody + "\r\n");
+     sb.Append("\r\n");
+
+     foreach(object o in message.Attachments)
+     {
+      MailAttachment a = o as MailAttachment;
+      byte[] binaryData;
+      if ( a != null )
+      {
+       FileInfo f = new FileInfo(a.Filename);
+       sb.Append("--unique-boundary-1\r\n");
+       sb.Append("Content-Type: application/octet-stream; file=" + f.Name + "\r\n");
+       sb.Append("Content-Transfer-Encoding: base64\r\n");
+       sb.Append("Content-Disposition: attachment; filename=" + f.Name + "\r\n");
+       sb.Append("\r\n");
+
+       using(FileStream fs = f.OpenRead())
+       {
+        binaryData = new Byte[fs.Length];
+        long bytesRead = fs.Read(binaryData, 0, (int)fs.Length);
+       }
+
+       string base64String = System.Convert.ToBase64String(binaryData, 0, binaryData.Length);
+
+       for(int i=0; i < base64String.Length; )
+       {
+        int nextchunk = 100;
+        if ( base64String.Length - (i + nextchunk ) < 0 )
+         nextchunk = base64String.Length -i;
+        sb.Append(base64String.Substring(i, nextchunk));
+        sb.Append("\r\n");
+        i += nextchunk;
+       }
+       sb.Append("\r\n");
+      }
+     }
+     msgBody = sb.ToString();
+    }
+
+    SendData(sw, ("DATA\r\n"));
+    CheckReply(sr, SMTPResponse.DATA_SUCCESS);
+
+    Header.Append( "\r\n" );
+    Header.Append( msgBody );
+    Header.Append( ".\r\n" );
+    Header.Append( "\r\n" );
+    Header.Append( "\r\n" );
+    SendData(sw, Header.ToString());
+    CheckReply(sr, SMTPResponse.GENERIC_SUCCESS);
+
+    SendData(sw, "QUIT\r\n");
+    CheckReply(sr, SMTPResponse.QUIT_SUCCESS);
+   }
+   finally
+   {
+    if ( sw != null )
+     sw.Close();
+    if ( sr != null )
+     sr.Close();
+    if ( client != null )
+     client.Close();
+   }
+  }
+
+  private void SendData(StreamWriter sw, string msg)
+  {
+            if ( trace )
+       tsb.Append(">" + msg);
+   sw.Write(msg);
+   sw.Flush();
+  }
+
+  private void CheckReply(StreamReader sr, SMTPResponse response_expected)
+  {
+   string reply = sr.ReadLine();
+            if ( trace )
+       tsb.Append("<" + reply + "\r\n");
+   int code = Convert.ToInt32(reply.Substring(0, 3));
+   if ( code != (int)response_expected )
+    throw new Exception(reply);
+  }
+ }
+} 

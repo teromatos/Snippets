@@ -1,0 +1,11 @@
+@echo off
+setlocal
+set anyfile=c:\dir1\dir2\dir3\dir4
+
+call :printPath %anyfile%
+echo %result%
+goto :eof
+
+:printPath
+set result=%~dp1 
+goto :eof

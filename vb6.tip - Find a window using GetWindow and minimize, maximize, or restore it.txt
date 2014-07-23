@@ -1,0 +1,79 @@
+' Find the target window and minimize, maximize,
+' or restore it.
+Private Sub cmdGo_Click()
+Dim action As Long
+Dim target As String
+Dim app_hwnd As Long
+Dim wp As WINDOWPLACEMENT
+
+    ' Set the appropriate action.
+    If optPlacement(0).Value Then
+        ' Minimize.
+        action = SW_SHOWMINIMIZED
+    ElseIf optPlacement(1).Value Then
+        ' Maximize.
+        action = SW_SHOWMAXIMIZED
+    Else
+        ' Restore.
+        action = SW_SHOWNORMAL
+    End If
+
+    ' Get the first window.
+    target = txtTargetName.Text
+    app_hwnd = GetWindow(GetDesktopWindow(), GW_CHILD)
+
+    ' Examine the windows.
+    Do While app_hwnd <> 0&
+        ' See if this is a top level window.
+        If IsTopLevelWindow(app_hwnd) Then
+            ' See if the window's text has the target in it.
+            If InStr(WindowText(app_hwnd), target) > 0 Then
+                ' Get the window's current placement.
+                wp.length = Len(wp)
+                GetWindowPlacement app_hwnd, wp
+
+                ' Perform the action.
+                wp.showCmd = action
+                SetWindowPlacement app_hwnd, wp
+            End If
+        End If
+
+        ' Get the next window.
+        app_hwnd = GetWindow(app_hwnd, GW_HWNDNEXT)
+    Loop
+End Sub
+
+' Return True if this is a top level window.
+Private Function IsTopLevelWindow(ByVal app_hwnd As Long) _
+    As Boolean
+    ' Assume the window is not top level.
+    IsTopLevelWindow = False
+
+    ' See if the window's text is blank.
+    If Len(WindowText(app_hwnd)) = 0 Then Exit Function
+
+    ' See if the window is visible.
+    If IsWindowVisible(app_hwnd) = 0 Then Exit Function
+
+    ' See if the window has an owner.
+    If GetWindow(app_hwnd, GW_OWNER) <> 0& Then Exit _
+        Function
+
+    ' The window has non-blank text, is visible, and has
+    ' no owner so it is (probably) a top level window.
+    IsTopLevelWindow = True
+End Function
+
+' Return the window's text.
+Private Function WindowText(ByVal app_hwnd As Long) As _
+    String
+Dim text_len As Long
+Dim window_text As String
+
+    text_len = GetWindowTextLength(app_hwnd)
+    window_text = Space$(text_len + 1)
+
+    text_len = GetWindowText(app_hwnd, window_text, _
+        text_len + 1)
+    WindowText = Left$(window_text, text_len)
+End Function

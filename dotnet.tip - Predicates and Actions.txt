@@ -1,0 +1,177 @@
+URL=http://msdn.microsoft.com/msdnmag/issues/06/09/AdvancedBasics/
+
+
+It's not that I'm lazy, but it really bothers me to have to manually iterate through all the members of a collection, taking an action on each. I wish I could just tell the collection what to do for each member and let it do the iterating. Well, guess what? On a recent exploration of the Microsoft® .NET Framework, I found just the solution to this and other nagging array and list issues. It turns out that the System.Array and System.Collections.Generic.List classes of the .NET Framework 2.0 each provide a number of methods, such as Find, FindAll, and FindLast, that let you avoid writing code to loop through every element of an array or list to find the one or more items you're looking for. You get the ability to "walk" an entire data structure, determining whether each item meets a set of criteria, without having to write the boilerplate code to loop through each row manually. In addition, because the predicate—the focus of this column— is simply the address of a procedure to call that, in effect, says yea or nay on each item in the collection, you can easily change the search criteria at run time.
+
+
+Digging into Predicates
+
+Predicates take advantage of the new generic features in the .NET Framework 2.0 (the lack of which in previous versions of the Framework made this sort of solution more difficult). Formally, the .NET Framework documentation defines the System.Predicate delegate like this: 
+
+Public Delegate Function Predicate(Of T)(obj As T) As Boolean
+
+In real life, this definition indicates that a function that acts as a predicate must take a single value as its parameter, which must be of the same type as the data in the array or list it's working with, and must return a Boolean value. The return value indicates whether the value passed to the procedure meets your particular criteria for inclusion.
+
+Here's a simple example: imagine that you've filled an array of bytes with random numbers and you want to retrieve an array containing all the values less than 50. You could iterate through each item in the original array, comparing each value to 50, and copying the appropriate values into a new array. Or you could instead call the Array.FindAll method, passing the array and the address of a System.Predicate delegate instance. The Array.FindAll method uses the predicate function you supply to return the appropriate array as its return value.
+
+You could use the following function as your predicate: 
+
+Private Function IsSmall(ByVal value As Byte) As Boolean
+    Return value < 50
+End Function
+
+Then, you could use code like this to retrieve the array: 
+Private Function GetSmallBytes(ByVal values() As Byte) As Byte()
+    Return Array.FindAll(values, AddressOf IsSmall)
+End Function
+
+Although this is a somewhat contrived example, it does show off the details. If you had a need to use a specific predicate multiple times, you might want to create a variable that refers to it instead, like this: 
+
+Dim pred As New System.Predicate(Of Byte)(AddressOf IsSmall)
+
+Then, you could call the Array.FindAll method, like this: 
+Dim smallValues() As Byte = Array.FindAll(values, pred)
+
+Although the amount of code you'd have to write otherwise isn't huge, it seems I often write code that iterates through collections of objects. Using predicates can save you time, both when writing the code and when executing it.
+
+Even though the System.Array class exposes all its predicate-related methods as shared methods, the System.Collections.Generic.List class exposes similar methods as instance methods. Therefore, you could revise the previous code like this for a List object: 
+
+Dim valueList As New List(Of Byte)
+' Fill the List with random bytes, then...
+Dim smallValues As List(Of Byte) = valueList.FindAll(AddressOf IsSmall)
+
+The System.Array and System.Collections.Generic.List classes each provide a number of methods that can take advantage of predicates, as shown in Figure 1. (Actually, the ConvertAll and ForEach methods don't use the System.Predicate delegate. These methods are similar to the methods that use predicates, so I've included them here. The concepts are the same as you've seen already, but these methods use the System.Action or System.Converter delegates instead.)
+
+In order to demonstrate each of these methods, I've constructed a simple example application, shown in Figure 2. This example fills Array and List instances with System.IO.FileInfo objects corresponding to all the files in the C:\Windows folder, and allows you to try out the various methods that involve delegates, displaying the results in the form's ListBox control. (The ForEach method example also allows you to determine the output location in order to demonstrate the System.Action delegate.)
+
+
+Figure 2 Results of FindAll with IsLarge
+The form's class defines four variables that can be used through the application: 
+
+Private fileList As New List(Of FileInfo)
+Private fileArray() As FileInfo
+
+Private action As System.Action(Of FileInfo)
+Private match As System.Predicate(Of FileInfo)
+
+The List and Array variables contain the file information. The various procedures assign values to the action and match variables, allowing different procedures to use different criteria for matching files and for handling the files. Each of these variables acts as a delegate instance—the code assigns the address of a procedure into each variable, so the Array and List methods that use delegates can pass these variables as parameters.
+
+As the form loads, it calls the RefillFileInformation method, filling both the List and Array instances with file information, and then displaying the contents of the List in the form's ListBox, as you can see in Figure 3. This procedure uses the List.ForEach method to display items within the ListBox: 
+
+fileList.ForEach(AddressOf DisplayFullList)
+
+The DisplayFullList procedure, which must be of the System.Action delegate type (that is, a subroutine that accepts a single parameter), adds each item in turn to the ListBox on the form: 
+
+Private Sub DisplayFullList(ByVal file As FileInfo)
+    completeListBox.Items.Add( _
+        String.Format("{0} ({1} bytes)", file.Name, file.Length))
+End Sub
+
+As you can surmise from the results, the List.ForEach method calls the DisplayFullList method for each item in its list, and the DisplayFullList method displays the item in the ListBox control.
+
+The sample form contains two GroupBox controls that allow you to specify delegate instances for the match and action variables. For example, when you click Small Files (<500 bytes), the corresponding CheckedChanged event handler runs the following code: 
+
+match = New System.Predicate(Of FileInfo)(AddressOf IsSmall)
+
+When you click Large Files (>1MB), you run the following code: 
+match = New System.Predicate(Of FileInfo)(AddressOf IsLarge)
+
+Clicking either of the two options within the Display group box runs this code: 
+action = New System.Action(Of FileInfo)(AddressOf DisplayInListBox)
+' or 
+action = New System.Action(Of FileInfo)(AddressOf DisplayInOutputWindow)
+
+The IsSmall procedure looks like much like the System.Predicate procedure you saw earlier (the IsLarge procedure simply modifies the size criteria). The point of the IsSmall and IsLarge procedures is simply to determine if a given item from the array or list meets your specific criteria: 
+
+Private Function IsSmall(ByVal file As FileInfo) As Boolean
+    Return file.Length < 500
+End Function
+
+The two instances of the System.Action delegate look like the following snippet (the sample application uses these to determine what to do with each FileInfo object, as the code iterates through the array or list): 
+Private Sub DisplayInListBox(ByVal file As FileInfo)
+    AddStringToListBox(String.Format("{0} ({1} bytes)", _
+        file.Name, file.Length))
+End Sub
+
+Private Sub DisplayInOutputWindow(ByVal file As FileInfo)
+    Debug.WriteLine(String.Format("{0} ({1} bytes)", _
+        file.Name, file.Length))
+End Sub
+
+
+Back to Contents
+
+System.Predicate and System.Action 
+
+The TrueForAll, Exists, Find, FindAll, FindLast, RemoveAll, FindIndex, and FindLastIndex methods all use an instance of the System.Predicate delegate to perform their tasks. Figure 4 shows lines of code extracted from the sample application using each of these methods. Figure 5 shows the results of calling the FindAll method using the IsLarge predicate to match only files that are larger than 1MB.
+
+
+Figure 5 Using Predicts with Lists and Arrays
+The ForEach method of the List and Array classes uses the System.Action delegate to describe an action to take for each element of the data structure. Rather than forcing you to write the loop to iterate through each element of the data structure, you can use the ForEach method to do the work for you. Of course, writing the loop isn't an onerous task, so that's not really the benefit of using ForEach. In my tests, using ForEach didn't improve performance over looping by hand, either. No, the real benefit from using ForEach is that you can change the action to take for each member of the data structure by simply changing the address of the procedure to be called for each element.
+
+Given that the action variable in the sample project refers to an instance of the System.Action delegate that describes the behavior to be taken for each FileInfo object, clicking the ForEach button on the form runs the following code: 
+
+fileList.ForEach(action)
+' or
+Array.ForEach(fileArray, action)
+
+Depending on the value of the action variable, the code either displays file information in the listbox or in the Output window. Changing the behavior doesn't require that you include a decision within the code—the action variable defines exactly what you want to do with each element of the data structure. The sample form allows you to select either DisplayInListBox or DisplayInOutputWindow for the value of the action variable.
+
+Back to Contents
+
+System.Converter 
+
+Recently I needed to convert an array of integers into an array of strings so I could call the String.Join method on the array. I spent a good hour attempting to find some easy way to write a single line of code to convert each item within the array from an integer into a string. I ended up with the following code, given arrays named integerValue and stringValues: 
+
+Dim stringValues(integerValues.Length – 1) As String
+For i As Integer = 0 To integerValues.Length - 1
+    stringValues(i) = integerValues(i).ToString
+Next
+Return String.Join(", ", stringValues)
+
+What I wanted was a single procedure I could call to do the trick. Unfortunately, I missed the trick—the Array.ConvertAll method. Using this method, you supply a System.Converter delegate instance that performs the conversion for each individual item and then call the ConvertAll method to do the work. You don't have to worry about creating the output array or about filling it with the values.
+
+For the previous example, I could have created a converter procedure like this: 
+
+Private Function MyConverter(ByVal value As Integer) As String
+    Return value.ToString()
+End Function
+
+To call the procedure, I could have written the following code: 
+stringValues = Array.ConvertAll(Of Integer, String)(
+    integerValues, AddressOf MyConverter)
+
+Calling the ConvertAll method requires a little care; you must supply the input and output types, along with the array to be converted and the address of the System.Converter delegate instance.
+
+Because the List class provides the ConvertAll method as an instance method, you only need to supply the output type. Therefore, calling the ConvertAll method of a List instance is slightly easier and might look like this: 
+
+stringValues = integerValues.ConvertAll(Of String)(
+    AddressOf MyConverter)
+
+The sample form provides a similar example, converting a FileInfo object into a string (by returning the FullName property of the FileInfo object). The sample uses the following converter: 
+Private Function FileInfoToString(ByVal file As FileInfo) As String
+    Return file.FullName
+End Function
+
+Clicking the ConvertAll button on the sample form runs the following code: 
+Dim fileNames As List(Of String) = 
+    fileList.ConvertAll(Of String)(AddressOf FileInfoToString)
+
+It may seem odd that you must supply the generic output type when you call the ConvertAll procedure. That is, you would expect that you could call the procedure like this: 
+
+' This code won't compile:
+fileNames = fileList.ConvertAll(AddressOf FileInfoToString)
+
+Because the compiler needs to know the type of the output for the conversion, you must supply this information at the time you write the code. Because it's a shared method and the compiler therefore has no information on either the input or the output types, calling the Array.ConvertAll method requires you to supply both the input and the output types: 
+
+fileNames = Array.ConvertAll(Of FileInfo, String)(
+    fileArray, AddressOf FileInfoToString)
+
+It may take a few attempts at using these methods before you can internalize the syntax, but once you get the concept calling the ConvertAll method can save you time when creating the code and at run time.
+
+Back to Contents
+
+Where Do You Go from Here?
+
+As you might have surmised, generics have weaseled their way into many corners of the .NET Framework 2.0. If you haven't investigated this important new feature, take some time to find out more. I introduced generics in the September 2005 column, and you'll find plenty of other information about using and creating generic procedures on MSDN®online. When you run across a method in the .NET Framework that requires you to supply an instance of a generic, as in the examples shown here, don't flee—sit down and attempt to work out the details. You can save a lot of time and effort by taking advantage of generics in your applications. 
+

@@ -1,0 +1,8 @@
+url=http://weblogs.asp.net/palermo4/archive/2007/07/10/how-to-convert-asp-net-trace-messages-into-system-diagnostics-trace-messages.aspx
+
+How To: Convert ASP.NET Trace Messages Into System.Diagnostics.Trace Messages
+
+After reading a post from Dan Wahlin, I decided to extend the discussion on Tracing in ASP.NET.  Dan discussed in his blog how to capture System.Diagnostic.Trace messages in the ASP.NET trace reports via trace.axd.  This blog post is to demonstrate how easy it is to do the opposite - send TraceContext message to System.Diagnostics.Trace listeners.  In web.config, do the following:
+
+<!-- tracing -->
+<trace enabled="true" writeToDiagnosticsTrace="true"/>

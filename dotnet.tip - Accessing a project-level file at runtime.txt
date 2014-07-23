@@ -1,0 +1,15 @@
+URL= http://codebetter.com/blogs/steve.hebert/archive/2005/06/29/128631.aspx
+
+Accessing a project-level file at runtime
+Here's the code for accessing a physical file (i.e. jpg, gif, etc.) that is referenced in the solution. I run into this bit of code every once in a while but never frequently enough to remember it off the top of my head...
+
+Stream stream=Assembly.GetExecutingAssembly().GetManifestResourceStream("[project].[path].[file]");
+
+
+I forgot one point... click on the file you want embedded in the exe/dll and change the Build Action property to "Embedded Resource". Once you do this, you'll be able to use the embedded file as shown above.
+
+A quick tip: WinForms/Console and WebApps will give you perhaps unexpected results when calling .GetExecutingAssembly() or .GetCallingAssembly(), so I find it useful to use .GetAssembly(Type) instead. 
+
+This way it doesn't matter if a library is called from a Console or a WebApp, it'll just work if I specify a Type from the assembly I want a handle on. 
+
+Also, no matter how many times I see it, the path seems to always confuse me. If I can't seem to get a handle on a resource, .GetManifestResourceNames() will give me a nice string array I can step through with the debugger so I can just copy & paste the path.

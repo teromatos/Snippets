@@ -1,0 +1,4 @@
+checkout first project
+create subdir (lib)
+set the property for subdir (lib) to  dllname file://path/to/dll/project
+update project dir

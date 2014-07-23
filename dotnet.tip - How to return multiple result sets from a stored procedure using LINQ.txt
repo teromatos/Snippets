@@ -1,0 +1,50 @@
+URL=http://blogs.msdn.com/ericnel/archive/2008/10/06/q-a-how-to-return-multiple-result-sets-from-a-stored-procedure-using-linq.aspx
+
+Q&A: How to return multiple result sets from a stored procedure using LINQ 
+This one has come up for both LINQ to SQL and LINQ to Entities. The scenario is a reasonably common one. How to handle something like this:
+
+CREATE PROCEDURE [dbo].[ReturnMultipleRS]
+AS
+      select * from customers
+      select * from products
+      
+LINQ to SQL:
+
+The solution is to add a method to the DataContext using a partial class. 
+Thankfully the Swiss MSDN team have already explained this one in great detail. 
+http://blogs.msdn.com/swiss_dpe_team/archive/2008/02/04/linq-to-sql-returning-multiple-result-sets.aspx
+Enjoy.
+
+LINQ to Entities:
+
+The easiest approach is to download the ADO.NET Entity Framework Extensions which enables multiple result set support. The download is tiny but still includes a sample project which demonstrates (among other things) working with multiple result sets to return categories and products.
+
+   1: /// <summary>   
+   2: /// Gets a category with the requested ID and populates related products using   
+   3: /// a single stored procedure call. The procedure returns multiple result sets:   
+   4: /// the first set returns the category and the second set returns related products.   
+   5: /// </summary>   
+   6: /// <param name="categoryID">Category ID.</param>   
+   7: /// <returns>Category with given ID or null if none is found.</returns>   
+   8: public Category GetCategoryAndRelatedProducts(int categoryID) {   
+   9:     DbCommand command = this.CreateStoreCommand("GetCategoryAndProducts", CommandType.StoredProcedure, new SqlParameter("cid", categoryID));  
+   10:     Category category;  
+   11:    
+   12:     using (command.Connection.CreateConnectionScope())  
+   13:     using (DbDataReader reader = command.ExecuteReader()) {  
+   14:         // first result set includes the category  
+   15:         category = s_categoryMaterializer  
+   16:             .Materialize(reader)  
+   17:             .Bind(this.CategorySet)  
+   18:             .SingleOrDefault();  
+   19:    
+   20:         // second result set includes the related products  
+   21:         if (null != category && reader.NextResult()) {  
+   22:             category.Products.Attach(s_productMaterializer  
+   23:                 .Materialize(reader)  
+   24:                 .Bind(this.ProductSet));  
+   25:         }  
+   26:     }  
+   27:    
+   28:     return category;  
+   29: }

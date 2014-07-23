@@ -1,0 +1,27 @@
+C:\WINDOWS\system32\inetsrv\urlscan\urlscan.ini
+
+add debug to [allowverbs]
+remove debug from [denyverbs] if found
+
+restart web server service
+
+
+=======================================
+
+
+Integrated Windows Authentication not Enabled 
+VB.NET user: I had a problem with my machine and had to uninstall and reinstall IIS (Win XP Pro). I have several VB.Net web apps that were running fine before. Now when I try to compile, I get the error... 
+
+Error while trying to run project: Unable to start debugging on the
+web server. Debugging failed because integrated Windows authentication
+is not enabled.
+I did run aspnet_regiis -i but it did not solve the issue. 
+
+Randy: A very common problem.
+
+goto Administrative Tools | Internet Information Services 
+right-click on your Website and select Properties 
+switch to Directory Security tab 
+click Edit button in Anonymous access and authentication control 
+check Integrated Windows authentication
+Permalink Comments +del.icio.us Tell-

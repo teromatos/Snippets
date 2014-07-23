@@ -1,0 +1,91 @@
+Private Sub Command1_Click()
+Dim msg As CDO.Message
+Set msg = LoadMessageFromFile("Path to Msg File")
+    Debug.Print msg.Subject
+    Debug.Print msg.To
+    Debug.Print msg.From
+    Debug.Print msg.ReceivedTime
+    Set msg = Nothing
+End Sub
+
+' Reference to Microsoft ActiveX Data Objects 2.5 Library
+' Reference to Microsoft CDO for Windows 2000 Library
+Function LoadMessageFromFile(Path As String) As Message
+    Dim Stm As New Stream
+    Stm.Open
+    Stm.LoadFromFile Path
+    Dim iMsg As New CDO.Message
+    Dim iDsrc As IDataSource
+    Set iDsrc = iMsg
+    iDsrc.OpenObject Stm, "_Stream"
+    Set LoadMessageFromFile = iMsg
+End Function
+
+================================================================
+
+Imports Microsoft.Office.Interop.Outlook
+
+Module Module1
+
+    Sub Main()
+
+        DisplayInbox()
+        Console.ReadLine()
+
+    End Sub
+
+    Public Sub DisplayInbox()
+        ' Get items in my inbox. 
+        Dim o As New Application
+        Dim outlookNS As [NameSpace] = o.GetNamespace("MAPI")
+        Dim inboxFolder As MAPIFolder = outlookNS.GetDefaultFolder(OlDefaultFolders.olFolderInbox)
+        ' Print out some basic info. 
+        Console.WriteLine("You have {0} e-mails.", inboxFolder.Items.Count)
+        Console.WriteLine()
+
+        Dim alist As New ArrayList
+
+        Dim obj As Object
+        For Each obj In inboxFolder.Items
+            Dim item As MailItem = obj
+            If Not (item Is Nothing) Then
+                alist.Add(item)
+            End If
+        Next obj
+
+
+        Dim sl As New System.Collections.SortedList
+        Dim i As Integer
+
+        For i = 0 To alist.Count - 1
+            sl.Add(CType(alist(i), MailItem).SentOn.ToString("yyyy/MM/dd HH:mm:ss") & "_" & i.ToString("0000"), i)
+        Next
+
+        Dim sw As New System.IO.StreamWriter("c:\junk\dotTextEmail.txt")
+        Dim sep As New String("-"c, 80)
+        Dim j As Integer
+        For i = 0 To sl.Count - 1
+            j = CType(sl.GetByIndex(i), Integer)
+            Dim item As MailItem = CType(alist(j), MailItem)
+
+            Dim sb As New System.Text.StringBuilder
+
+            sb.Append("Message Id: " & i.ToString).Append(Environment.NewLine)
+            sb.Append("From: " & item.SenderEmailAddress).Append(Environment.NewLine)
+            sb.Append("Sent: " & item.SentOn.ToString).Append(Environment.NewLine)
+            sb.Append("To: " & item.To).Append(Environment.NewLine)
+            sb.Append("Subject: " & item.Subject).Append(Environment.NewLine)
+            sb.Append("").Append(Environment.NewLine)
+            sb.Append(item.Body).Append(Environment.NewLine)
+            sb.Append("").Append(Environment.NewLine)
+            sb.Append(sep).Append(Environment.NewLine)
+            sb.Append("").Append(Environment.NewLine)
+
+            sw.WriteLine(sb.ToString)
+
+        Next
+
+        sw.Close()
+
+    End Sub 'DisplayInbox
+End Module

@@ -1,0 +1,33 @@
+Source: http://blogs.msdn.com/bgroth/archive/2004/11/11/256190.aspx
+
+Command-line view of ports in use
+Here is a quick and easy way to dig into what ports are being used, and what apps are using them. 
+
+Step 1: Find out what ports are being used:
+C:\>NetStat -o
+Which will return the following (your list will probably be much longer):
+
+Proto  Local Address    Foreign Address          State        PID
+TCP    EC968728:1108    somesite.corp.com:https  ESTABLISHED  4072
+
+Step 2: See what app (& more) is using that port:
+C:\>TaskList /FI "PID eq 4072" /FO LIST /V
+Which will return the following 
+
+Image Name:   OUTLOOK.EXE
+PID:          4072
+Session Name: Console
+Session#:     0
+Mem Usage:    105,320 K
+Status:       Running
+User Name:    ****DomainName****\bgroth
+CPU Time:     0:01:44
+Window Title: Inbox - Microsoft Outlook
+
+There you have it! 
+
+I used the following pages to dig into the NetStat and TaskList commands:
+
+NetStat Info 
+TaskList Info 
+ 

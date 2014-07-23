@@ -1,0 +1,151 @@
+DHCP: An error occurred while accessing the dhcp database
+
+I received the error message "An error occurred while accessing the DHCP database. Look at the DHCP server event log for more information on this error" when administering DHCP this afternoon.
+
+It took me ages to track down what the problem was - the clue was that I was adding a DHCP reservation; every time I clicked on "Add" I got the error message.
+
+To troubleshoot it I wanted to get an export or dump of all the entries and configuration of DHCP on the server. After a bit of Googling I came across this:
+
+netsh dhcp server <IP address> dump >u:\dhcpdump.txt
+
+But the first time I ran the command I got the output
+
+The following command was not found: dhcp server <IP address> dump
+
+The answer is to issue the command:
+
+netsh add helper dhcpmon.dll
+
+You just have to do it once - and then netsh will know about the DHCP commands you can use.
+
+N.B. <IP address> has to be the IP address of the DHCP server. It can't lookup the server from the hostname
+
+ 
+
+As for my problem; searching for the MAC address I was trying to use highlighted the issue. A single MAC address cannot be reserved twice in a scope. Unfortunately the error message I was getting wasn't explicit enough (and I don't have the rights to look at the logs on the DCs).
+
+
+====================================================================
+Get dhcp dump from server 10.20.20.6 for scope 10.20.20.0
+netsh -c dhcp server 10.20.20.6 scope 10.20.20.0 dump > dhcpdump.txt
+====================================================================
+
+Managing Changes to DHCP with NETSH
+
+Posted By Alan Finn On April 10, 2003 @ 11:15 am In Windows Scripting, VBScript, DHCP, TCP/IP | Comments Disabled
+
+How many times have you been approached by the Network Engineering Group with the news that the internal IP scheme needs to be changed or that VLAN’s are going to be implemented on all switching equipment? The first will require some configuration, but the second can mean large amounts of work to create and configure the new scopes and scope options needed to complement the additional subnets.
+
+The [1] DHCP MMC snap-in can definitely facilitate this procedure; however, the NETSH utility offers a method to script modifications to DHCP scopes automatically. For those of you who are still building your [2] VBScript, WMI, and ADSI scripting skills, don’t fret. This is good old-fashioned command line work and doesn’t require knowledge of objects, methods, components, etc.
+
+The NETSH utility has many different functional parameters within the DHCP context alone. As there are far too many options to cover at one time, this guide will focus on the following common administrative tasks in making changes to DHCP scopes that can be accomplished with NETSH:
+
+   1. Dumping scopes and configurations from and existing DHCP server into a text file.
+   2. Creating a new scope.
+   3. Defining the range of the scope.
+   4. Adding options to the scope.
+   5. Assigning reservations for IP addresses.
+   6. Listing authorized DHCP servers and authorizing DHCP servers.
+
+Dumping Existing Scopes and Configurations
+
+Getting your configuration in a text file is a great method to obtain as much or as little dhcp information as needed in a single document without navigating around the MMC. The following example run from the command line will dump all information for the scope 192.168.2.0 from the DHCP server 192.168.2.5 into a text file call test.txt. Note – You may also specify the DHCP server by name. For example: \\DHCP-SVR01.
+
+C:\>netsh -c dhcp server 192.168.2.5 scope 192.168.2.0 dump > c:\test.txt
+
+The first few lines of output will resemble the following:
+
+# Changed the current scope context to 192.168.3.0 scope.Dhcp Server 192.168.2.5 add scope 192.168.3.0 255.255.255.0 "ScopeA" "First Scope"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set state 1
+
+# ============================================================
+#  Start Add Ipranges to the Scope 192.168.3.0, Server 192.168.2.5
+# ============================================================
+
+All lines with the hash mark (#) are ignored as input similar to the REM statement used in batch files. The two lines beginning with Dhcp Server are actual commands that can be edited to change information and then the file can be used as an input script which we will cover later in this work.
+
+Creating a new scope
+
+To create a new scope we will use one of the lines in the above example to create a scope for the network ID 192.168.3.0. For this example, the first non-commented line is copied to notepad and then the file is saved as C:\dhcp.txt.
+
+Next, from the command line we run C:\>netsh exec c:\dhcp.txt. This creates and activates the new scope as shown below. Note – The scope does not have any Property Options set at this time, hence the blue information icon.
+
+Defining the range of the scope
+
+In order for the clients to lease IP’s, we must obviously assign a range from which leases will be distributed. This is done as follows in our script:
+
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add iprange 192.168.3.1 192.168.3.254
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add excluderange 192.168.3.1 192.168.3.10
+
+Note - that an exclusion range is included in the example to prevent a range of IP addresses from being assigned to the clients.
+
+As we are executing these commands in steps from our script, we will save the lines above to C:\range.txt. Going back to the command line, we now run C:\>netsh exec c:\range.txt which adds the ranges to the scope as shown below in the MMC:
+
+Adding options to the scope
+
+Now that the scope is created, we need to add some options for the clients to better define their DHCP leases. Note – Normally, these lines would be included in the script (dhcp.txt) underneath the line that defines the range of the scope and actually run in the previous step. Since it is activated upon creation, clients that might lease IP addresses from this scope would need the defined options at the time of lease. This has been broken into steps in this article for subject demonstration. To create a scope that was deactivated initially, the following line would need to be added after the first line in the script:
+
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set state 0
+
+This example will add the standard options: router (gateway), [3] DNS servers, and lease expiration to the scope. All possible options can be scripted, but are beyond the scope of this example. It is possible to get the syntax for all options for scripts by creating a dump file at the server level instead of the scope level. The syntax for the three options we will use is as follows in the script file:
+
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set optionvalue 3 IPADDRESS "192.168.2.2"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set optionvalue 6 IPADDRESS "192.168.2.5" "192.168.2.6"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set optionvalue 51 DWORD "691200"
+
+The first line sets the router for the scope. This is the gateway the clients will use to leave the defined network. The second line assigns DNS servers to the client leases and can include as many as needed. The third line in this example assigns the expiration for the lease. In this case 8 days expressed in seconds (691200 seconds/60 = 11520 minutes/60 = 192 hours/24 = 8 days). Again, the changes can be verified in the MMC.
+
+Note – The lease expiration is not viewable in this screen as it is a property of the scope and not an option. This may be viewed by right-clicking on the scope and selecting Properties.
+
+Assigning reservations to the scope
+
+To assign the same IP to a client whenever the lease is renewed, we can define reservations via the netsh script.  As we are using multiple steps to create the scope in this example, we will use the following syntax and save the file as C:\reserve.txt.
+
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add reservedip 192.168.3.20 00043c40fb6a SVR01
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add reservedip 192.168.3.21 0600ba34f50c SVR02
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add reservedip 192.168.3.22 02003b5d80ca SVR03
+
+In this example, we are working on server 192.168.2.5 in scope 192.168.3.0. The number at the end of the line is the MAC (Media Access Control) address of the NIC card. This ensures that whenever this NIC requests a lease renewal, it will always get the same IP. The name on the end is simply for labeling the reservation in DHCP, it has no effect on the client. We now execute the script file with the following syntax from the command line: C:\>netsh exec c:\reserve.txt. Again, we can verify the results in the MMC.
+
+Note – I have run into intermittent issues with reservation client types where the reservation will sometimes be assigned a lease type of BOOTP instead of DHCP. This can be forced by adding another entry to the end of each line of the script specifying any of the following options [BOOTP | DHCP | BOTH] as needed.
+
+Listing and authorizing DHCP servers in [4] Active Directory
+
+It is possible to verify and list all the authorized DHCP servers in Active Directory from the command line using the following syntax: C:\netsh dhcp show server. This allows you to view all authorized servers to ensure that an over-eager administrator hasn’t added an unnecessary server to the network.
+
+You may also authorize a DHCP server in AD remotely with the following command:
+
+C:\ netsh dhcp add server DHCP-SVR01.yourdomain.com 10.2.2.2
+
+This one can be extremely handy if you want to hand off the job of creating the DHCP scopes and/or server to a junior admin. As Enterprise rights are needed to authorize the server, the work could be verified before going into production and then authorized remotely from the command line. Note – Remember that it can take a DHCP server 15 minutes to authorize so if it doesn’t show up immediately, give it a little while to process.
+
+Bringing it all together
+
+This has been broken into steps for better demonstration; however, all of the steps can be combined into a single script after you are comfortable with the syntax. The completed script would look like the following:
+
+Dhcp Server 192.168.2.5 add scope 192.168.3.0 255.255.255.0 "ScopeA" "First Scope"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add iprange 192.168.3.1 192.168.3.254
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add excluderange 192.168.3.1 192.168.3.10
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set optionvalue 3 IPADDRESS "192.168.2.2"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set optionvalue 6 IPADDRESS "192.168.2.5" "192.168.2.6"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set optionvalue 51 DWORD "691200"
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add reservedip 192.168.3.20 00043c40fb6a SVR01
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add reservedip 192.168.3.21 0600ba34f50c SVR02
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 add reservedip 192.168.3.22 02003b5d80ca SVR03
+Dhcp Server 192.168.2.5 Scope 192.168.3.0 set state 1
+
+This would all be saved to a single file and run using the C:\>netsh exec filename.txt command from the command line.
+
+Netsh is a very powerful command line tool with MANY other options and uses. The syntax can be tricky but after a little practice, you’ll find that it simplifies several mundane administrative tasks.
+Written by Alan Finn - [5] Visit Website
+
+Article printed from 2000Trainers.com: http://www.2000trainers.com
+
+URL to article: http://www.2000trainers.com/windows-scripting/manage-dhcp-netsh/
+
+URLs in this post:
+[1] DHCP: http://www.2000trainers.com/tutorials/dhcp/
+[2] VBScript: http://www.2000trainers.com/tutorials/vbscript/
+[3] DNS: http://www.2000trainers.com/tutorials/dns/
+[4] Active Directory: http://www.2000trainers.com/tutorials/active-directory/
+[5] Visit Website: http://

@@ -1,0 +1,36 @@
+Source: http://www.vonsharp.net/StopwatchWriterClass.aspx
+
+StopwatchWriter Class 
+  
+Do you ever get sick of having to write 4 whole lines for timing certain parts of your code. I know 4 lines isn't that bad, but they multiply quickly when you're testing a lot of different code, or different parts of the same method. That is why I came up with a StopwatchWriter class, it implements IDisposable so you can use it in a using statement which reduces the needed code to one line, put at the top of the code your testing (as opposed to before to setup and after to write). The constructor starts a stopwatch and when the Dispose method gets called, it stops the stopwatch and writes the time to the console, but it could easily be changed to write any type of log.
+
+public class StopwatchWriter : IDisposable
+{
+    Stopwatch _stopwatch = new Stopwatch();
+    string _text;
+
+    public StopwatchWriter(string text)
+    {
+        _text = text + " - ";
+        _stopwatch.Start();
+    }
+
+    public void Dispose()
+    {
+        _stopwatch.Stop();
+        Console.WriteLine("stopw: "+_text + _stopwatch.ElapsedMilliseconds);
+    }
+}
+
+Usage looks like:
+
+using (new StopwatchWriter("populateStuff"))
+{
+    this.PopulateStep1();
+    this.PopulateStep2();
+}
+
+-or-
+
+using (new StopwatchWriter("doStuff"))
+    DoStuff();

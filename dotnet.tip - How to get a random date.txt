@@ -1,0 +1,22 @@
+public class RandomDate {
+    public RandomDate() : this(Environment.TickCount) {
+    }
+
+    public RandomDate(int seed) {
+        ran = new Random(seed);
+    }
+
+    public DateTime Next(DateTime max) {
+        return new DateTime((long)(ran.NextDouble() * (double)max.Ticks));
+    }
+
+    public DateTime Next(DateTime min, DateTime max) {
+        if(min > max)
+            throw new ArgumentOutOfRangeException("min", min, "min DateTime after max DateTime");
+
+        long ticks = max.Ticks - min.Ticks;
+        return new DateTime((long)(ran.NextDouble() * (double)ticks) + min.Ticks);
+    }
+
+    readonly private Random ran = new Random();
+}

@@ -1,0 +1,11 @@
+Here's my list. All of these can be accessed on Tools->Options menu:
+
+Disable F1. (Environment->Keyboard) This is probably the best advice that I found somewhere.
+Disable "Animate environment tools" (Environment->General).
+Disable Start Page (Environment->Startup).
+    Disable "Track Active Item in Solution Explorer" (Projects and Solutions).
+    Disable Navigation Bar (Text Editor->C#). I think this is available for every language.
+Set "AutoToolboxPopulate" to false (Windows Forms Designer).
+You can set the Code view as the default view when viewing Windows Forms. Just right-click on the cs file and select "Open With...".
+Open Visual Studio using the command line (devenv) rather than using the Start menu. I don't know why but I notice it loads faster.
+Turn off Track Changes. (Text Editor->Track changes)

@@ -1,0 +1,42 @@
+I'm working with a list of files and I want to sort this list before
+displaying it to the user.  Many of the files have numbers in the names
+at multiple locations, for example with a pattern similar to
+Class#_Student#.txt, and I'd like the sorting algorithm to consider
+those numbers in their entirety during the sort, rather than sorting
+based on the character values of the individual digits.  So, if I have a
+list of files named "Class1_Student1.txt", "Class10_Student1.txt", and
+"Class2_Student1.txt", they should be sorted as "Class1_Student1.txt",
+"Class2_Student1.txt", and "Class10_Student1.txt".  Is there anything in
+the .NET Framework that will allow me to easily perform this form of
+sort?
+
+
+
+A As far as I know, the base class libraries do not provide a string
+comparison option that would allow for this kind of comparison.
+However, given that you're asking about doing this with file names, you
+probably already know that the Windows® shell is capable of sorting
+files by name in this fashion.  In fact, the Microsoft® Shell
+Lightweight Utility Library, shlwapi.dll, exposes this comparison
+routine as StrCmpLogicalW.  You can easily consume this function from
+your managed code using P/Invoke:
+
+[DllImport("shlwapi.dll", CharSet=CharSet.Unicode, ExactSpelling=true)]
+private static extern int StrCmpLogicalW(string strA, string strB);
+
+It's then very straightforward to incorporate this method into an IComparer implementation that you can use with Array.Sort.
+public class StringLogicalComparer : IComparer {
+    public int Compare(object x, object y) {
+        string text1 = x as string;
+        if (text1 != null) {
+            string text2 = y as string;
+            if (text2 != null) return StrCmpLogicalW(text1, text2);
+        }
+        return Comparer.Default.Compare(x, y);
+    }
+    •••
+}
+
+This IComparer implementation could obviously be extended to support
+FileInfo, DirectoryInfo, or any other file-related classes you might
+want to sort based on the needs of your particular application.

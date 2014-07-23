@@ -1,0 +1,153 @@
+Get public key from X509 Cert
+
+Some ~simple C# code wrapping pinvoke to get the public key on an X509Cert:
+
+// Usage
+string certFile = @"c:\mycert.cer";
+X509Certificate cert = X509Certificate.CreateFromCertFile(certFile);
+RSACryptoServiceProvider rsa = CertUtil.GetCertPublicKey(cert);
+Console.WriteLine(rsa.ToXmlString(false));
+
+
+/// CertUtil helper Class.
+using System;
+using System.Security.Cryptography;
+using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
+
+namespace WSESimpleTCPDLL
+{
+ [StructLayout(LayoutKind.Sequential)]
+ public struct PUBKEYBLOBHEADERS
+ {
+  public byte bType;  //BLOBHEADER
+  public byte bVersion;   //BLOBHEADER
+  public short reserved;  //BLOBHEADER
+  public uint aiKeyAlg;   //BLOBHEADER
+  public uint magic;  //RSAPUBKEY
+  public uint bitlen;  //RSAPUBKEY
+  public uint pubexp;  //RSAPUBKEY
+ }
+
+ /// <summary>
+ /// Summary description for CertUtil.
+ /// </summary>
+ public sealed class CertUtil
+ {
+  const uint CERT_SYSTEM_STORE_CURRENT_USER = 0x00010000;
+  const uint CERT_STORE_READONLY_FLAG = 0x00008000;
+  const uint CERT_STORE_OPEN_EXISTING_FLAG = 0x00004000;
+  const uint CERT_FIND_SUBJECT_STR = 0x00080007;
+  const uint X509_ASN_ENCODING = 0x00000001;
+  const uint PKCS_7_ASN_ENCODING = 0x00010000;
+  const uint RSA_CSP_PUBLICKEYBLOB = 19;
+  const int  AT_KEYEXCHANGE = 1;  //keyspec values
+  const int  AT_SIGNATURE = 2;
+  static uint ENCODING_TYPE = PKCS_7_ASN_ENCODING | X509_ASN_ENCODING ;
+
+  private CertUtil()
+  {
+  }
+
+  public static RSACryptoServiceProvider GetCertPublicKey(X509Certificate cert)
+  {
+   byte[] publickeyblob ;
+   byte[] encodedpubkey = cert.GetPublicKey(); //asn.1 encoded public key
+
+   uint blobbytes = 0;
+
+   if(Win32.CryptDecodeObject(ENCODING_TYPE, RSA_CSP_PUBLICKEYBLOB, encodedpubkey, (uint)encodedpubkey.Length, 0, null, ref blobbytes))
+   {
+    publickeyblob = new byte[blobbytes];
+    Win32.CryptDecodeObject(ENCODING_TYPE, RSA_CSP_PUBLICKEYBLOB, encodedpubkey, (uint)encodedpubkey.Length, 0, publickeyblob, ref blobbytes);
+   }
+   else
+   {
+    throw new Exception("Could not decode publickeyblob from certificate publickey") ;
+   }
+ 
+   PUBKEYBLOBHEADERS pkheaders = new PUBKEYBLOBHEADERS() ;
+   int headerslength = Marshal.SizeOf(pkheaders);
+   IntPtr buffer = Marshal.AllocHGlobal( headerslength);
+   Marshal.Copy( publickeyblob, 0, buffer, headerslength );
+   pkheaders = (PUBKEYBLOBHEADERS) Marshal.PtrToStructure( buffer, typeof(PUBKEYBLOBHEADERS) );
+   Marshal.FreeHGlobal( buffer );
+
+   //-----  Get public exponent -------------
+   byte[] exponent = BitConverter.GetBytes(pkheaders.pubexp); //little-endian ordered
+   Array.Reverse(exponent);    //convert to big-endian order
+
+   //-----  Get modulus  -------------
+   int modulusbytes = (int)pkheaders.bitlen/8 ;
+   byte[] modulus = new byte[modulusbytes];
+   try
+   {
+    Array.Copy(publickeyblob, headerslength, modulus, 0, modulusbytes);
+    Array.Reverse(modulus);   //convert from little to big-endian ordering.
+   }
+   catch(Exception)
+   {
+    throw new Exception("Problem getting modulus from publickeyblob");
+   }
+
+   RSAParameters parms = new RSAParameters();
+   parms.Modulus = modulus;
+   parms.Exponent = exponent;
+   RSACryptoServiceProvider rsa = new RSACryptoServiceProvider();
+   rsa.ImportParameters(parms);
+   return rsa;
+  }
+ }
+}
+
+////  Win32 Helpers
+using System;
+using System.Runtime.InteropServices;
+using System.ComponentModel;
+using System.Collections;
+using System.Text;
+
+namespace WSESimpleTCPDLL
+{
+ public class Win32
+ {
+  [DllImport("crypt32.dll")]
+  public static extern bool CryptDecodeObject(
+   uint CertEncodingType,
+   uint lpszStructType,
+   byte[] pbEncoded,
+   uint cbEncoded,
+   uint flags,
+   [In, Out] byte[] pvStructInfo,
+   ref uint cbStructInfo);
+
+
+  [DllImport("crypt32.dll", SetLastError=true)]
+  public static extern IntPtr CertFindCertificateInStore(
+   IntPtr hCertStore,
+   uint dwCertEncodingType,
+   uint dwFindFlags,
+   uint dwFindType,
+   [In, MarshalAs(UnmanagedType.LPWStr)]String pszFindString,
+   IntPtr pPrevCertCntxt) ;
+
+  [DllImport("crypt32.dll", SetLastError=true)]
+  public static extern bool CertFreeCertificateContext(
+   IntPtr hCertStore) ;
+
+
+  [DllImport("crypt32.dll", CharSet=CharSet.Auto, SetLastError=true)] //overloaded
+  public static extern IntPtr CertOpenStore(
+   [MarshalAs(UnmanagedType.LPStr)] String storeProvider,
+   uint dwMsgAndCertEncodingType,
+   IntPtr hCryptProv,
+   uint dwFlags,
+   String cchNameString) ;
+
+
+  [DllImport("crypt32.dll", SetLastError=true)]
+  public static extern bool CertCloseStore(
+   IntPtr hCertStore,
+   uint dwFlags) ;
+ }
+}

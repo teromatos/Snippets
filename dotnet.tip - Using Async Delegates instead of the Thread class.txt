@@ -1,0 +1,88 @@
+URL=http://jachman.wordpress.com/2009/04/03/using-async-delegates-instead-of-the-thread-class/
+
+Using Async Delegates instead of the Thread class
+April 3, 2009 — Gerhard Stephan 
+If you want to write some asnychronous code, the good old fashioned way is to create a new Thread. But this has several pitfalls, e.g. when you need to use parameters or you need to retrieve a return value. Then this way is getting tricky. 
+
+Have a look at this solution that is using async delegates instead of the Thread class.
+
+private delegate bool ThreadDelegate(int counter, int sleep);
+
+/// <summary>
+/// Thread Method.
+/// </summary>
+public static bool ThreadMethod(int counter, int sleep)
+{
+    for (int x = counter; x > 0; x--)
+    {
+        Console.WriteLine("Sleeping " + sleep + "ms");
+        Thread.Sleep(sleep);
+    }
+    
+    return true;
+}
+
+/// <summary>
+/// Main Thread
+/// </summary>
+static void Main()
+{
+    ThreadDelegate threadDelegate = ThreadMethod;
+    
+    IAsyncResult result = threadDelegate.BeginInvoke(10, 200, null, null);
+    // do something between BeginInvoke and EndInvoke
+    bool threadResult = threadDelegate.EndInvoke(result);
+    
+    Console.WriteLine("Result " + threadResult);
+}
+
+
+And now the opposite, the solution that is using the Thread class. 
+
+/// <summary>
+/// Thread Arguments 
+/// </summary>
+class ThreadArguments
+{
+    public int counter;
+    public int sleep;
+    
+    public bool result;
+}
+
+/// <summary>
+/// Thread method
+/// </summary>
+public static void ThreadMethod(object argument)
+{
+    ThreadArguments ta = (ThreadArguments) argument;
+    for (int x = ta.counter; x > 0; x--)
+    {
+        Console.WriteLine("Sleeping " + ta.sleep + "ms");
+        Thread.Sleep(ta.sleep);
+    }
+    
+    ta.result = true;
+}
+
+/// <summary>
+/// Main Thread
+/// </summary>
+static void Main()
+{
+    ThreadArguments ta = new ThreadArguments();
+    ta.counter = 10;
+    ta.sleep = 200;
+    
+    Thread thread = new Thread(ThreadMethod);
+    thread.Start(ta);
+    thread.Join();
+    
+    Console.WriteLine("Result " + ta.result);
+}
+
+
+As you can see, that’s not really a nice solution to do such things, because you have to create a separated class to pass the parameters to the thread function. I think the better solution is the first one that is using async delegates. 
+
+I hope that I could deliver you some new insights about async delegates and threads.
+- Gerhard

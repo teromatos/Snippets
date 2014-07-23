@@ -1,0 +1,309 @@
+URL= http://downloads.interscapeusa.com/SmartList.vb.txt
+
+#Region " Copyright 2005 Interscape Technologies, Inc. All Rights Reserved. "
+
+
+#End Region
+
+#Region " Namespace Imports "
+
+Imports System.Collections.Generic
+
+#End Region
+
+''' <summary>
+''' An enhancement of the Generic List that tracks changes to the List for state persistence.
+''' </summary>
+''' <typeparam name="T">The type of elements in the list.</typeparam>
+''' <remarks></remarks>
+Public Class SmartList(Of T)
+    Inherits List(Of T)
+
+#Region " Private Members "
+
+    Private _addedItems As List(Of T)
+    Private _isDirty As Boolean
+    Private _removedItems As List(Of T)
+    Private _trackChanges As Boolean
+
+#End Region
+
+#Region " Properties "
+
+#Region " AddedCount "
+
+    ''' <summary>
+    ''' Returns a count of all the items that have been added to the list.
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property AddedCount() As Integer
+        Get
+            Return Me._addedItems.Count
+        End Get
+    End Property
+
+#End Region
+
+#Region " AddedItems "
+
+    ''' <summary>
+    ''' Contains a list of all the items that have been added to the list since it began tracking changes.
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property AddedItems() As List(Of T)
+        Get
+            Return Me._addedItems
+        End Get
+        Set(ByVal value As List(Of T))
+            Me._addedItems = value
+        End Set
+    End Property
+
+#End Region
+
+#Region " IsDirty "
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property IsDirty() As Boolean
+        Get
+            Return _isDirty
+        End Get
+        Set(ByVal value As Boolean)
+            _isDirty = value
+        End Set
+    End Property
+
+#End Region
+
+#Region " RemovedCount "
+
+    ''' <summary>
+    ''' Returns a count of all the items that have been removed from the list.
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public ReadOnly Property RemovedCount() As Integer
+        Get
+            Return Me._removedItems.Count
+        End Get
+    End Property
+
+#End Region
+
+#Region " RemovedItems "
+
+    ''' <summary>
+    ''' Contains a list of all the items that have been removed from the list since it began tracking changes.
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property RemovedItems() As List(Of T)
+        Get
+            Return Me._removedItems
+        End Get
+        Set(ByVal value As List(Of T))
+            Me._removedItems = value
+        End Set
+    End Property
+
+#End Region
+
+#Region " TrackChanges "
+
+    ''' <summary>
+    ''' Determines whether or not the list is currently tracking items added to or removed from the list.
+    ''' </summary>
+    ''' <value></value>
+    ''' <returns></returns>
+    ''' <remarks></remarks>
+    Public Property TrackChanges() As Boolean
+        Get
+            Return _trackChanges
+        End Get
+        Set(ByVal value As Boolean)
+            _trackChanges = value
+            Me.Reset()
+        End Set
+    End Property
+
+#End Region
+
+#End Region
+
+#Region " Methods "
+
+#Region " Default Constructor "
+
+    ''' <summary>
+    ''' Initializes a new instance of the SmartList class that is empty and has the default initial capacity.
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New()
+        MyBase.New()
+        Me._addedItems = New List(Of T)
+        Me._removedItems = New List(Of T)
+        Me.TrackChanges = True
+    End Sub
+
+    ''' <summary>
+    ''' Initializes a new instance of the SmartList class that is empty and has the default initial capacity.
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub New(ByVal trackChanges As Boolean)
+        MyBase.New()
+        Me._addedItems = New List(Of T)
+        Me._removedItems = New List(Of T)
+        Me.TrackChanges = trackChanges
+    End Sub
+
+#End Region
+
+#Region " Add "
+
+    ''' <summary>
+    ''' Adds an object to the end of the List.
+    ''' </summary>
+    ''' <param name="item">The object to be added to the end of the List. The value can be a null reference (Nothing in Visual Basic) for reference types.</param>
+    ''' <remarks></remarks>
+    Public Overloads Sub Add(ByVal item As T)
+        MyBase.Add(item)
+        If Me.TrackChanges Then
+            Me._addedItems.Add(item)
+            _isDirty = True
+        End If
+    End Sub
+
+#End Region
+
+#Region " Remove "
+
+    ''' <summary>
+    ''' Removes the first occurrence of a specific object from the List.
+    ''' </summary>
+    ''' <param name="item">The object to remove from the List. The value can be a null reference (Nothing in Visual Basic) for reference types.</param>
+    ''' <returns>true if item is successfully removed; otherwise, false. This method also returns false if item was not found in the List.</returns>
+    ''' <remarks>This method determines equality using the default equality comparer EqualityComparer.Default for T, the type of values in the list.</remarks>
+    Public Overloads Function Remove(ByVal item As T) As Boolean
+        If MyBase.Remove(item) Then
+            If Me.TrackChanges Then
+                Me._removedItems.Add(item)
+                If Me._addedItems.Contains(item) Then
+                    Me._addedItems.Remove(item)
+                End If
+                _isDirty = True
+            End If
+            Return True
+        End If
+        Return False
+    End Function
+
+#End Region
+
+#Region " Reset "
+
+    ''' <summary>
+    ''' Clears all item tracking lists.
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Sub Reset()
+        Me._addedItems.Clear()
+        Me._removedItems.Clear()
+        _isDirty = False
+    End Sub
+
+#End Region
+
+#Region " ToString "
+
+    ''' <summary>
+    ''' Returns a String that represents the current Object.
+    ''' </summary>
+    ''' <returns>A String that represents the current Object. </returns>
+    Public Overloads Function ToString() As String
+        If AddedCount + RemovedCount >= 5 Then
+            Dim sb As New StringBuilder
+            If AddedCount > 0 Then
+                sb.AppendLine("Added:")
+                For Each item As T In Me._addedItems
+                    sb.Append("  ")
+                    sb.Append(item.ToString())
+                    sb.AppendLine()
+                Next
+            End If
+            If RemovedCount > 0 Then
+                sb.AppendLine("Removed:")
+                For Each item As T In Me._removedItems
+                    sb.Append("  ")
+                    sb.Append(item.ToString())
+                    sb.AppendLine()
+                Next
+            End If
+            If Me.Count > 0 Then
+                sb.AppendLine("Items:")
+                For Each item As T In Me
+                    sb.Append("  ")
+                    sb.Append(item.ToString())
+                    sb.AppendLine()
+                Next
+            End If
+            Return sb.ToString
+        Else
+            Dim str1 As String = ""
+            If AddedCount > 0 Then
+                str1 += "Added:" & Environment.NewLine
+                For Each item As T In Me._addedItems
+                    str1 += "  "
+                    str1 += item.ToString()
+                    str1 += Environment.NewLine
+                Next
+            End If
+            If RemovedCount > 0 Then
+                str1 += "Removed:" & Environment.NewLine
+                For Each item As T In Me._removedItems
+                    str1 += "  "
+                    str1 += item.ToString()
+                    str1 += Environment.NewLine
+                Next
+            End If
+            If Me.Count > 0 Then
+                str1 += "Items:" & Environment.NewLine
+                For Each item As T In Me
+                    str1 += "  "
+                    str1 += item.ToString()
+                    str1 += Environment.NewLine
+                Next
+            End If
+            Return str1
+        End If
+    End Function
+
+#End Region
+
+#Region " TrimExcess "
+
+    ''' <summary>
+    ''' 
+    ''' </summary>
+    ''' <remarks></remarks>
+    Public Overloads Sub TrimExcess()
+        MyBase.TrimExcess()
+        Me._addedItems.TrimExcess()
+        Me._removedItems.TrimExcess()
+    End Sub
+
+#End Region
+
+#End Region
+
+End Class

@@ -1,0 +1,10 @@
+'Determine attributes
+Dim fa As FileAttributes = File.GetAttributes(filename)
+
+'Remove Readonly, Hidden attributes, if then exist
+If (fa And FileAttributes.ReadOnly) = FileAttributes.ReadOnly Then File.SetAttributes(filename, fa And Not FileAttributes.ReadOnly)
+If (fa And FileAttributes.Hidden) = FileAttributes.Hidden Then File.SetAttributes(filename, fa And Not FileAttributes.Hidden)
+
+'Set original attributes
+File.SetAttributes(filename, fa)
+

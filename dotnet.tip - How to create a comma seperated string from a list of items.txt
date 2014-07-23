@@ -1,0 +1,31 @@
+URL=http://blog.crowe.co.nz/archive/2007/08/25/c---How-to-create-a-comma-seperated-string-from.aspx
+
+I found an interesting post from a work colleague "Simeon Pilgrim" at http://simeonpilgrim.com/blog/2007/08/23/how-to-rewriter-systemconfigurationcommadelimitedstringcollection-wrong/ that shows that in the System.Configuration namespace there is a very simple class that will create a comma seperated string for you.
+
+The class is called CommaDelimitedStringCollection and you must add a reference to System.Configuration in order to use it.
+
+ There is a simple example of how to use it.using System; 
+using System.Collections; 
+using System.Configuration; 
+
+namespace Commas 
+{ 
+    internal class Program 
+    { 
+        private static void Main(string[] args) 
+        { 
+            ArrayList Items = new ArrayList(); 
+            Items.Add("http://blog.crowe.co.nz"); 
+            Items.Add("http://www.simeonpilgrim.com"); 
+            Items.Add("http://www.iis.net"); 
+
+            CommaDelimitedStringCollection commaStr = 
+                new CommaDelimitedStringCollection(); 
+
+            foreach (string item in Items) 
+                commaStr.Add(item); 
+
+            Console.WriteLine(commaStr.ToString()); 
+        } 
+    } 
+}The output from the above would be :http://blog.crowe.co.nz,http://www.simeonpilgrim.com,http://www.iis.netIn the sample above we loop through each item in my ArrayList and add it to the list of strings to comma seperate.We could have replaced for foreach loop with this to make it a bit easier.commaStr.AddRange((string[]) Items.ToArray(typeof(string))); I wonder how many other usefull classes are out there but no one uses them and reinvents the wheel.

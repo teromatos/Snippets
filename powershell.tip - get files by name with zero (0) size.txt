@@ -1,0 +1,9 @@
+get-childitem  -recurse | where-object -filterscript {$_.Name -eq "readme.txt"} | where-object -filterscript {$_.Length -eq "0"} | format-table -property fullname > c:\tmp\zero_readme.txt
+
+
+
+
+
+
+
+

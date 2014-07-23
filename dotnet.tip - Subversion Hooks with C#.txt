@@ -1,0 +1,127 @@
+URL= http://weblogs.asp.net/rchartier/archive/2005/07/29/421045.aspx
+
+Subversion Hooks with C# 
+One thing I noticed yesterday when setting up Subversion is that it has "Hook Scripts".  
+
+"A hook is a program triggered by some repository event, such as the creation of a new revision or the modification of an unversioned property. Each hook is handed enough information to tell what that event is, what target(s) it's operating on, and the username of the person who triggered the event. Depending on the hook's output or return status, the hook program may continue the action, stop it, or suspend it in some way."
+
+In the doc it mentions...
+
+"Windows, however, uses file extensions to determine whether or not a program is executable, so you would need to supply a program whose basename is the name of the hook, and whose extension is one of the special extensions recognized by Windows for executable programs, such as .exe or .com for programs, and .bat for batch files."
+
+This has to be too easy.  So I whipped up a quick C# Console Executable:
+
+"post-commit.cs" Source Listing:
+----------------------------------
+using System;
+
+namespace post_commit {
+    class Class1 {
+        [STAThread]
+        static void Main(string[] args) {
+        System.IO.StreamWriter sw = new System.IO.StreamWriter(@"f:\PostCommit.txt", true, System.Text.Encoding.Default);
+            sw.Write(System.DateTime.Now.ToString() + ":" + string.Join("|", args));
+            sw.Close();
+        }
+    }
+}
+----------------------------------
+Now build it, "csc post-commit.cs"
+
+Built it, and placed the .exe  into the Project\Hooks\ Folder.  Now commit any file into the repository; you should see a file f:\PostCommit.txt created.  Inspect the contents.
+
+I wonder what cool things are being done with Hooks and subversion.  Obvious examples (in the Doc's) include triggering backups, and sending emails.  
+
+
+
+=====================================================================
+URL= http://svn.haxx.se/users/archive-2005-05/0455.shtml
+
+ still stuck on this. I renamed pre-commit.tmpl to pre-commit.bat 
+>and I replaced the contents with the two lines: 
+> 
+>echo "pre-commit.bat" 
+>pause 
+> 
+>I just want to see that the batch script is triggered. But when I 
+>check something in, nothing seems to happen. Any ideas? 
+> 
+>Thanks, 
+> 
+>Greg 
+> 
+> 
+> 
+> 
+Greg 
+The following batch file prevents commits without comments and logs the 
+attempts and successes to a file. 
+
+
+@echo off 
+rem Add path to Subversion executable 
+set path=%path%;c:\Program Files\Subversion\bin 
+rem Add path to grep.exe 
+set path=%path%;c:\Program Files\Borland\Delphi7\Bin 
+Date /T >> D:\pre-commit.log 
+Time /T >> D:\pre-commit.log 
+echo %CMDCMDLINE% >> D:\pre-commit.log 
+SVNLOOK.exe log -t "%2" "%1" | grep.exe "[a-zA-Z0-9]" > nul || exit 1 
+echo Commit Permitted >> D:\pre-commit.log 
+exit 0 
+
+
+=====================================================================
+URL= http://tortoisesvn.sourceforge.net/?q=node/156
+
+SVN+SSH+public key authentication on Windows Box as server
+Submitted by luebbe on Fri, 2005-07-29 15:22. Authentication | SSH 
+This walkthrough on getting SVN+SSH up and running on a Windows Box was provided by Thorsten Möller
+Thanks!
+
+Hi all,
+
+I just want to provide my solution to the community since I have found out that there might be many people struggling with the same issue.
+
+Server: Install Cygwin SSH daemon as described here: http://pigtail.net/LRP/printsrv/cygwin-sshd.html 
+Install SVN on the server (as described in the Subversion doku) 
+Server: Create an account (for instance "SVNuser") which you will later use for logging in. Check that the user permissions are sufficient to read and write your SVN repository directory on the server. 
+Server (if not already done): Open Cygwin console and run mkpasswd -l > /etc/passwd 
+Client: Download PuTTY and PuTTYgen (http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html)
+and place it in a directory which is part of the PATH, for instance C:\Windows 
+Client: Create a key pair with PuTTYgen an save the keys. 
+Transfer the public key to the server file: /home/<svnuser>/.ssh/authorized_keys 
+Create a PuTTY session for loggin in to the server as described here:
+Subversion / TortoiseSVN SSH HowTo.
+Do not forget to activate auto login, i.e. set the user name. 
+Test whether you can log in to the server with the key.
+Server: If that works you might want to disable password authentication for SSH by editing /etc/sshd_config. Change/edit lines as follows (and restart SSH service afterwards):
+
+
+PubkeyAuthentication yes
+PasswordAuthentication no
+PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+
+
+Server: Modify /home/<svnuser>/.ssh/authorized_keys as follows. Note that every user which is supposed to use SVN uses the same login but a different key, thus you have to add one line for every user/key.
+
+Note: This is all on one very long line.
+
+command="svnserve -t -r c:/mySVNroot/ --tunnel-user=<SVNuser>",no-port-forwarding,no-agent-forwarding,no-X11-forwarding,no-pty ssh-rsa <thePublicKey> <publicKeyComment>
+
+
+The trick here is to use the slash instead of backslash to specifiy the SVN repository root:
+-r c:/mySVNroot.
+Another important thing is --tunnel-user=<SVNuser>.
+Since all users later will do a SSH login with the same login name (but different keys) you have to map each key to a SVN user - remember that SVN maintains its own users/userrights. 
+
+Client: Access the repository with a URL like:
+
+svn+ssh://<PuTTYSessionName>/<MyRepository>/trunk 
+
+In various documentations and news group postings you will read that the URL has to contain the real path on the server. But this is not neccessary if the -r parameter was set correctly, see 10. I swear, for me it works fine :-)
+
+Thorsten
+
+

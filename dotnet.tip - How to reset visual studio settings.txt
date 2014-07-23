@@ -1,0 +1,2 @@
+devenv /resetuserdata
+devenv /setup

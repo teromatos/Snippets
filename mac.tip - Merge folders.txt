@@ -1,0 +1,8 @@
+http://the.taoofmac.com/space/HOWTO/Merge%20Folders
+
+# The standard UNIX way
+cp -R -v source/. destination
+# The geeky UNIX way (restartable)
+rsync -vaEW source/ destination
+# The OSX "easy" way
+ditto -V source destination

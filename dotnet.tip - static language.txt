@@ -1,0 +1,10 @@
+static language, explicit class checked language
+
+language like java, c#, c++ 
+you must declare your variabels and their types
+the signature of every function and every method along with the types of their arguments
+and most significantly it achives polymorphism through inheritance
+
+
+
+

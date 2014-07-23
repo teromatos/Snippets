@@ -1,0 +1,22 @@
+Unable to emit assembly
+
+
+To sign the assembly manually
+Use the Strong Name Tool (Sn.exe) to create a public/private key pair file. 
+
+This file has a .snk extension. 
+
+Delete the COM reference that is generating the error from your project.
+
+From the Windows Start menu, point to Programs, point to Microsoft Visual Studio 2005, point to Visual Studio Tools, and then click Visual Studio 2005 Command Prompt.
+
+Move to the directory where you want to place your assembly wrapper.
+
+Type the following code.
+ 
+	tlbimp <path to COM reference file> /out:<output assembly name> /keyfile:<path to .snk file>
+ 
+
+Tero's Sample Usage:
+
+	tlbimp c:\windows\system32\shell32.dll /out:c:\temp\Interop.Shell32.dll /keyfile:c:\work\dotnet\_snk\tero.snk

@@ -1,0 +1,1 @@
+c:\windows\regedit.exe /e I:\Outlook\outlook_settings.reg "HKEY_CURRENT_USER\Software\Microsoft\Windows NT\CurrentVersion\Windows Messaging Subsystem\Profiles\Outlook"

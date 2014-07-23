@@ -1,0 +1,5 @@
+Windows Vista Beta 1 
+WinFX Runtime Components Beta 1 
+VS.NET Beta 2 (MUST be be Beta2!!, not July or June) 
+WinFX SDK Beta 1 
+Microsoft Visual Studio Extensions for WinFX Beta 1

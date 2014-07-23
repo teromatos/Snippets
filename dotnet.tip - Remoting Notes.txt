@@ -1,0 +1,132 @@
+SERVER
+
+// 1
+// Declare channel, including port number
+HttpChannel chnl = new HttpChannel(1234);
+
+		
+// 2
+// Register declared channel
+ChannelServices.RegisterChannel(chnl);
+
+
+// 3.1 (SAO, server activated object, singleton or singlecall)
+// Define the object available to remoting,
+// the uri where it's located and the mode
+// Singleton (shared by all clients) or 
+// SingleCall (new obj created with each 
+// method call).
+RemotingConfiguration.RegisterWellKnownServiceType
+(typeof(CustomerManager), "uri.soap", WellKnownObjectMode.SingleCall);
+
+
+// 3.2 (CAO, client actived objects, like a "normal" .NET object)
+// Define the application name for the remoting server
+// Register the object type which will be avaible
+// from the remoting server
+// NOTE: URI will be http://<hostname>:<port>/<ApplicationName>
+//       Behind the scenes a object will be created using SAO
+//       and published at http://<hostname>:<port>/<ApplicationName>/RemoteActivationService.rem
+RemotingConfiguration.ApplicationName = "MyServer";
+RemotingConfiguration.RegisterActivatedServiceType(typeof(CustomerManager));
+
+
+// 3.3 (Published objects, like a Singleton)
+// Define the object available to remoting,
+// publish the defined object which will
+// behave like a Singleton
+CustomerManager cm = New CustomerManager();
+RemotingServices.Marshal(obj, "uri.soap");
+
+
+
+CLIENT
+
+// 1
+// Declare channel, without the port number
+HttpChannel chnl = new HttpChannel();
+
+		
+// 2
+// Register declared channel
+ChannelServices.RegisterChannel(chnl);
+
+
+// 3.1 (SAO, server activated object, singleton or singlecall)
+// Create a local proxy object that will support the ICustomerManager
+// interface
+ICustomerManager obj = (ICustomerManager) Activator.GetObject(typeof(ICustomerManager),
+"http://<localhost>:<port>/uri.soap");
+obj.GetCustomer(4711);
+
+
+// 3.2 (CAO, client activated object, like a "normal" .NET object)
+// Create a local proxy object that will support the ICustomerManager
+// interface
+// NOTE: The client must access to the metadata of objected refernced.
+//       You must use soapsuds for retrieve this metadata. Page 36
+RemotingConfiguration.RegisterActivatedClientType(typeof(CustomerManager),
+"http://<localhost>:<port>/uri.soap");
+CustomerManager obj = new CustomerManager;
+obj.GetCustomer(4711);
+
+
+================================================================================
+
+
+One-way calls
+One-Way calles are a little different from asynchronous calls in 
+the respect that the .NET Framework does not guarantee their execution. 
+In addition, the methods used in ths kind of call cannot return
+values or out parameters. Reasons for using these kind of methods 
+(which are not guaranteed to be executed at all) can be found in 
+uncritical or tracing facilities, where the nonexistence of the 
+server should not slow down the application
+
+To define a one-way call method, add the [OneWay] attribute to a method.
+
+[OneWay()]
+String DoSomething(int myvalue)
+
+
+================================================================================
+
+//Remoting Configuration Files
+// NOTE: Under the wellknown type
+//       <namespace,class>,<assmebly>
+
+//Sample Server configuration file
+<configuration>
+  <system.runtime.remoting>
+    <application>
+      <channels>
+        <channel ref="http" port="1234"/>
+      </channels>      
+      <service>
+        <wellknown mode="SingleCall"
+                   type="Server.CustomerManager, Server"
+                   objectUri="uri.soap"
+      </service>
+    </application>
+  </system.runtime.remoting>
+</configuration>
+
+
+
+//Sample Client configuration file
+<configuration>
+  <system.runtime.remoting>
+    <application>
+      <client>
+        <wellknown type="Server.CustomerManager, Client"
+                   objectUri="http://<hostname>:<port>/uri.soap"
+      </client>
+    </application>
+  </system.runtime.remoting>
+</configuration>
+
+
+
+//To use a remoting configuartion file (server and client)
+String filename = "applicationname.exe.config";
+RemotingConfiguration.Configure(filename);

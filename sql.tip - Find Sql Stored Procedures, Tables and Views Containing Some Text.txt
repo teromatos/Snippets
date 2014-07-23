@@ -1,0 +1,70 @@
+URL= http://codebetter.com/blogs/raymond.lewallen/archive/2005/08/15/130730.aspx
+
+Find Sql Stored Procedures, Tables and Views Containing Some Text 
+posted on Monday, August 15, 2005 10:43 AM 
+Last week, John posted a T-Sql script to find all stored procedures that contain some text. Along those sames lines, I have expanded what he has done to also include returning tables and views that have column names that contain the same text.
+
+
+CREATE PROCEDURE sp_find_objects_containing
+
+            @search varchar(128)
+
+AS
+
+ 
+
+SET @search = '%' + @search + '%'
+
+ 
+
+SELECT o.name As "Stored Procedures"
+
+            FROM SYSOBJECTS o INNER JOIN SYSCOMMENTS c
+
+                        ON o.id = c.id
+
+            WHERE c.text LIKE @search
+
+                        AND o.xtype = 'P'
+
+            GROUP BY o.name
+
+            ORDER BY o.name
+
+ 
+
+SELECT o.name As "Views"
+
+            FROM SYSOBJECTS o INNER JOIN SYSCOMMENTS c
+
+                        ON o.id = c.id
+
+            WHERE c.text LIKE @search
+
+                        AND o.xtype = 'V'
+
+            GROUP BY o.name
+
+            ORDER BY o.name
+
+ 
+
+SELECT o.name As "Tables"
+
+            FROM SYSCOLUMNS c INNER JOIN SYSOBJECTS o
+
+                        ON c.id = c.id
+
+                        INNER JOIN MASTER.DBO.SYSTYPES t
+
+                        ON c.xtype = t.xtype
+
+            WHERE o.name LIKE @search
+
+                        AND o.Type = 'U'
+
+            GROUP BY o.name
+
+            ORDER BY o.name
+
+GO

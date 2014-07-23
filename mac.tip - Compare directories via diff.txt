@@ -1,0 +1,123 @@
+URL=http://hints.macworld.com/article.php?story=20070408062023352
+
+Compare directories via diff  
+Apr 10, '07 07:30:02AM ï Contributed by: grasshoppermouse
+I like to keep the home directories on my work (PC) and home (Mac) machines more-or-less in sync using a hard drive that I tote back and forth every few weeks. In addition to rsync, one useful tool is the unix diff command. 
+
+As mentioned in other hints, diff can not only compare two files, it can, by using the -r option, walk entire directory trees, recursively checking differences between subdirectories and files that occur at comparable points in each tree. The trick is to use the -q option to suppress line-by-line comparisons in files that differ:
+diff -rq dirA dirB
+This command will provide a nice list of files that occur in dirA but not in dirB, files that occur in dirB, but not in dirA, and files that differ between dirA and dirB. Pipe the output through grep to remove mention of uninteresting files, and sort to tidy it up, e.g.:
+diff -qr dirA dirB | grep -v -e 'DS_Store' -e 'Thumbs' | 
+sort > diffs.txt
+This list gives me a good feel for the big picture before I start overwriting things: which files or subdirectories can be deleted, which can be synced (and in which direction) using rsync, and which should be carefully checked before replacing, in case changes need to be merged. 
+
+To forestall some obvious comments, Unison would seem to be the ideal tool, but it lists hundreds of files that only differ in their permissions metadata (not important to me). Although Unison appears to have an option to turn off permission checking (-perms 0, or -perms=0), I couldn't get it to work. There are, of course, a number of GUI apps that would do the job, too (e.g., FileMerge), many of them shareware.
+    ï     
+Currently 4.58 / 5   You rated: 5 / 5 (12 votes cast)  
+[103,283 views]  
+Hint Options
+
+Mail Hint to a Friend
+Printable Hint Format
+Subscribe to 'macosxhints.com Unix tips and tricks'
+
+Compare directories via diff | 13 comments | Create New Account
+
+    
+Click here to return to the 'Compare directories via diff' hint
+The following comments are owned by whoever posted them. This site is not responsible for what they say.
+Compare directories via diff
+Authored by: RalphLoizzo on Apr 10, '07 12:42:10PM
+I use rsync alot myself to copy files from and to work. Any projects Im currently working on for an extended period of time get their own folder and rsynced between work and home. 
+
+Though Im usually good about rsyncing before I leave work or home, I forget occassionally. 
+
+So I dont accidentally overwrite any changes - I usually use the -n flag. That does a "dry run" of rsync showing possible changes without actually making them.
+
+Compare directories via diff
+Authored by: m√ºzso on Apr 10, '07 03:16:41PM
+Some time ago I was looking for a tool to binary-compare two directories too. Diff is a bit of an overkill in this case since I was not interested in the details of differences between the two dir structures, I just wanted to know whether they're the same or not.
+
+I've found only one GUI application that would satisfy my needs, it was Kdiff3. However there's a lot more simple and elegant solution. :-) Start a shell and enter the dir that you want to compare with another, then run a "find":
+
+cd /path/to/dir1
+find . -type f -not -exec cmp {} /path/to/dir2/{} ";" -print
+
+This will print the name of each file that differs between the two directories.
+
+Compare directories via diff
+Authored by: LC on Apr 17, '07 08:14:03PM
+It seems to me that any items uniquely found in dir2 won't be reported by the find command.
+
+Or use Toast instead
+Authored by: magir on Apr 10, '07 11:47:55PM
+Some people may haven't found the feature, yet, but Toast has a "Compare" function hidden in the Utilities menu, it'll provide a nice colored output of the differences.
+
+And TextWrangler also supports diffing of folders.
+
+Compare directories via diff
+Authored by: cobrp on Apr 11, '07 03:15:32AM
+I prefer the use of Subversion to stay in sync with several computers with different OS-es.
+There good clients available for OSX like svnX
+Sync'ing between laptop and desktop (OT?)
+Authored by: raffar on Apr 11, '07 07:35:18AM
+I too am trying to keep a desktop and a laptop in sync - both running OSX. Of course the laptop has much less hd space which means I need to be selective. I have been using Unison very successfully so far for documents in general and for certain application preferences. It is very fast and a pleasure to use.
+
+The complications come in due to the fact that applications do not always play nice with copying preferences and the like. For some apps, I haven't figured out which pref and support files are safe to copy. For example, taking a simple-minded approach to syncing causes MS Office to sort of re-install itself each time. Firefox preference copying is also not obvious to me.
+
+Is anyone else sync'ing app preferences and executables?
+
+Also, I am curious how people are using Subversion.
+
+Update directories using a flash drive
+Authored by: melodrama on Apr 11, '07 06:23:02AM
+This hint makes me realise I'm not alone in thinking there must be simpler solution to the problem of keeping a directory in sync between work and home computers, without having to lug an external hard drive around. I need to keep a large (about 5GB) directory of pdf files in sync between a work PC and a home Mac, all sorted into appropriate sub-directories. I currently do this manually by copying any changed files onto a flash memory stick and then copying them onto the other machine when I get home. The flash drive is not big enough to contain a copy of the entire directory, but can easily hold just the changed files. Ideally, some little program or script would identify added or changed files, copy them to the flash drive, then put them into the corresponding sub-directory when the flash drive was connected to the other machine. Then it would repeat the process in the opposite direction.
+
+Synchronization utilities are no good as they require a disk big enough to hold the entire directory. Unison is no good as it requires a network connection between the 2 machines (which most admins baulk at).
+
+Anyone have any other ideas?
+
+Sync'ing between laptop and desktop (OT?)
+Authored by: raffar on Apr 11, '07 07:50:55AM
+I too am trying to keep a desktop and a laptop in sync - both running OSX. Of course the laptop has much less hd space which means I need to be selective. I have been using Unison very successfully so far for documents in general and for certain application preferences. It is very fast and a pleasure to use.
+
+The complications come in due to the fact that applications do not always play nice with copying preferences and the like. For some apps, I haven't figured out which pref and support files are safe to copy. For example, taking a simple-minded approach to syncing causes MS Office to sort of re-install itself each time. Firefox preference copying is also not obvious to me.
+
+Is anyone else sync'ing app preferences and executables?
+
+Also, I am curious how people are using Subversion.
+
+Compare directories via diff
+Authored by: LC on Apr 16, '07 06:44:14PM
+I noticed a long time ago that we don't have dircmp
+in OS X; since I guess it was only released in sysv unixes.  I've
+noticed this good informational page from the rdiff-backup site --
+related info from rdiff-backup
+
+Larry.
+dircmp
+Authored by: googoo on Apr 17, '07 08:29:13AM
+After reading your comment, I found a perl script on CPAN that implements dircmp. The URL is.
+
+http://search.cpan.org/~schulte/File-Dircmp-1.30/Dircmp.pm
+
+I have not tried it, though.
+
+-Mark
+Compare directories via diff
+Authored by: dangr on Apr 03, '08 05:42:34AM
+I have a question about this hint.... I'm not too well versed in terminal, but I'd love to do this with my two music folders (one on my external HD,and one on my internal). Do I put all of that code into terminal (including the "|"s) in one line, or do I run them as three separate commands in succession?
+
+Also, where does this diffs.txt show up?
+
+Thanks!
+
+Compare directories via diff
+Authored by: grasshoppermouse on Apr 03, '08 12:49:39PM
+Put it all on one line. The diff.txt file will show up in your working directory. If you just started terminal and did not change directories, this will be your home directory (i.e., not the Desktop or Document directories).
+
+One tip: to quickly enter the two folders you want compare, first type the diff -rq command. Then drag-and-drop the first folder onto the terminal. The path will automatically appear. Then drag-and-drop the second folder. Then type the rest of the command.
+
+Compare directories via diff
+Authored by: macmurph on Jun 03, '08 09:28:53PM
+Users trying to sync home directories between two computers (say a laptop and a desktop) may find Apple's Portable Home Directory feature of Mac OS X Server helpful. I haven't used it, so I can't say how well it works.

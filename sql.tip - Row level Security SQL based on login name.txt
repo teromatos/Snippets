@@ -1,0 +1,9 @@
+URL=http://blogs.geekdojo.net/german/archive/2005/05/09/8078.aspx
+
+Row level Security SQL
+
+Microsoft provides a method to grant permisisons to individual columns within a table. Row-level security, however, is implemented using a "view", a stored proc, or SQL function. The method I most commonly see is using a SQL view--it's a lot easier than trying to manage column permissions. Instead, you grant SQL permissions to the view, not the underlying table. With creative use of a WHERE clause, you should only need one "view" for every type of database access. For example, a customer service rep viewing his/her trouble tickets can be accomplished by creating a view that filters the TroubleTicket database for tickets WHERE AgentName = SUSER_NAME(), a built-in SQL function that returns the currently logged-in username. This ensures that all actions taken using the view will only affect tickets for that agent. Deny permissions to all the tables and only grant your users permissions to the views.
+
+Referencias
+
+http://vyaskn.tripod.com/row_level_security_in_sql_server_databases.htm

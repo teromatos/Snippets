@@ -1,0 +1,35 @@
+URL=http://weblogs.sqlteam.com/mladenp/archive/2007/09/13/SQL-Server-The-proper-and-fastest-way-to-check-if.aspx
+
+SQL Server: The proper and fastest way to check if rows matching a condition exist 
+You wouldn't believe how many times i've seen this code
+
+IF (SELECT COUNT(*) FROM Table1 WHERE ... ) > 0
+ 
+
+It's understandable though. Logically it's the easiest way to write "if there are any rows matching my condition do this".
+
+But it's also wrong. Plainly and simplly wrong! 
+
+Why?
+
+Because when you do a count(*) there is no way to get around an index range scan or a full table scan. For a large resultset this will be a huge resource hog.
+
+So how do i do this you might ask yourself?
+
+Very simple:  Use EXISTS!
+
+IF EXISTS(SELECT * FROM Table1 WHERE ...) 
+
+Exists stops the execution as soon as it reads the first row, compared to Count which goes through the whole resultset matching our condition. 
+
+ 
+
+This may seem as such a trivial tip but EXISTS is so underused even by experienced database developers.
+
+And don't forget the NOT EXISTS to check if rows matching the condition don't exist.
+
+ 
+
+SQL Server Product team recognised this problem so in SQL Server 2005 those 2 statements produce same execution plans whenever possible.
+
+However relying on some internal "maybe when it suits me" operation is not good practice in my book.

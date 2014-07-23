@@ -1,0 +1,71 @@
+dumpbin /?
+
+Microsoft (R) COFF Binary File Dumper Version 5.00.7022
+Copyright (C) Microsoft Corp 1992-1997. All rights reserved.
+
+usage: DUMPBIN [options] [files]
+
+options:
+
+/ALL
+/ARCHIVEMEMBERS
+/DIRECTIVES
+/DISASM
+/EXPORTS
+/FPO
+/HEADERS
+/IMPORTS
+/LINENUMBERS
+/LINKERMEMBER[:{1|2}]
+/OUT:filename
+/PDATA
+/RAWDATA[:{NONE|BYTES|SHORTS|LONGS}[,#]]
+/RELOCATIONS
+/SECTION:name
+/SUMMARY
+/SYMBOLS
+
+Beispiel:
+---------
+
+dumpbin /imports C:\Winnt\system32\write.exe
+
+Microsoft (R) COFF Binary File Dumper Version 5.00.7022
+Copyright (C) Microsoft Corp 1992-1997. All rights reserved.
+
+Dump of file write.exe
+
+File Type: EXECUTABLE IMAGE
+
+Section contains the following Imports
+
+SHELL32.dll
+61 ShellExecuteA
+
+KERNEL32.dll
+128 GetStartupInfoA
+AA GetCommandLineA
+FE GetModuleHandleA
+
+MSVCRT.dll
+CF _exit
+244 exit
+67 __p__acmdln
+10B _initterm
+48 _XcptFilter
+81 __setusermatherr
+58 __getmainargs
+69 __p__commode
+6E __p__fmode
+7F __set_app_type
+C6 _except_handler3
+B3 _controlfp
+9A _adjust_fdiv
+
+Summary
+
+1000 .data
+1000 .rdata
+1000 .reloc
+1000 .rsrc
+1000 .text

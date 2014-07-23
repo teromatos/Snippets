@@ -1,0 +1,59 @@
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/odbc/htm/odbcjetschema_ini_file.asp
+http://weblogs.asp.net/bhouse/archive/2003/09/10/27036.aspx
+
+
+using System;
+using System.Collections;
+using System.Data.OleDb;
+using System.Data;
+
+public class MyClass
+{
+  public static void Main()
+  {
+    OleDbConnection conn = new OleDbConnection();
+    conn.ConnectionString = "Provider=Microsoft.Jet.OLEDB.4.0;Data Source=c:\\temp;Extended Properties=\"text;HDR=Yes;FMT=Delimited\"";
+    try    
+    {
+		conn.Open();
+		OleDbCommand myCommand = conn.CreateCommand();
+		string commandString = "select * from test.csv where firstname='John'";
+		myCommand.CommandType = CommandType.Text;      
+		myCommand.CommandText = commandString;       
+		OleDbDataReader dataReader = myCommand.ExecuteReader();      
+		dataReader.Read();
+		Console.WriteLine("FirstName: {0} \t LastName: {1}",dataReader["FirstName"],dataReader["LastName"]);
+    }    
+    catch( Exception ex )    
+    {      
+		Console.WriteLine(ex.Message);      
+		Console.WriteLine(ex.StackTrace);    
+	}      
+	finally    
+	{      
+		conn.Close();    
+	}    
+	Console.WriteLine("all done.");  }
+}
+
+
+
+
+
+[webclms.tmp]
+Format=CSVDelimited
+ColNameHeader=False
+DateTimeFormat=mm/dd/yyyy
+Col1=Fund              Char Width 8
+Col2=GroupNo           Char Width 8
+Col3=MemberId          Char Width 9
+Col4=Person            Char Width 2
+Col5=FillDate          DateTime
+Col6=DrugName          Char Width 30
+Col7=PharmacyName      Char Width 30
+Col8=PharmacyCity      Char Width 15
+Col9=PharmacyState     Char Width 2
+Col10=Quantity         Long
+Col11=Cost             Long
+Col12=NotificationDate DateTime
+CharacterSet=ANSI

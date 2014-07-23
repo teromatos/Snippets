@@ -1,0 +1,16 @@
+// Create an instance of the shell class
+Shell32.ShellClass objShel = new Shell32.ShellClass();
+	  
+
+// Show the desktop
+((Shell32.IShellDispatch4) objShel).ToggleDesktop();
+
+	  
+
+	  // Do some operations here
+
+
+
+// Restore the desktop
+((Shell32.IShellDispatch4) objShel).ToggleDesktop();
+

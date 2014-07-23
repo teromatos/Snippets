@@ -1,0 +1,9 @@
+Return a list of open connections on an instance of SQL Server
+----------
+use master
+select * from sysprocesses
+
+Return the server name (accessing the database server), program name, and long name in the hostname, and loginname columns
+--------
+use master
+select hostname, program_name from sysprocesses

@@ -1,0 +1,93 @@
+Print stylesheet - the definitive guide
+Advert: Training courses3Come on one of our excellent training courses and become a usability, accessibility or CSS guru!
+
+Writing for the web training4
+Web usability training5
+Usability testing training6
+Web accessibility training7
+Information architecture (IA) training8
+Intermediate CSS training9
+Advanced CSS training10
+Courses are held every month in London and are taught by usability and accessibility professionals.
+A print stylesheet formats a web page so when printed, it automatically prints in a user-friendly format. Print stylesheets have been around for a number of years and have been written about a lot. Yet so few websites implement them, meaning we're left with web pages that frustratingly don't properly print on to paper.
+
+It's remarkable that so few websites use print stylesheets as:
+
+Print stylesheets enormously improve usability, especially for pages with a lot of content (such as this one!)
+They're phenomenally quick and easy to set up
+Some websites do offer a link to a print-friendly version of the page, but this of course needs to be set up and maintained. It also requires that users notice this link on the screen, and then use it ahead of the regular way they print pages (e.g. by selecting the print button at the top of the screen). Print-friendly versions are however useful when printing a number of web pages at the same time such as an article that spans on to several web pages.
+
+How to set up your print stylesheetA print stylesheet works in much the same way as a regular stylesheet, except it only gets called up when the page is printed. To make it work, the following needs to be inserted into the top of every web page:
+
+<link rel="stylesheet" href="print.css" type="text/css" media="print" />
+
+The file, print.css is the print stylesheet, and the media="print" command means that this CSS file only gets called up when web pages are printed. (There are many different media you can use for stylesheets, such as for handheld, TV, projection etc. - see a full list of media types11 for more.)
+
+What to put in your print stylesheetThe CSS commands in the print stylesheet essentially override the CSS commands in the main stylesheet. As such, the only commands you need to put in the print stylesheet are ones to override the CSS commands in the main stylesheet. This means you don't need to repeat any colour or branding CSS commands as they'll already be taken from the main stylesheet.
+
+Generally speaking, you'll want your print stylesheet to make the following happen when users hit that print button:
+
+Remove unwanted items
+Usually it's just your organisation logo and page content that you'll want to appear on the printed version of the web page. You'll normally want to remove the header, left column and right column. You may also want to remove the footer (or some of it) from the printed version, unless it contains your contact details.
+
+There may be certain isolated items you'd prefer weren't printed so you can simply assign these class="noprint" in the HTML. To get rid of these items, along with the header and navigation (assuming these are assigned <div id="header"> and <div id="nav">) use the display: none command:
+
+#header, #nav, .noprint {display: none;}
+
+You may also want to remove certain images and adverts, especially animated images as these won't make sense when printed.
+
+Format the page
+There's nothing worse than printing off a web page to find the last few words of each line cut off. It's also annoying (and a waste of paper) when the left and right columns are left in, leaving a very narrow space for the content so the web page prints on to 15 pieces of paper.
+
+Generally speaking, the three CSS commands you'll need are:
+
+width: 100%; margin: 0; float: none;
+
+These commands should be applied to any containing elements (<div>s for a CSS layout and <table>s for table layouts) to ensure the content spans the full width of the paper. So, the full CSS command would perhaps be something like:
+
+#container, #container2, #content {width: 100%; margin: 0; float: none;}
+
+Change the font?
+Some print stylesheets do change the font size (often to 12pt) but this isn't generally a very good idea. If users increase text size on the screen then the text will print in this larger font size... unless you specify a fixed font size in the print stylesheet.
+
+Other print stylesheets change the font family to a serif font (such as Times New Roman) as this is slightly easier to read from print. Whether you choose to do this or not is up to you as users may be a bit surprised to see a different font printed out.
+
+Do also bear in mind that background images and colours don't print out by default. As such, you may wish to change the colour of text in a light colour so it has a reasonable colour contrast without its background.
+
+Links
+Print-outs are often in black and white so do make sure that links have a decent colour contrast. If not, assign links a slightly darker colour in the print out. For example:
+
+a:link, a:visited {color: #781351}
+
+For bonus usability you could include a footnote on the page listing all the URLs from that page, with each link referencing its URL underneath with a number. It's otherwise impossible to know where a link is pointing to when reading a print out from a web page. See this working example12 and find out how to do this by reading this Improving link display for print13 article.
+
+Making the print stylesheetWhen making the print stylesheet place the print CSS commands into the bottom of your main CSS file. As you keep adding more commands check how your web pages look on the computer screen (don't do this on a live website!). Keep adding commands until you're happy with the appearance, then cut these commands out of the main CSS file and paste into the print stylesheet.
+
+To summarise, your print stylesheet may look similar to this:
+
+/* Remove unwanted elements */
+#header, #nav, .noprint
+{
+display: none;
+}
+
+/* Ensure the content spans the full width */
+#container, #container2, #content
+{
+width: 100%; margin: 0; float: none;
+}
+
+/* Change text colour to black (useful for light text on a dark background) */
+.lighttext
+{
+color: #000 
+}
+
+/* Improve colour contrast of links */
+a:link, a:visited
+{
+color: #781351
+}
+
+
+You've now got a print stylesheet! For something this quick and easy to set up that improves usability as much as it does, you'd be mad not to use one!

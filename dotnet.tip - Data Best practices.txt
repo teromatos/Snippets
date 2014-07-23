@@ -1,0 +1,6 @@
+Tagential aside: There's some yummy best practices up on TheServerSide.NET.  Here's my favorites:
+
+Using a DataReader vs. a DataSet: The DataReader was of course faster. It was faster by 16% in this particular case.
+SQLDataReader vs. OleDBDataReader: Going with native drivers is always better. The SQLDataReader was 115% faster than going through OLE.
+DataReader Column Reference - By Name, Ordinal, or GetString(): The order of speed? dr[0] was the fastest, followed by dr["ProductName"], followed by dr.GetString(0) as it has to do the conversion.
+Inline (DataReader) vs. Controls (DataGrid): The inline script was 233% faster than a DataGrid component

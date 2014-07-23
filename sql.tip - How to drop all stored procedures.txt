@@ -1,0 +1,21 @@
+NOTE: For the love of God, make sure that you dont run this against your master database
+
+USE myDatabase
+GO
+
+declare @procName sysname
+
+declare someCursor cursor for
+    select name from sysobjects where type = 'P' and objectproperty(id, 'IsMSShipped') = 0
+
+open someCursor
+fetch next from someCursor into @procName
+while @@FETCH_STATUS = 0
+begin
+    exec('drop proc ' + @procName)
+    fetch next from someCursor into @procName
+end
+
+close someCursor
+deallocate someCursor
+go

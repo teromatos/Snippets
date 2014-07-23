@@ -1,0 +1,30 @@
+'About Box' forms, the 'My' Namespace, and Class Libraries
+In Visual Studio 2005, there is a built-in form called the "About Box". In a VB.NET project, you can add it to your application, and it will automatially display the info that you put in your AssemblyInfo file for the user. It's a pretty neat little addition that makes it just a little bit easier to build an app.
+
+But, as far as I can tell, you can't use it in Class Library projects. Why would you want to? Well, the underlying project type for a Visual Studio Add-in is a Class Library. When you try to display an About Box form as part of a Visual Studio add-in, it will throw an error without warning. That's because, for some reason, the initialization of the My namespace is not passing in the executing assembly to the My.Application.Info default constructor (which maps to Microsoft.VisualBasic.ApplicationServices.AssemblyInfo).
+
+The simple solution is to replace the AboutBox_Load code with the code below:
+
+1    Private Sub AboutBox1_Load(ByVal sender As System.Object, ByVal e As System.EventArgs) Handles MyBase.Load
+2        Dim info As New Microsoft.VisualBasic.ApplicationServices.AssemblyInfo(System.Reflection.Assembly.GetExecutingAssembly)
+3
+4        ' Set the title of the form.
+5        Dim ApplicationTitle As String
+6        If info.Title <> "" Then
+7            ApplicationTitle = info.Title
+8        Else
+9            ApplicationTitle = System.IO.Path.GetFileNameWithoutExtension(info.AssemblyName)
+10        End If
+11        Me.Text = String.Format("About {0}", ApplicationTitle)
+12        ' Initialize all of the text displayed on the About Box.
+13        ' TODO: Customize the application's assembly information in the "Application" pane of the project 
+14        '    properties dialog (under the "Project" menu).
+15        Me.LabelProductName.Text = info.ProductName
+16        Me.LabelVersion.Text = String.Format("Version {0}", info.Version.ToString)
+17        Me.LabelCopyright.Text = info.Copyright
+18        Me.LabelCompanyName.Text = info.CompanyName
+19        Me.TextBoxDescription.Text = info.Description
+20    End Sub
+Basically, I've added a new line to instantiate the AssemblyInfo class manually, and then replaced My.Application.Info with info. The form will then work as it is supposed to.
+
+I've filed this as a bug, but I have a feeling it may not get fixed... so keep this workaround handy in case you need it.

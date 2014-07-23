@@ -1,0 +1,156 @@
+ALSO CHECK URL=http://blog.stevex.net/index.php/string-formatting-in-csharp/
+
+DateTime CurrTime = DateTime.Now; 
+Console.WriteLine("DateTime display listing specifier and result:\n"); 
+Console.WriteLine("d = {0:d}", CurrTime);  // 2008-11-06
+Console.WriteLine("D = {0:D}", CurrTime );  // 2008year 11month 6day THURS DAY
+Console.WriteLine("f = {0:f}", CurrTime);  // 2008year 11month 6day THURS DAY PM 1:46    
+Console.WriteLine("F = {0:F}", CurrTime);  // 2008year 11month 6day THURS DAY PM 1:46:44    
+Console.WriteLine("g = {0:g}", CurrTime );  // 2008-11-06 PM 1:46 
+Console.WriteLine("G = {0:G}", CurrTime);  // 2008-11-06 PM 1:46:44    
+Console.WriteLine("M = {0:M}", CurrTime );  // 11Month 6Day    
+Console.WriteLine("R = {0:R}", CurrTime );  // Thu, 06, Nov 2008 13:46:44 GMT    
+Console.WriteLine("s = {0:s}", CurrTime );  // 2008-11-06T13:46:44    
+Console.WriteLine("t = {0:t}", CurrTime );  // PM 1:46    
+Console.WriteLine("T = {0:T}", CurrTime);  // PM 1:46:44    
+Console.WriteLine("u = {0:u}", CurrTime);  // 2008-11-06 13:46:44Z    
+Console.WriteLine("U = {0:U}", CurrTime );  // 2008Year 11Month 6Day ThursDay AM 4:46:44 (OtherTime)   
+Console.WriteLine("Y = {0:Y}", CurrTime );  // 2008Year 11Month    
+Console.WriteLine();    
+Console.WriteLine("DateTime.Month     = " + CurrTime.Month);      // number of month   11 
+Console.WriteLine("DateTime.DayOfWeek = " + CurrTime.DayOfWeek);  // full name of day  ThursDay  
+Console.WriteLine("DateTime.TimeOfDay = " + CurrTime.TimeOfDay);  // 24 hour time     13:46:44.4843750
+
+
+Console.WriteLine(CurrTime.ToString("yyyy/MM/dd HH:mm:ss")); //HH(24Hours) hh(12hours)
+
+// number of 100-nanosecond intervals that have elapsed since 1/1/0001, 12:00am    
+// useful for time-elapsed measurements    
+Console.WriteLine("DateTime.Ticks     = " + CurrTime.Ticks);  
+Console.Read();  // wait
+
+
+
+NumberFormatInfo Class
+
+c, C Currency format. CurrencyNegativePattern, CurrencyPositivePattern, CurrencySymbol, CurrencyGroupSizes, CurrencyGroupSeparator, CurrencyDecimalDigits, CurrencyDecimalSeparator. 
+d, D Decimal format. 
+e, E Scientific (exponential) format. 
+f, F Fixed-point format. 
+g, G General format. 
+n, N Number format. NumberNegativePattern, NumberGroupSizes, NumberGroupSeparator, NumberDecimalDigits, NumberDecimalSeparator. 
+r, R Roundtrip format, which ensures that numbers converted to strings will have the same value when they are converted back to numbers. 
+x, X Hexadecimal format. 
+
+
+Custom Numeric Format Strings
+
+0 Zero placeholder If the value being formatted has a digit in the position where the '0' appears in the format string, then that digit is copied to the result string. The position of the leftmost '0' before the decimal point and the rightmost '0' after the decimal point determines the range of digits that are always present in the result string. The "00" specifier causes the value to be rounded to the nearest digit preceding the decimal, where rounding away from zero is always used. For example, formatting 34.5 with "00" would result in the value 35. 
+# Digit placeholder If the value being formatted has a digit in the position where the '#' appears in the format string, then that digit is copied to the result string. Otherwise, nothing is stored in that position in the result string. Note that this specifier never displays the '0' character if it is not a significant digit, even if '0' is the only digit in the string. It will display the '0' character if it is a significant digit in the number being displayed. The "##" format string causes the value to be rounded to the nearest digit preceding the decimal, where rounding away from zero is always used. For example, formatting 34.5 with "##" would result in the value 35. 
+. Decimal point The first '.' character in the format string determines the location of the decimal separator in the formatted value; any additional '.' characters are ignored. The actual character used as the decimal separator is determined by the NumberDecimalSeparator property of the NumberFormatInfo that controls formatting. 
+, Thousand separator and number scaling The ',' character serves two purposes. First, if the format string contains a ',' character between two digit placeholders (0 or #) and to the left of the decimal point if one is present, then the output will have thousand separators inserted between each group of three digits to the left of the decimal separator. The actual character used as the decimal separator in the result string is determined by the NumberGroupSeparator property of the current NumberFormatInfo that controls formatting. 
+Second, if the format string contains one or more ',' characters immediately to the left of the decimal point, then the number will be divided by the number of ',' characters multiplied by 1000 before it is formatted. For example, the format string "0,," will represent 100 million as simply 100. Use of the ',' character to indicate scaling does not include thousand separators in the formatted number. Thus, to scale a number by 1 million and insert thousand separators you would use the format string "#,##0,,".
+ 
+% Percentage placeholder The presence of a '%' character in a format string causes a number to be multiplied by 100 before it is formatted. The appropriate symbol is inserted in the number itself at the location where the '%' appears in the format string. The percent character used is dependent on the current NumberFormatInfo class. 
+E0 
+E+0
+
+E-0
+
+e0
+
+e+0
+
+e-0
+ Scientific notation If any of the strings "E", "E+", "E-", "e", "e+", or "e-" are present in the format string and are followed immediately by at least one '0' character, then the number is formatted using scientific notation with an 'E' or 'e' inserted between the number and the exponent. The number of '0' characters following the scientific notation indicator determines the minimum number of digits to output for the exponent. The "E+" and "e+" formats indicate that a sign character (plus or minus) should always precede the exponent. The "E", "E-", "e", or "e-" formats indicate that a sign character should only precede negative exponents. 
+\ Escape character In C# and the Managed Extensions for C++, the backslash character causes the next character in the format string to be interpreted as an escape sequence. It is used with traditional formatting sequences like '\n' (new line). 
+In some languages, the escape character itself must be preceded by an escape character when used as a literal. Otherwise, the compiler interprets the character as an escape sequence. Use the string "\\" to display '\'.
+
+Note that this escape character is not supported in Visual Basic; however, ControlChars provides the same functionality.
+ 
+'ABC' 
+"ABC"
+ Literal string Characters enclosed in single or double quotes are copied to the result string literally, and do not affect formatting. 
+; Section separator The ';' character is used to separate sections for positive, negative, and zero numbers in the format string. 
+Other All other characters All other characters are copied to the result string as literals in the position they appear. 
+
+
+
+Standard DateTime Format Strings
+
+d Short date pattern Displays a pattern defined by the DateTimeFormatInfo.ShortDatePattern property associated with the current thread or by a specified format provider. 
+D Long date pattern Displays a pattern defined by the DateTimeFormatInfo.LongDatePattern property associated with the current thread or by a specified format provider. 
+t Short time pattern Displays a pattern defined by the DateTimeFormatInfo.ShortTimePattern property associated with the current thread or by a specified format provider. 
+T Long time pattern Displays a pattern defined by the DateTimeFormatInfo.LongTimePattern property associated with the current thread or by a specified format provider. 
+f Full date/time pattern (short time) Displays a combination of the long date and short time patterns, separated by a space. 
+F Full date/time pattern (long time) Displays a pattern defined by the DateTimeFormatInfo.FullDateTimePattern property associated with the current thread or by a specified format provider. 
+g General date/time pattern (short time) Displays a combination of the short date and short time patterns, separated by a space. 
+G General date/time pattern (long time) Displays a combination of the short date and long time patterns, separated by a space. 
+M or m Month day pattern Displays a pattern defined by the DateTimeFormatInfo.MonthDayPattern property associated with the current thread or by a specified format provider. 
+R or r RFC1123 pattern Displays a pattern defined by the DateTimeFormatInfo.RFC1123Pattern property associated with the current thread or by a specified format provider. This is a defined standard and the property is read-only; therefore, it is always the same regardless of the culture used, or the format provider supplied. The property references the CultureInfo.InvariantCulture property and follows the custom pattern "ddd, dd MMM yyyy HH:mm:ss G\MT". Note that the 'M' in "GMT" needs an escape character so it is not interpreted. Formatting does not modify the value of the DateTime; therefore, you must adjust the value to GMT before formatting. 
+s Sortable date/time pattern; conforms to ISO 8601 Displays a pattern defined by the DateTimeFormatInfo.SortableDateTimePattern property associated with the current thread or by a specified format provider. The property references the CultureInfo.InvariantCulture property, and the format follows the custom pattern "yyyy-MM-ddTHH:mm:ss". 
+u Universal sortable date/time pattern Displays a pattern defined by the DateTimeFormatInfo.UniversalSortableDateTimePattern property associated with the current thread or by a specified format provider. Because it is a defined standard and the property is read-only, the pattern is always the same regardless of culture or format provider. Formatting follows the custom pattern "yyyy-MM-dd HH:mm:ssZ". No time zone conversion is done when the date and time is formatted; therefore, convert a local date and time to universal time before using this format specifier.  
+U Universal sortable date/time pattern Displays a pattern defined by the DateTimeFormatInfo.FullDateTimePattern property associated with the current thread or by a specified format provider. Note that the time displayed is for the universal, rather than local time. 
+Y or y Year month pattern Displays a pattern defined by the DateTimeFormatInfo.YearMonthPattern property associated with the current thread or by a specified format provider. 
+Any other single character Unknown specifier     
+
+
+Custom DateTime Format Strings
+
+d Displays the current day of the month, measured as a number between 1 and 31, inclusive. If the day is a single digit only (1-9), then it is displayed as a single digit. 
+Note that if the 'd' format specifier is used alone, without other custom format strings, it is interpreted as the standard short date pattern format specifier. If the 'd' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+dd Displays the current day of the month, measured as a number between 1 and 31, inclusive. If the day is a single digit only (1-9), it is formatted with a preceding 0 (01-09). 
+ddd Displays the abbreviated name of the day for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, then the AbbreviatedDayNames property of the DateTimeFormat and its current culture associated with the current thread is used. Otherwise, the AbbreviatedDayNames property from the specified format provider is used. 
+dddd (plus any number of additional "d" characters)  Displays the full name of the day for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, then the DayNames property of the DateTimeFormat and its current culture associated with the current thread is used. Otherwise, the DayNames property from the specified format provider is used. 
+f Displays seconds fractions represented in one digit. 
+Note that if the 'f' format specifier is used alone, without other custom format strings, it is interpreted as the full (long date + short time) format specifier. If the 'f' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+ff Displays seconds fractions represented in two digits. 
+fff Displays seconds fractions represented in three digits. 
+ffff Displays seconds fractions represented in four digits. 
+fffff Displays seconds fractions represented in five digits. 
+ffffff Displays seconds fractions represented in six digits. 
+fffffff Displays seconds fractions represented in seven digits. 
+g or gg (plus any number of additional "g" characters)  Displays the era (A.D. for example) for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, then the era is determined from the calendar associated with the DateTimeFormat and its current culture associated with the current thread. 
+Note that if the 'g' format specifier is used alone, without other custom format strings, it is interpreted as the standard general format specifier. If the 'g' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+h Displays the hour for the specified DateTime in the range 1-12. The hour represents whole hours passed since either midnight (displayed as 12) or noon (also displayed as 12). If this format is used alone, then the same hour before or after noon is indistinguishable. If the hour is a single digit (1-9), it is displayed as a single digit. No rounding occurs when displaying the hour. For example, a DateTime of 5:43 returns 5. 
+hh, hh (plus any number of additional "h" characters)  Displays the hour for the specified DateTime in the range 1-12. The hour represents whole hours passed since either midnight (displayed as 12) or noon (also displayed as 12). If this format is used alone, then the same hour before or after noon is indistinguishable. If the hour is a single digit (1-9), it is formatted with a preceding 0 (01-09). 
+H Displays the hour for the specified DateTime in the range 0-23. The hour represents whole hours passed since midnight (displayed as 0). If the hour is a single digit (0-9), it is displayed as a single digit. 
+HH, HH (plus any number of additional "H" characters)  Displays the hour for the specified DateTime in the range 0-23. The hour represents whole hours passed since midnight (displayed as 0). If the hour is a single digit (0-9), it is formatted with a preceding 0 (01-09). 
+m Displays the minute for the specified DateTime in the range 0-59. The minute represents whole minutes passed since the last hour. If the minute is a single digit (0-9), it is displayed as a single digit. 
+Note that if the 'm' format specifier is used alone, without other custom format strings, it is interpreted as the standard month day pattern format specifier. If the 'm' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+mm, mm (plus any number of additional "m" characters)  Displays the minute for the specified DateTime in the range 0-59. The minute represents whole minutes passed since the last hour. If the minute is a single digit (0-9), it is formatted with a preceding 0 (01-09). 
+M Displays the month, measured as a number between 1 and 12, inclusive. If the month is a single digit (1-9), it is displayed as a single digit. 
+Note that if the 'M' format specifier is used alone, without other custom format strings, it is interpreted as the standard month day pattern format specifier. If the 'M' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+MM Displays the month, measured as a number between 1 and 12, inclusive. If the month is a single digit (1-9), it is formatted with a preceding 0 (01-09). 
+MMM Displays the abbreviated name of the month for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, the AbbreviatedMonthNames property of the DateTimeFormat and its current culture associated with the current thread is used. Otherwise, the AbbreviatedMonthNames property from the specified format provider is used. 
+MMMM Displays the full name of the month for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, then the MonthNames property of the DateTimeFormat and its current culture associated with the current thread is used. Otherwise, the MonthNames property from the specified format provider is used. 
+s Displays the seconds for the specified DateTime in the range 0-59. The second represents whole seconds passed since the last minute. If the second is a single digit (0-9), it is displayed as a single digit only. 
+Note that if the 's' format specifier is used alone, without other custom format strings, it is interpreted as the standard sortable date/time pattern format specifier. If the 's' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+ss, ss (plus any number of additional "s" characters)  Displays the seconds for the specified DateTime in the range 0-59. The second represents whole seconds passed since the last minute. If the second is a single digit (0-9), it is formatted with a preceding 0 (01-09). 
+t Displays the first character of the A.M./P.M. designator for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, then the AMDesignator (or PMDesignator) property of the DateTimeFormat and its current culture associated with the current thread is used. Otherwise, the AMDesignator (or PMDesignator) property from the specified IFormatProvider is used. If the total number of whole hours passed for the specified DateTime is less than 12, then the AMDesignator is used. Otherwise, the PMDesignator is used. 
+Note that if the 't' format specifier is used alone, without other custom format strings, it is interpreted as the standard long time pattern format specifier. If the 't' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+tt, tt (plus any number of additional "t" characters)  Displays the A.M./P.M. designator for the specified DateTime. If a specific valid format provider (a non-null object that implements IFormatProvider with the expected property) is not supplied, then the AMDesignator (or PMDesignator) property of the DateTimeFormat and its current culture associated with the current thread is used. Otherwise, the AMDesignator (or PMDesignator) property from the specified IFormatProvider is used. If the total number of whole hours passed for the specified DateTime is less than 12, then the AMDesignator is used. Otherwise, the PMDesignator is used. 
+y Displays the year for the specified DateTime as a maximum two-digit number. The first two digits of the year are omitted. If the year is a single digit (1-9), it is displayed as a single digit. 
+Note that if the 'y' format specifier is used alone, without other custom format strings, it is interpreted as the standard short date pattern format specifier. If the 'y' format specifier is passed with other custom format specifiers or the '%' character, it is interpreted as a custom format specifier.
+ 
+yy Displays the year for the specified DateTime as a maximum two-digit number. The first two digits of the year are omitted. If the year is a single digit (1-9), it is formatted with a preceding 0 (01-09). 
+yyyy Displays the year for the specified DateTime, including the century. If the year is less than four digits in length, then preceding zeros are appended as necessary to make the displayed year four digits long. 
+z Displays the time zone offset for the system's current time zone in whole hours only. The offset is always displayed with a leading sign (zero is displayed as "+0"), indicating hours ahead of Greenwich mean time (+) or hours behind Greenwich mean time (-). The range of values is –12 to +13. If the offset is a single digit (0-9), it is displayed as a single digit with the appropriate leading sign. The setting for the time zone is specified as +X or –X where X is the offset in hours from GMT. The displayed offset is affected by daylight savings time. 
+zz Displays the time zone offset for the system's current time zone in whole hours only. The offset is always displayed with a leading or trailing sign (zero is displayed as "+00"), indicating hours ahead of Greenwich mean time (+) or hours behind Greenwich mean time (-). The range of values is –12 to +13. If the offset is a single digit (0-9), it is formatted with a preceding 0 (01-09) with the appropriate leading sign. The setting for the time zone is specified as +X or –X where X is the offset in hours from GMT. The displayed offset is affected by daylight savings time. 
+zzz, zzz (plus any number of additional "z" characters)  Displays the time zone offset for the system's current time zone in hours and minutes. The offset is always displayed with a leading or trailing sign (zero is displayed as "+00:00"), indicating hours ahead of Greenwich mean time (+) or hours behind Greenwich mean time (-). The range of values is –12:00 to +13:00. If the offset is a single digit (0-9), it is formatted with a preceding 0 (01-09) with the appropriate leading sign. The setting for the time zone is specified as +X or –X where X is the offset in hours from GMT. The displayed offset is affected by daylight savings time. 
+: Time separator. 
+/ Date separator. 
+" Quoted string. Displays the literal value of any string between two quotation marks preceded by the escape character (/).  
+' Quoted string. Displays the literal value of any string between two " ' " characters. 
+%c Where c is both a standard format specifier and a custom format specifier, displays the custom format pattern associated with the format specifier. 
+Note that if a format specifier is used alone as a single character, it is interpreted as a standard format specifier. Only format specifiers consisting of two or more characters are interpreted as custom format specifiers. In order to display the custom format for a specifier defined as both a standard and a custom format specifier, precede the specifier with a % symbol.
+ 
+\c  Where c is any character, the escape character displays the next character as a literal. The escape character cannot be used to create an escape sequence (like "\n" for new line) in this context. 
+Any other character  Other characters are written directly to the result string as literals. 

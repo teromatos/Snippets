@@ -1,0 +1,9 @@
+    'Private Sub ShowDesktop()
+
+    '    Try
+    '        Dim objShell As New Shell32.ShellClass
+    '        CType(objShell, Shell32.IShellDispatch4).ToggleDesktop()
+    '    Catch ex As Exception
+    '    End Try
+
+    'End Sub

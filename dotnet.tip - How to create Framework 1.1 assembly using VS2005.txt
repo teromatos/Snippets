@@ -1,0 +1,26 @@
+How to create Framework 1.1 assembly using VS2005
+
+I was wondering for some time if its possible to create vs2003 (framework 1.1) assembly using vs2005 as i would love the option to still be able to produce fw 1.1 code mainly for supportability while using the vs2005 IDE which has such great improvements…. Class Diagram… Generate unit Tests etc…
+
+Jomo Fisher published on his blog the 9 steps of enabling fw 1.1 build on vs 2005 … and ITS WORKING !
+
+1. Copy the content of this blog post  (MSBuild targets file) to “C:\program files\msbuild\” and name it “CrossCompile.CSharp.targets”
+2. Create a new C# console project (I’m working currently on directions for winforms app)
+3. Use notepad to edit MyApp.csproj. Replace the entire <Import> tag with 
+  <Import Project="$(MSBuildExtensionsPath)\CrossCompile.CSharp.targets" />
+4. When prompted, reload the project. You’ll have to answer a security dialog :
+    choose Load Project Normally
+5. In VS, click the drop-down that says ‘Any CPU’ and select ‘Configuration Manager’
+6. Under Active Solution Platform, select <New…>
+7. Select ‘.NET 1.1’ and press OK.
+8. Build and notice error about System.Collections.Generic. This means its working because generics aren’t supported in 1.1.
+9. Open Program.cs and delete the line: using System.Collections.Generic;    And rebuild.
+
+Because winform apps in vs 2005 uses partial classes the easiest way to create a new win form app in 2005 that is compatible to 2003 is to create a winform app in 2003 then open it in 2005 (it will be converted to 2005) and follow the above step to build it using fw 1.1
+
+Note: you wont be able to use the new vs2005 controls on vs2003 app as the framework 1.1 will not know how to deal with them so when ever you’ll try compiling forms with such controls you’ll get a compile time error.
+
+
+Have you seen my MSBuild Toolkit yet? It takes Jomo's targets and adds support for .NET 1.1, 1.0, VB, and C#. It also has an add-in for managing your projects targets in the IDE. You should check it out. 
+
+http://weblogs.asp.net/rmclaws/archive/2005/06/04/410360.aspx

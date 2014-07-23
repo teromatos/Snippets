@@ -1,0 +1,27 @@
+Uncommon C#.NET Keywords
+
+* stackalloc
+stackalloc allocates memory dynamically from the stack. Its very fast and the memory is reclaimed after the enclosing function exits. But it, of course, has some limitations. It only works with blittable types. It's good for arrays that will never be anything more than a few hundred kilobytes. By default, the maximum stack size is one megabyte. In practive, function call depth is very very small, unless you do something like a recursive function scanning a deep tree. Offsetting the risk that a stackalloc can generate the StackOverflowException is the infrequency of multiple dynamic stack allocations in use at the same time.
+Even for moderately large arrays, stack-based allocation can be preferable to heap allocations, especially if these allocations are very frequent or very temporary. The worst type of allocation for the garbage collector are large arrays, especially temporary ones. Large objects (over 85K) are placed separately in the large heap and are only release during a full garbage collection. (In other words, the more frequent Gen 0 or Gen 1 partial collections do not release large memory allocations). Large objects are never compacted, resulting in potential fragmentation and wasted memory.
+
+* yield
+yield is a common term used when referring to Iterators. The keyword can only be used in the context of an Iterator actually. Furthermore, the definition of an iterator holds the usage of yeild. Here are some definitions via MSDN.t
+An iterator is a section of code that returns an ordered sequence of values. 
+An iterator can be used as the body of a method, an operator, or a get accessor. 
+The interator code uses the yield return statement to return each element in turn. 
+Using iterators, it is no longer necessary to implement the interfaces System.Collections.IEnumerable and System.Collections.IEnumerator when creating a collection class that supports foreach. The compiler does this work for you. 
+The return type of an iterator must be System.Collections.IEnumerable, System.Collections.IEnumerator or one of the generic iterator interfaces. 
+ 
+* volatile
+The volatile keyword indicates that a field might be modified by multiple concurrently executing threads. Fields that are declared volatile are not subject to compiler optimizations that assume access by a single thread. This ensures that the most up-to-date value is present in the field at all times.
+The volatile modifier is usually used for a field that is accessed by multiple threads without using the lock Statement (C# Reference) statement to serialize access. See How to: Create and Terminate Threads (C# Programming Guide) for an example of volatile in a multi-threaded scenario.
+
+* default
+Generally seen in generic code, the default keyword can be used to obtain the default value to a parameterized type (such as T) when you don't know some of the following:
+Is the type: Value-Type or Reference Type.
+If it is a value-type, is it numeric or a struct.
+The easiest way to get the initialized value is by calling the default keyword. This will avoid any code that may initialize a generic type to null or a numeric value. We can add a little more polish to our generic types and utilize the type constraints feature of C# 2.0.
+
+* Type Constraints
+Aside from the usual keywords, there are also other concepts that may be uncommonly used. One really neat trick to generics in C# .NET 2.0 is type constraints. This is where you can take a generic type like T, and apply constraints such as the types polymorphisms and inheritance factors. We can take a simple type T, and actually require that it implements a given interface or inherits from a particular class. Even still, we can require that it has a default constructor created.
+In this case I am writing type constraints on the generic type Products to implement the IBuilder interface and contain a default constructor (indicated by the new() constraint). This can be handy when dealing with generic types and you can ensure that not just any type is being used for a particular class.

@@ -1,0 +1,299 @@
+Here's an interesting equation: Most bands and labels are posting free mp3s of their latest music on their sites. Add to that an army of fans scouring these sites daily, then blogging what they find. The result is a constant stream of new music being discovered, sorted, commented, and publicized. 
+
+But how to keep up?
+
+For a while, I just visited a couple of interesting and well written mp3 blogs, but then they'd link to a couple more, and I'd start reading those. And then that happened a few dozen more times. My desire to stay in touch was in conflict with my increasingly limited free time.
+
+Wget to the rescue. It's a utility for unix/linux/etc. that goes and gets stuff from Web and FTP servers -- kind of like a browser but without actually displaying what it downloads. And since it's one of those awesomely configurable command line programs, there is very little it can't do. So I run wget, give it the URLs to those mp3 blogs, and let it scrape all the new audio files it finds. Then I have it keep doing that on a daily basis, save everything into a big directory, and have a virtual radio station of hand-filtered new music. Neat.
+
+Here's how I do it:
+
+wget -r -l1 -H -t1 -nd -N -np -A.mp3 -erobots=off -i ~/mp3blogs.txt
+
+And here's what this all means:
+
+-r -H -l1 -np These options tell wget to download recursively. That means it goes to a URL, downloads the page there, then follows every link it finds. The -H tells the app to span domains, meaning it should follow links that point away from the blog. And the -l1 (a lowercase L with a numeral one) means to only go one level deep; that is, don't follow links on the linked site. In other words, these commands work together to ensure that you don't send wget off to download the entire Web -- or at least as much as will fit on your hard drive. Rather, it will take each link from your list of blogs, and download it. The -np switch stands for "no parent", which instructs wget to never follow a link up to a parent directory.
+
+We don't, however, want all the links -- just those that point to audio files we haven't yet seen. Including -A.mp3 tells wget to only download files that end with the .mp3 extension. And -N turns on timestamping, which means wget won't download something with the same name unless it's newer. 
+
+To keep things clean, we'll add -nd, which makes the app save every thing it finds in one directory, rather than mirroring the directory structure of linked sites. And -erobots=off tells wget to ignore the standard robots.txt files. Normally, this would be a terrible idea, since we'd want to honor the wishes of the site owner. However, since we're only grabbing one file per site, we can safely skip these and keep our directory much cleaner. Also, along the lines of good net citizenship, we'll add the -w5 to wait 5 seconds between each request as to not pound the poor blogs.
+
+Finally, -i ~/mp3blogs.txt is a little shortcut. Typically, I'd just add a URL to the command line with wget and start the downloading. But since I wanted to visit multiple mp3 blogs, I listed their addresses in a text file (one per line) and told wget to use that as the input.
+
+I put this in a cron job, run it every day, and save everything to a local directory. And since it timestamps, the app only downloads new stuff. I'll should probably figure out a way to import into iTunes automatically with a script and generate a smart playlist, so I can walk in, hit play, and have the music just go.
+
+The following are a couple of lists of mp3 blogs that you can use to find authors that match your musical tastes. Put their URLs in your text file and off you go.
+
+
+Sample to get all .msi file from a ms page (note must use the recursive options, links are in different pages)
+wget -r -l1 -H -t1 -nd -N -np -A.msi -erobots=off http://msdn.microsoft.com/vbasic/pdc05/demosandsamples/
+
+
+=========================================================================================================================================================
+
+1. On 7 July 2004 at 3:49 PM Keith wrote: 
+Sounds very interesting, thanks for the write-up I'll check it out.
+
+So, how do I find new music. Well, a few ways:
+
+1 -- KEXP. You can listen to them online at kexp.org.
+2 -- PitchforkMedia.com. There are lots of great reviews in there.
+3 -- Live shows. I tend to catch a lot of shows and many times I get introduced to a new band there.
+4 -- Newsgroups. I check various lists on Easynews.com and dip in and sample anything that looks interesting. This is how I discovered Snow Patrol last year.
+5 -- Word of mouth. Blogs, such as music (for robots) and then friends. My brothers seem to dig up good recommendations quite a bit.
+
+Of course then I try and share these finds on my own sites. Finding and sharing good music is one of my favorite pleasures in life.
+
+ 2. On 7 July 2004 at 4:31 PM Adrian Holovaty wrote: 
+Jeff, you've invaded the turf of the wget and curl weblog! :-)
+
+http://www.superdeluxo.com/wget_curl/index.php
+
+ 3. On 7 July 2004 at 4:42 PM Patrick wrote: 
+Question: Where do the files get saved. You refer to a single directory... but not where it is created. Or defined?
+
+ 4. On 7 July 2004 at 5:44 PM pb wrote: 
+garageband.com is trying to pick up where mp3.com and cnet left off.
+
+ 5. On 7 July 2004 at 5:48 PM veen wrote: 
+The files get saved in the directory from which you issue the command. You can chage that by adding a greater-than sign and specifying a directory. For example:
+
+wget [all the switches] > ~/jeff/Music/
+
+ 6. On 7 July 2004 at 6:10 PM JP wrote: 
+I didn't have wget with my default install of OS X.3 (Panther). This article, Building wget 1.9 on OS X.2.8 [http://wincent.org/article/articleview/173/1/8], was a great help—it worked fine with Panther.
+
+Thanks a lot for the script, Jeff!
+
+ 7. On 7 July 2004 at 6:11 PM Ben wrote: 
+If you don't want to save all these files, you could just use a Webjay bookmarklet to scrape any page and make a playlist out of it. This assumes of course that you are on a live net connection...
+
+ 8. On 7 July 2004 at 6:22 PM anders wrote: 
+you should use "-A.mp3,.ogg" to catch the oggs too. 
+
+ 9. On 7 July 2004 at 6:27 PM JP wrote: 
+Regarding Applescripts & playlists, it looks like this might be the start of a useful script: http://www.malcolmadams.com/itunes/scripts/scripts06.php?page=1#droptoaddnmake
+
+It'd be great if someone could alter the script to automatically run in tandem with the above shell script so that one could just press play, as Jeff suggested above. (hint, hint)
+
+ 10. On 7 July 2004 at 7:42 PM sean wrote: 
+"wget [all the switches] > ~/jeff/Music/"
+
+Hmm I use '-P'.
+wget [all the switches] -P ~/Music
+
+Jeff, nice one-liner. Extremely useful.
+
+ 11. On 7 July 2004 at 9:00 PM Scott wrote: 
+This should be very do-able, at least with perl... I don't have osx (dirty windows user am I) but this looks promising:
+
+http://www.macdevcenter.com/pub/a/mac/2002/11/22/itunes_perl.html
+
+I've taken things a bit further, myself, by making that text file in the form of:
+
+FolderName=URL
+
+Then I parse the file and run wget with a different -P parameter for each blog that I'm scraping. I can sort out better which blogs are more to my liking that way. I could post the (extremely simple) perl script I use to do this if there's interest, or you can email me.
+
+ 12. On 7 July 2004 at 9:21 PM John Y. wrote: 
+I cruise by www.3hive.com once a week or so; all they do is post free, legal mp3 downloads with brief descriptions. Also, they categorize it.
+
+ 13. On 7 July 2004 at 11:47 PM Tim wrote: 
+www.last.fm plays everything from obscure to major label stuff. You tell it what you like. It's kind of like creating your own radio station. Definitely still in beta.
+
+ 14. On 8 July 2004 at 12:03 AM Richard Earney wrote: 
+I think curl is the new wget.
+
+ 15. On 8 July 2004 at 6:07 AM dekay wrote: 
+I think this is about the first application I see that screams "Folder actions"!!! But then: How do you do it?
+Oh, btw: Fusker could help, too :)
+
+ 16. On 8 July 2004 at 6:15 AM Steve K. wrote: 
+I like PureVolume myself (http://www.purevolume.com/).
+
+ 17. On 8 July 2004 at 7:55 AM paolo wrote: 
+Yep, use Webjay.org ! you can create playlists of mp3s available on the web or simply listen to the playlists created by other people.
+
+ 18. On 8 July 2004 at 11:25 AM Lucas wrote: 
+Given an mp3 blog at http://www.redfishaudio.com/samples.html, pick up http://gonze.com/m3udo, then do:
+
+GET 'http://webjay.org/playthispage?x-fmt=m3u&url=http://www.redfishaudio.com/samples.html' | tee redfishaudio.m3u | m3udo wget -
+
+You want to use the playthispage utility for the scraping because figuring out what's a bona fide audio file is very picky and generally intensely buggy. Otherwise you will end up with HTML, troff, pdf, and a bunch of other junk in your playlist, and that will make mp3 players throw an error and stop.
+
+Also, this way you get the playlist in most-recent order with duplicates stripped out. :)
+
+
+
+ 19. On 8 July 2004 at 11:32 AM Jeff wrote: 
+You can get Win32 ports of wget and other *nix utils here:
+http://unxutils.sourceforge.net/
+
+ 20. On 8 July 2004 at 11:51 AM bogg wrote: 
+You can't put wget into the public audience it is too good!!! nice popscraper - could you do one for ringtones too?
+
+http://www.mobile-phone-directory.org/
+
+ 21. On 8 July 2004 at 4:06 PM Philip Dorrell wrote: 
+"Weak Subscriptions", which is part of the Womcat Bookmarks application, does something similar, but includes a popularity ranking.
+
+
+ 22. On 9 July 2004 at 2:28 AM Jean Jordaan wrote: 
+What about mp3s you've heard and decided once is enough? If you delete the file, wget will download it again. If you leave it, it'll clog up your playlist and disk. Maybe 'echo "" > badfile.mp3' to zero it, and tell wget --no-clobber ? (Your mp3 player will probably still list it though :( )
+
+ 23. On 9 July 2004 at 6:11 AM sfb wrote: 
+And what's in your mp3blogs.txt?
+
+It should only be links to blogs, so you should be able to post it, and I would be interested to have a starting point of mp3 blogs.
+
+ 24. On 9 July 2004 at 8:03 AM veen wrote: 
+my mp3blogs.txt:
+
+http://teachingtheindiekidstodanceagain.blogspot.com/
+http://www.fatplanet.com.au/
+http://music.for-robots.com/
+http://tofuhut.blogspot.com/
+http://www.scenestars.blogspot.com/
+http://blog.largeheartedboy.com/
+http://www.livejournal.com/community/talkiewalkie/
+http://www.kingblind.com/
+
+ 25. On 9 July 2004 at 9:33 AM Mark Crane wrote: 
+Is there a flag to set so that you don't repeatedly download the same files each time the command is run?
+
+Does anyone have a fortified bash script of this?
+
+Great stuff.
+
+ 26. On 9 July 2004 at 11:30 PM no1son wrote: 
+omfg, i m famous mb!
+
+hey what can i say, i learned a bunch. i may have the blog but i'm still a noob. still looking for more authors on the blog.
+
+http://www.superdeluxo.com/wget_curl
+
+ 27. On 10 July 2004 at 4:27 AM Geek wrote: 
+What command line argument do you use to tell it which directory to dump the mp3 files in. Or do you recommend dumping the program in the windows or systems directory.
+
+ 28. On 10 July 2004 at 8:11 AM Mark Crane wrote: 
+geek: directory question answered above. 
+
+
+wget [switches] >~/tunes
+
+ 29. On 10 July 2004 at 8:51 PM Marc wrote: 
+Thanks for a great article on a great tool! Inspired me to write a free little PHP frontend that gives you an interface for the jobs of managing your blog list, setting a download directory, avoiding duplicate downloads, ...
+
+You can get ':: blogmethree' at http://www.rowlff.de/blogmethree/
+
+ 30. On 11 July 2004 at 5:18 PM Gerrit wrote: 
+"I'll should probably figure out a way to import into iTunes automatically with a script and generate a smart playlist, so I can walk in, hit play, and have the music just go."
+
+This simple AppleScript should to the trick:
+----snip----
+on adding folder items to this_folder after receiving added_items
+try
+--find out the name of the folder
+tell application "Finder"
+set the folder_name to the name of this_folder
+end tell
+
+--put the stuff into a new playlist
+tell application "iTunes" to add added_items to playlist "new stuff"
+
+end try
+end adding folder items to
+----snap----
+Fire up Script Editor.app & save it to /Library/Scripts/Folder Action Scripts/
+Then Right-Click on the folder you save your music into, enable folder actions, right-click again and choose "Attach a Folder Action..."
+
+Every time a new file is created in said directory, it is added to the iTunes library (be aware of the fact that this only works if the "copy files to iTunes Music folder when adding to library"-preference is disabled. Otherwise incomplete files will be copied to the library).
+
+ 31. On 12 July 2004 at 1:06 AM swen wrote: 
+I am a big fan of the british music magazin THE WIRE. Every issue is full with unknown artists(at least to me).
+On my weblog http://swen.antville.org I post links to legal downloads of those artits mentioned in the WIRE magazine.
+
+Swen
+
+ 32. On 12 July 2004 at 5:39 AM Brian Pipa wrote: 
+Try iRate: http://irate.sf.net
+It's similar - it downloads free, legal MP3s off the net. You rate them, then it learns what kind of music you like and tries to download only music it think you will like.
+
+brian
+
+ 33. On 12 July 2004 at 9:29 AM richard wrote: 
+check out zerophase. just do it already, what are you waiting for? :)
+
+ 34. On 12 July 2004 at 10:27 AM Mark Crane wrote: 
+"And -N turns on timestamping, which means wget won't download something with the same name unless it's newer."
+
+Whoops, missed this the first time I read the post. Cool.
+
+ 35. On 12 July 2004 at 11:19 AM Shane wrote: 
+This is fantastic, but I have no clue what all the command line stuff and script stuff is... Is there anybody that would like to give a super-simple, for an idiot, step-by-step of how to do this awesome trick (including the Applescript/Folder Action part) for a regular dude that is new to OSX with a new iBook? Thanks in advance!!!
+
+ 36. On 12 July 2004 at 11:52 AM redacted wrote: 
+Isn't this kind of a shitty thing to do? I mean, bloggers spend their time finding this stuff and crafting an interesting thing to say about the songs. Scraping their directories for the music files (esp. ignoring their robots.txt exclusions) takes them out of the equation, and makes them nothing but a passive interface between SoulSeek (or whatever) and you. Whatever your ethics about taking music from the web, doesn't this amount the the same thing as stealing, except you're stealing from TWO entities now, rather than one? 
+
+I know, I know, you're finding new music, and that's great, I love mp3 blogs too, but this rubs me the wrong way. I guess it was inevitable that the 'take take take' sensibility would permeate into mp3 blogs sooner or later. I can't see bloggers being happy about this. I'll stick to the realm of RSS, myself.
+
+ 37. On 12 July 2004 at 8:23 PM Marc wrote: 
+redacted, reading mp3 blogs and using wget to download the songs doesn't have to be mutually exclusive in my book.
+Actually, what I do is first read the blogs for the comments and reviews - but instead of eventually 'right-clicking and save-asing' me to death to download the songs, I then use my ':: blogmethree' frontend to get the mp3 files to my hard drive... and everybody wins!
+
+ 38. On 12 July 2004 at 9:36 PM Nelson wrote: 
+A better way to get wget on the Mac is to install fink. Then it's easy to use FinkCommander or the command-line to either install the binary/build from source.
+
+ 39. On 12 July 2004 at 11:37 PM tomByrer wrote: 
+I find new music mostly listening to http://Live365.com . If I hear something I like, I'll just copy & paste the song info from the playlist onto a text doc. Some stations like mine (http://live365.com/stations/infuzion ) are just one big mix without individual traxs, but then you can find "stations similar to" using the stations' page on Live365.
+
+Thanks for the WGet post; I was thinking to do that or sites without an RSS/Atom feed!
+
+ 40. On 14 July 2004 at 7:23 AM todd wrote: 
+i'm new to os x. can someone show the cron job file text? 
+
+thanks.
+
+ 41. On 16 July 2004 at 12:19 PM Vegiemite wrote: 
+Played around with the Windows version of wget and the following worked for me:
+
+wget -r -l1 -H -t1 -nd -N -np -A.mp3 -erobots=off -i mp3blogs.txt -P ../../Incoming
+
+you can change the ../../Incoming to whatever folder you want it dumped to. The ~ seems to confuse the windows version.
+
+ 42. On 17 July 2004 at 1:09 PM Joe wrote: 
+Nice method, thanks. A small glitch: Some songs don't seem to be served with a date so they download every time.
+
+ 43. On 23 July 2004 at 1:47 PM tomwsmf wrote: 
+
+A great place to scrap for songs is webjay.org
+
+Hundreds of playlists of music found around the web put there speficialy to be found.
+
+Enjoy.
+
+
+ 44. On 23 July 2004 at 2:06 PM tomwsmf wrote: 
+
+I have noticed a couple of posts here saying "gee app XYZ is much easier and cooler ". Thing is app XYZ often turns out to be good for just one thing or tied to some overstuffed backend mess I dont want to deal with.
+
+wget, like many unix tools , is robust. It can do lots of things with a little tweeking. Its not just an mp3 scrapper, its also a site backup tool, its a spidering tool, its a site spanner and a mirrioring aid. Its also a lot of things no one has thought of yet:)- 
+
+Dont forget that wget is a unix tool that can be used in conjuction with other unix tools (via a simple method called pipes |) so it can do more and more and more.
+
+That the beuaty of command line tools versus over Gui'd apps. 
+
+Explore, Expand, Evolve (sub text...Think..for yourself)
+-tomwsmf
+
+ 45. On 26 July 2004 at 5:10 AM Adrian wrote: 
+I don't know if it'll work with iTunes, but I've been playing with some code to generate m3u playlists automatically. It's available at http://www.mcqn.net/projects/NewMusicRadio/
+
+ 46. On 21 September 2004 at 5:44 PM Stephen B wrote: 
+Is there anyway to make wget ignore files that already exist? The timestamping option seems to fail a lot and I don't want to pound somebodies server every couple of days...
+
+ 47. On 24 September 2004 at 6:00 AM Peter Cooper wrote: 
+Just thought I'd say ta. Teaching The Indie Kids to Dance has gone over to tinyurl.com forwards to stop leechers, and that means legitimate visitors like myself have to rename our MP3s once they're downloaded. Oh well, gives us sommat to do ;-)
+
+ 48. On 28 September 2004 at 11:35 AM Matt LeClair wrote: 
+Hey, is there any way to make wget save a list of urls of mp3s it finds into a text file rather than saving the actual files?

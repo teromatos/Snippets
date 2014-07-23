@@ -1,0 +1,26 @@
+    Public Function GetAgeFromDOB(ByVal dob As Date) As Short
+        Dim ThisYearDOB As Date
+        Dim TodayDate As Date
+        Dim ThisAge As Short
+
+        TodayDate = DateTime.Today
+        Select Case True
+            Case dob = DateTime.MinValue
+                ThisAge = -1
+            Case dob.Year > TodayDate.Year
+                ThisAge = -1
+            Case dob.Year = TodayDate.Year
+                ThisAge = 0
+            Case Else
+                ThisAge = DateDiff(Microsoft.VisualBasic.DateInterval.Year, dob, DateTime.Today)
+                ThisYearDOB = TodayDate
+                Try
+                    ThisYearDOB = CDate(dob.Month.ToString & "/" & dob.Day.ToString & "/" & TodayDate.Year.ToString)
+                    If ThisYearDOB > TodayDate Then
+                        ThisAge = ThisAge - 1
+                    End If
+                Catch ex As Exception
+                End Try
+        End Select
+        Return (ThisAge)
+    End Function

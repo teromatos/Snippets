@@ -1,0 +1,8 @@
+NOTE : Not the most efficient, see 
+
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/dnsqlpro04/html/sp04c1.asp
+
+
+SQL TIP: Selecting Random Selection Of Rows From A Database Table
+
+SELECT TOP 10 * FROM someTable ORDER By NEWID() 

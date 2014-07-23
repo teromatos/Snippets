@@ -1,0 +1,52 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Text;
+using System.Windows.Forms;
+
+using System.Runtime.InteropServices;
+
+namespace GetWindowRec
+{	
+	public partial class Form1 : Form
+	{
+        [DllImport("user32.dll")]
+        static extern bool GetWindowRect(IntPtr hWnd, out RECT lpRect);
+
+        [StructLayout(LayoutKind.Sequential)]
+        public struct RECT
+        {
+            public int Left;    
+            public int Top;    
+            public int Right;    
+            public int Bottom;
+        }
+
+		public Form1()
+		{
+			InitializeComponent();
+		}
+
+        private void btnRetrieve_Click(object sender, EventArgs e)
+        {
+            RECT rct;
+
+            if(!GetWindowRect( this.Handle, out rct ))
+            {
+                MessageBox.Show("ERROR");
+            }
+            else
+			{
+				string s = string.Empty;
+				s = s + "Top: " + rct.Top.ToString() + Environment.NewLine;
+				s = s + "Left: " + rct.Left.ToString() + Environment.NewLine;
+				s = s + "Right: " + rct.Right.ToString() + Environment.NewLine;
+				s = s + "Bottom: " + rct.Bottom.ToString() + Environment.NewLine;
+                MessageBox.Show(s);
+            }
+        }
+
+	}
+}

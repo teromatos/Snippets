@@ -1,0 +1,25 @@
+url=http://fredrik.nsquared2.com/viewpost.aspx?PostID=391
+
+I have notice that several developers are using ASP.Net Ajax to do Web Service call for inserting, updating and removing data from a datasource, but they haven't thought about security at all.
+Remeber that a user can easy see what Web Service and method that will be called by looking at the source (using view source in a internet browser). You don't really need to care about if a user can locate a Web Service etc,
+the important thing it to prevent untrusted user to call it.
+
+I was talking with Stefan Schackow at the ASP.Net team about security regarding Web Service call with ASP.Net Ajax.
+
+He had some recommendations that is listed here (I want to thank Stefan for the recommendations):
+
+-Always require authentication for their services
+-Never GET enable the web services
+-Optionally setup URL authorization to further limit access
+-Optionally require SSL for the web service calls if very sensitive information such as credit card numbers are being sent
+-Always re-validate information on the server since developers should never trust the client, even if the client is a web service caller.
+
+Some other solutions that can be used to secure a site would be to check the user-agent and the http-referer (because headers can be passed with the XmlHttpRequest, a header with the info could be created, but at least it can stop some people that don't know about that ;))
+
+Another solution could also be that the server generates a sequence-number that will be passed from the client when a call is made, this number will be validated on the server side and can only be used one time. That will at least make sure it will be harder for someone to try to call a method.
+
+The last solution with the sequence-number is only another way to validate if the correct user have the right to call the Web Service or not.
+
+If you have enable the possibility to pass HTML into a input field and display it, make sure to not make it possible for users to pass client-side scripts, if they can pass
+client-side script, they can make code that will call a WebService etc. Maybe the user don't have the permission to call the service, but if the script is saved and will be 
+displayed on a page for another user, ant that user has the permission, a call can be made.

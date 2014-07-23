@@ -1,0 +1,10 @@
+Converting a byte array to a string and string to byte array
+Okay the actual answer to this is quite complex, because it really depends on the kind of encoding you are using. But assuming that you are using ASCII encoding, (the rest are similar), the code looks like as below --
+
+// String to Byte Array
+byte[] monkey = System.Text.Encoding.ASCII.GetBytes("Sahil Malik");
+
+// Byte Array to String
+Console.WriteLine(System.Text.Encoding.ASCII.GetString(monkey));
+
+Just a little tidbit that I thought may help some poor soul. Of course feel free to add your knowledge in the comments below.

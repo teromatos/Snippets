@@ -1,0 +1,41 @@
+tell application "iTunes"
+	pause
+	
+	set myTrack to location of current track
+	
+	# the player’s position within the currently playing track in seconds
+	set mySeconds to player position
+end tell
+
+# show a Dialog
+set SpeedFactor to 1.5
+display dialog "Enter speed factor:" default answer SpeedFactor
+set SpeedFactor to text returned of the result
+
+
+tell application "QuickTime Player"
+	activate
+	
+	# pause all previously opened documents
+	set open_docs to documents
+	repeat with doc in open_docs
+		pause doc
+	end repeat
+	
+	# open the track just played in iTunes
+	open myTrack
+	
+	# get the 'QuickTime' document, MyTrack should be equivalent but it isn't
+	set MyMovie to first document
+	
+	# rewind by 10 seconds
+	if mySeconds > 10 then
+		set mySeconds to mySeconds - 10
+	end if
+	
+	# set current time
+	set current time of MyMovie to mySeconds
+	
+	# set Speed Factor and start playing
+	set rate of MyMovie to SpeedFactor
+end tell

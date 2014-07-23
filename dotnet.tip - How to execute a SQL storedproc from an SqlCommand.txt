@@ -1,0 +1,16 @@
+NOTE:  Use EXEC sp_executesql because otherwise the execution plan isn't cached.
+================================================================================
+
+
+A database has a storedproc with some parameters. I don't know exactly what it does, I don't want to know, I don't have to know, it's not under my management. But my app does have a connection to it and has to call to stored proc. This is how it does that :
+
+SqlCommand berekenUrenverdeling = new SqlCommand("EXEC dbo.SP_STUDOND_URVRD_BEREKEN @AIDGEBRUIKER, @AIDURENVRD", sqlConnection1);
+
+berekenUrenverdeling.Parameters.Add("@AIDGEBRUIKER", idGebruiker);
+berekenUrenverdeling.Parameters.Add("@AIDURENVRD", idUrenvrd);
+
+berekenUrenverdeling.ExecuteNonQuery();
+
+I create a new sql command. The command text contains the name of the stored proc, dbo.SP_STUDOND_URVRD_BEREKEN, and the name of the two parameters, @AIDGEBRUIKER and @AIDURENVRD. Both parameters are added to the SqlCommands parameter collection as name value pairs. (In ADO.NET 2.0 the Add method has 3 parameters). ExecuteNonQuery fires off the proc. In case I'm interested it will return the number of rows affected.
+
+Nothing special at all, works like a charm and thanks to the parameters it's pretty safe against a sqlinjection attack.

@@ -1,0 +1,22 @@
+"C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\MsBuild.exe" "C:\WORK\DotNet\AInfo\AInfo.sln" /t:Clean /p:Configuration=Debug
+
+"C:\WINDOWS\Microsoft.NET\Framework\v2.0.50727\MsBuild.exe" "C:\WORK\DotNet\AInfo\AInfo\AInfo.vbproj" /t:Clean /p:Configuration=Debug
+
+
+/t:Clean
+/t:Build
+/t:Rebuild
+
+/p:Configuration=Debug
+/p:Configuration=Release
+
+
+
+http://weblogs.asp.net/KDente/archive/2005/06/05/410432.aspx
+
+MSBuild with Solutions 
+When you build a Visual Studio 2005 solution file from the command-line using MSBuild, it constructs an in-memory MSBuild project, that project is what actually gets built. It turns out it's possible to have MSBuild save that temporary MSBuild project to disk, to make it easier to understand what's going on. To do this, set the MSBuildEmitSolution environment variable to 1, then build the solution. MSBuild will save a .sln.proj in the same directory as the solution.
+
+This trick came in handy to answer two related questions I had about building solutions - how do you build just a specific web project of a solution, and how do you build a particular target of a particular project in the solution. You can determine this by inspecting the target names generated in the solution project file. It's turns out that the current MSDN documentation is wrong here. The MSBuild command line reference documentation says to specify "MSBuild solution.sln /t:<Project Name>.<Target Name>". But in reality the correct syntax is "MSBuild solution.sln /t:<Project Name>:<Target Name>" - 
+
+Thanks to Lukasz Gwozdz of the MSBuild team for this info.

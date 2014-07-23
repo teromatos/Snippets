@@ -1,0 +1,41 @@
+''Public Sub ToggleInternetImages(bolValue As Boolean)
+'''-- Turn images off/on in IE browser
+'''-- This makes the page load up faster on the web
+'''-- browser control. Also, some of the images are
+'''-- pulled from external web sites, so they may
+'''-- never get pulled at all. Might as well, turn them
+'''-- off at the beginning of the sesion and then turn
+'''-- them back on.  This maybe not be the proper way
+'''-- but it works :)
+'''
+''
+''    Dim strValue As String
+''
+''    On Error GoTo EH
+''
+''    '-- Create registry key, if it exists, does nothing
+''    'CreateNewKey HKEY_CURRENT_USER, "Software\Microsoft\Internet Explorer\Main"
+''
+''    RegistryCreateNewKey rrkHKeyCurrentUser, "Software\Microsoft\Internet Explorer\Main"
+''
+''    '-- The registry uses the words : yes and no
+''    '-- Convert the input value to the registry counterpart
+''    If bolValue = True Then
+''        strValue = "yes"
+''    Else
+''        strValue = "no"
+''    End If
+''
+''    '-- Update registry key with the respective value
+''    'SetKeyValue HKEY_CURRENT_USER, "Software\Microsoft\Internet Explorer\Main", "Display Inline Images", strValue, REG_SZ
+''
+''    RegistrySetKeyValue rrkHKeyCurrentUser, "Software\Microsoft\Internet Explorer\Main", "Display Inline Images", strValue, rrkRegSZ
+''
+''    Exit Sub
+''
+''EH:
+''    '-- Error
+''    IntShutDown True, MENAME, "LogMsg", "Windows Error"
+''    Exit Sub
+''
+''End Sub ' ToggleInternetImages

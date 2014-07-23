@@ -1,0 +1,37 @@
+URL=http://stackoverflow.com/questions/377968/how-do-you-forward-http-request-to-a-https-url/378039#378039
+
+You tagged ASP.NET so I assume you use IIS. Create a file in your Web Root of your web site, call it SSL_Redirect.htm or something like that. Put this Javascript in there:
+
+<Script language="JavaScript"> 
+<!-- begin hide 
+
+function goElseWhere() 
+{ 
+
+var oldURL = window.location.hostname + window.location.pathname; 
+
+
+var newURL = "https://" + oldURL; 
+
+query = '' + window.location; 
+position = query.indexOf('?'); 
+if (position > -1) 
+{ 
+query = query.substring(position + 1); 
+newURL = newURL + "?" + query; 
+} 
+
+
+window.location = newURL; 
+
+} 
+goElseWhere(); 
+
+// end hide --> 
+</script>
+Now, go to the properties of your Web Site. Go to the Customer Errors Tab, look for the 403.4 error, edit it. Change it to use a URL of /SSL_Redirect.htm (or whatever you named it). Now, in the IIS Admin, find that file, SSL_Redirect.htm, right click, go to properties. Go to File Security and uncheck Require SSL for that particular file.
+
+You're done.
+
+====================================================================================================
+

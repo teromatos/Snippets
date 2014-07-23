@@ -1,0 +1,152 @@
+Source: http://ryanfarley.com/blog/archive/2004/07/13/879.aspx
+
+Writing to Your .NET Application's Config File 
+
+There's likely been times that you might have thought that it would make things convenient to write back to your .NET application's config file. The framework provides simple methods for reading from the config file, but gives you nothing for writing values back to the config file. It is easy enough to write values back to the file. It's only XML. When I need to do this sort of thing I use a class that wraps up the ability to read and write settings in the config file.
+
+Warning: As a rule of thumb, it is not good to write back to the config file. The framework does not include this ability for a reason. If you want your application's users to not require administrative rights then it is always a better idea to store settings in the user's documents & settings directory or in the registry if needed. That said, this won't break anything and does come in handy for utility applications etc.
+
+OK, let's move on. A config file for a .NET application is a text file that has a name of myapplication.exe.config. The VS.NET IDE makes things easy for you and allows you to add a file named “App.config” to your project and it will copy it to the appropriate bin directory and rename it to myapplication.exe.config. This config file is intended to store static values or settings for your application. As I mentioned before, it is nothing more than XML. Here's a sample of an application config file:
+
+<?xml version="1.0" encoding="utf-8" ?>
+<configuration>
+    <appSettings>
+        <add key="Test1" value="My value 1" />
+        <add key="Test2" value="Another value 2" />
+    </appSettings>
+</configuration>
+
+
+The framework make life simple to read those values. The ConfigurationSettings class in the System.Configuration namespace includes the static AppSettings property which returns a NameValueCollection of name/value pairs. To read the value for the “Test1” setting you can do this:
+
+string test1 = ConfigurationSettings.AppSettings["Test1"];
+
+
+Easy enough, right? One thing to note is that this will allow you to read settings from the appSettings section only. If you add other sections then you won't be able to read them this way (that's coming in a future post). But as the title of this post indicates, what I really wanted to talk about is how you can write settings back to the config file. Let's move on to that.
+
+To write values back, you just need to open the config file as an XmlDocument and write away. No big deal. You can add name/value pairs, remove elements, modify them or whatever. And because I am tired of typing (and my wife is waiting for me to start a movie), let's just cut to the code. This class will allow you to read, write, and remove settings from the appSettings section of the config file based on the key or name of the setting.
+
+using System;
+using System.Xml;  
+using System.Configuration;
+using System.Reflection;
+//...
+
+
+public class ConfigSettings
+{
+    private ConfigSettings() {}
+
+    public static string ReadSetting(string key)
+    {
+        return ConfigurationSettings.AppSettings[key];
+    }
+
+    public static void WriteSetting(string key, string value)
+    {
+        // load config document for current assembly
+        XmlDocument doc = loadConfigDocument();
+
+        // retrieve appSettings node
+        XmlNode node =  doc.SelectSingleNode("//appSettings");
+
+        if (node == null)
+            throw new InvalidOperationException("appSettings section not found in config file.");
+
+        try
+        {
+            // select the 'add' element that contains the key
+            XmlElement elem = (XmlElement)node.SelectSingleNode(string.Format("//add[@key='{0}']", key));
+
+            if (elem != null)
+            {
+                // add value for key
+                elem.SetAttribute("value", value);
+            }
+            else
+            {
+                // key was not found so create the 'add' element 
+                // and set it's key/value attributes 
+                elem = doc.CreateElement("add");
+                elem.SetAttribute("key", key);
+                elem.SetAttribute("value", value); 
+                node.AppendChild(elem);
+            }
+            doc.Save(getConfigFilePath());
+        }
+        catch
+        {
+            throw;
+        }
+    }
+
+    public static void RemoveSetting(string key)
+    {
+        // load config document for current assembly
+        XmlDocument doc = loadConfigDocument();
+
+        // retrieve appSettings node
+        XmlNode node =  doc.SelectSingleNode("//appSettings");
+
+        try
+        {
+            if (node == null)
+                throw new InvalidOperationException("appSettings section not found in config file.");
+            else
+            {
+                // remove 'add' element with coresponding key
+                node.RemoveChild(node.SelectSingleNode(string.Format("//add[@key='{0}']", key)));
+                doc.Save(getConfigFilePath());
+            }
+        }
+        catch (NullReferenceException e)
+        {
+            throw new Exception(string.Format("The key {0} does not exist.", key), e);
+        }
+    }
+
+    private static XmlDocument loadConfigDocument()
+    {
+        XmlDocument doc = null;
+        try
+        {
+            doc = new XmlDocument();
+            doc.Load(getConfigFilePath());
+            return doc;
+        }
+        catch (System.IO.FileNotFoundException e)
+        {
+            throw new Exception("No configuration file found.", e);
+        }
+    }
+
+    private static string getConfigFilePath()
+    {
+        return Assembly.GetExecutingAssembly().Location + ".config";
+    }
+}
+
+
+So now to use it, you just use the static methods provided in the class like this:
+
+// read the Test1 value from the config file
+string test1 = ConfigSettings.ReadSetting("Test1");
+
+// write a new value for the Test1 setting
+ConfigSettings.WriteSetting("Test1", "This is my new value");
+
+// remove the Test1 setting from the config file
+ConfigSettings.RemoveSetting("Test1");
+
+
+Now, before you get carried away, a few things to be aware of. First, this was written to work for config files for windows applications. If you wanted to use this for a web application's config file you'd change the private static method that returns the name/location of the config file to something like this:
+
+System.Web.HttpContext.Current.Server.MapPath("web.config");
+
+You'd also need to make sure the ASP.NET process user account had access to write to that directory. I'd avoid doing this anyway, but still wanted to point this out.
+
+Note: Milan Negovan pointed out another strong word of caution in the comments about editing the web.config file for a web application and I thought it was worth adding it to the post so it wouldn't be missed. Every time you touch the web.config file the web app will recycle. Doing this often will throw performance out the window.
+
+Second, if you wanted to put this class into it's own assembly/dll so you could reuse it easier, beware that this class get's the path of the config file based on the location of the executing assembly. So if this is in a DLL, it will be looking for a config file for the DLL, not the application using the class. In those cases you'd be better off passing in a reference to the assembly that you want to read/write config values for, or just pass in it's path or something. Got it?
+
+All in all, an easy way to store configuration settings for your application. But heed my earlier warning. If your application is used by users in an AD, then you don't want to have to give them elevated rights just to write back to your applications directory under Program Files. That's what the Application Data directory is for under the users folder in Documents and Settings. Use it.

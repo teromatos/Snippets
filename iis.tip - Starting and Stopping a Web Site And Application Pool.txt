@@ -1,0 +1,20 @@
+Option Explicit
+
+Dim WebSiteID, objWebSite, ObjAppPool
+
+WebSiteID = "1"
+
+Set objWebSite = GetObject("IIS://localhost/W3SVC/" & WebSiteID)
+WScript.Echo "Stopping Web Site : " & objWebSite.ServerComment
+objWebSite.Stop()
+
+wscript.echo "Stopping Application Pool : " & objWebSite.AppPoolID
+Set objAppPool = GetObject("IIS://localhost/W3SVC/AppPools/" & objWebSite.AppPoolID)
+objAppPool.Stop()
+
+wscript.echo "Starting Application Pool : " & objWebSite.AppPoolID
+objAppPool.Start()
+
+WScript.Echo "Starting Web Site : " & objWebSite.ServerComment
+objWebSite.Start()
+

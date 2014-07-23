@@ -1,0 +1,6 @@
+Outlook toolbars positions are saved under
+
+C:\Documents and Settings\username\Application Data\Microsoft\Outlook\outcmd.dat
+
+If Outlook is not saving the toolbar positions, try to delete this file.
+Rearrange the toolbars and see if it saves then.

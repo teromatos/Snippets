@@ -1,0 +1,9 @@
+// Default beep
+Console.Beep();
+You can also specify the frequency and length of the beep in milliseconds.
+
+// Beep at 5000 Hz for 1 second
+Console.Beep(5000, 1000);
+
+
+System.Media.SystemSounds.Beep.Play();

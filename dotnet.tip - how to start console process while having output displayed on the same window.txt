@@ -1,0 +1,14 @@
+            Helper.Status("Creating zip file. Please wait...");
+            int exitCode;
+            using (Process p = new Process())
+            {
+                p.StartInfo.FileName = @"y:\root\programs\7za.exe";
+                p.StartInfo.Arguments = string.Format(" a -tzip {0} @{1}", zipFilename, listFile);
+                p.StartInfo.UseShellExecute = false;
+                p.Start();
+                p.WaitForExit();
+                exitCode = p.ExitCode;
+                p.Close();
+            }
+            Helper.Status("Zip file created.");
+            Helper.Status();

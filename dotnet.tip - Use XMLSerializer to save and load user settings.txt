@@ -1,0 +1,52 @@
+url=http://www.codeproject.com/useritems/XmlSerializationSettings.asp?print=true
+
+Using the XMLSettings class is very basic
+
+When you want to save settings, first create your settings class with the variables you need in your program. Make sure it has a parameterless contructer as serialization can't serialize without. Give it the path to your xml file, and make sure all folders are created. Then pass your settings class also
+
+//Save
+XMLSettings<MySettings>.Save(XMLPath, Settings); 
+
+When loading, the Load method simply returns your type, just pass the xmlpath to the method and voila!
+
+//Load
+setting = XMLSettings<MySettings>.Load(XMLPath); 
+
+
+
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Xml.Serialization;
+using System.IO;
+
+namespace XMLSerializationSettings
+{
+    public static class XMLSettings<T>
+    {
+        public static T Load(string XMLPath)
+        {
+            //Load settings and return our type
+
+            T temp;
+
+            XmlSerializer DeSerializer = new XmlSerializer(typeof(T));
+            TextReader reader = new StreamReader(XMLPath);
+            temp = (T)DeSerializer.Deserialize(reader);
+            reader.Close();
+
+            return temp;
+        }
+
+        public static void Save(string XMLPath, T settings)
+        {
+            //Save settings to xml using our type
+
+            XmlSerializer serializer = new XmlSerializer(typeof(T));
+            TextWriter writer = new StreamWriter(XMLPath);
+            serializer.Serialize(writer, settings);
+            writer.Close();
+        }
+    }
+}

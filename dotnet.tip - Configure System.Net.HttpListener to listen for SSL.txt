@@ -1,0 +1,17 @@
+Configure System.Net.HttpListener to listen for SSL
+Whidbey contains cool class HttpListener under System.Net namespace, it allows you to create your your own HttpServer on top of HttpSys. Some of you aske about steps for configuring HttpListener to work with SSL. Basically you need to configure httpsys. You need to  bound particular port to a server certificate, where you want your listener to listen
+
+1)  install the server certificate in machine store – you can manually install certificate using mmc (Alternatively you can also use winhttpcertcfg command line tool, which is available with win32 SDK install)
+
+2) next step is to bind the port to use this certificate, this could be done using httpcfg tool (Also a part of win32 sdk), following example demonstrate configuration for port 9443
+   a. Command line with no client certificate authentication 
+         > httpcfg.exe set ssl -i 0.0.0.0:9443 -c "MY" -h <Certificate Hash>
+    b. Command line with client certificate authentication 
+         > httpcfg.exe set ssl -i 0.0.0.0:9443 -f 2 -c "MY" -h <Certificate Hash>
+
+To know more about System.Net.HttpListener, check the System.Net Whidbey documentation
+http://msdn2.microsoft.com/library/btdf6a7e.aspx
+
+To know more about winhttpcertcfg.exe and httpcfg.exe, you could follow the following links,
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/winhttp/http/winhttpcertcfg_exe__a_certificate_configuration_tool.asp
+http://msdn.microsoft.com/library/default.asp?url=/library/en-us/http/http/httpcfg_exe.asp

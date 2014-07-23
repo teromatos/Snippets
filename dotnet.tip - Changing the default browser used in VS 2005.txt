@@ -1,0 +1,19 @@
+URL:http://weblogs.asp.net/scottgu/archive/2005/11/18/430943.aspx
+
+Changing the default browser used in VS 2005 and Visual Web Developer
+
+I've seen a few people ask if it is possible to change what browser is launched and used when running web apps in VS 2005 and Visual Web Developer (for example: to use FireFox instead of IE).  The good news is that there is an easy way to configure this.  To-do this:
+
+1) Right click on a .aspx page in your solution explorer
+
+2) Select the "browse with" context menu option
+
+3) In the dialog you can select or add a browser.  If you want Firefox in the list, click "add" and point to the firefox.exe filename
+
+4) Click the "Set as Default" button to make this the default browser when you run any page on the site.
+
+Note that there is also an optional drop-down at the bottom of the dialog that lets you select the default browser window size when loading.  You can choose 800x600 or 1024x768 if you want to visualize what the site will look like for people using those screen resolutions.  This works for both IE and FireFox (and probably other browsers too -- those just happened to be the two I checked).
+
+Hope this helps,
+
+Scott

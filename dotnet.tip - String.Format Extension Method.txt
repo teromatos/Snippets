@@ -1,0 +1,21 @@
+Source: http://www.paulstovell.com/blog/stringformat-extension-method
+
+Snippet: String.Format Extension Method
+Posted on February 21st, 2008 by Paul Stovell 
+Early this year Mitch suggested a string formatting syntax for C# vNext. His suggestion was that string.Format could be replaced with syntax like this:
+
+throw new Exception( @("{0} {1} {2}"|a|b|c) );I think it’s a great suggestion and I too would like to see it. 
+
+In the mean time, I’ve been making use of the following extension method:
+
+throw new Exception("{0} {1} {2}".F(a, b, c));I much prefer it to this:
+
+throw new Exception(string.Format("{0} {1} {2}", a, b, c));As not only is it shorter, but it removes the string.Format call from the front of the string, which I find easier to follow. The extension method is very simple:
+
+public static class StringExtensions
+{
+    public static string F(this string format, params object[] args)
+    {
+        return string.Format(format, args);
+    }
+}

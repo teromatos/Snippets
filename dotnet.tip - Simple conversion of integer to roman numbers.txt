@@ -1,0 +1,19 @@
+Public Function i2r(i As Integer) As String
+Application.Volatile
+
+	i2r = ""
+	i2r = i2r + m(i, "l", 50)
+	i2r = i2r + m(i, "xl", 40)
+	i2r = i2r + m(i, "x", 10)
+	i2r = i2r + m(i, "ix", 9)
+	i2r = i2r + m(i, "v", 5)
+	i2r = i2r + m(i, "iv", 4)
+	i2r = i2r + m(i, "i", 1)
+End Function
+
+Public Function m(ByRef i As Integer, ByVal RomanCharacter As String, ByVal IntegerValue As Integer) As String
+	While i >= IntegerValue
+		m = m + RomanCharacter
+		i = i - IntegerValue
+	Wend
+End Function

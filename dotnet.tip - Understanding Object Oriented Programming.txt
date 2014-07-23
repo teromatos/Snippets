@@ -1,0 +1,331 @@
+What is an object? 
+
+See My OO Presentation Notes as a preface. 
+Objects are the building blocks of an object-oriented program. The advantage of object-oriented programming is that data and operations used to interact with objects are contained within each object. In a distributed environment, objects can be created and transported across a network, fully containing their unique data and behaviors, and capable of receiving and sending messages, and processing data. 
+
+“Each object can be viewed as an independent little machine or actor with a distinct role or responsibility” (ObjectWiki, 2006). Since an object is comprised of data and behaviors, good design principles suggest that the each object have only one responsibility, and that all of its services should be aligned with that sole responsibility. This concept is known as the Single Responsibility Principle (SRP). 
+
+Single Responsibility Principle 
+
+The single responsibility principle states that “a class should have only one reason to change” (Martin, 2002). In essence, a class, its data and operations, should only have one reason to change. Each responsibility represents one reason. If a class has two responsibilities, then a change in one will force the entire class to change, which yields to a coupled class. Each responsibility should be independent of the other, so a change in one does not affect the other. In well designed systems, we strive for decoupled classes each with its own responsibility. This leads to flexible, extensible, and testable code. 
+
+An example to illustrate SRP’s principle concept is a Search class that is theoretically based upon KBSearch found in our hosted product. The Search class should be able to search for results that start with, or contain a given string. The Search class should not need to know how to connect to a database, nor create a dictionary file of noise words, nor display its results in a data grid. It should only know how to search. If the requirements change on what to display, we delegate that responsibility to a separate class, DisplayResults. If the requirements change on the underlying data source, and we need to implement a file system search, our Search class should not need to change. 
+
+Cohesion 
+
+SRP forms the greater part of another concept, cohesion. Cohesion is a term connoting the measurement of how well lines of source code within a module interact in order to produce a specific piece of functionality (CohesionWiki, 2005). It measures how strongly related and focused the responsibilities of a class are (CohesionWiki, 2005). Objects with a single responsibility exhibit low coupling, and have high cohesion. 
+
+Cohesion is an ordinal type of measurement, typically expressed as “high cohesion” or “low cohesion.” High cohesion suggest a loosely couple system, whereas low cohesion implies the opposite. High cohesion is desirable because it is associated with reliability, reusability, testability, understandability, and maintainability. Low cohesion corresponds to the opposite. There are different types of cohesive measurement, but this article will not cover those. 
+
+References: 
+
+CohesionWiki. (n.d.). Retrieve May 16, 2006, from http://en.wikipedia.org/wiki/Cohesion
+Martin, R. C. (2002). Agile Software Development, Principles, Patterns, and Practices (1st ed.). Upper Saddle River, NJ: Prentice-Hall, Inc. 
+ObjectWiki. (n.d.). Retrieve May 16, 2006, from http://en.wikipedia.org/wiki/Object_%28computer_science%29
+
+What is a class? 
+
+See My OO Presentation Notes as a preface. 
+“In short, a class is a blueprint for an object” (Weisfeld, 2000). A class is a template for defining an object. When we instantiate an object, we use a predefined set of instructions describing how to build the object. A class is a data type, used to define data and behavior representing a concept. Classes support inheritance, a concept that will be covered later in this article. Classes are the building blocks of object-oriented programming. 
+
+To further define the class, it is a data structure that may contain the following: data members (constants and fields), function members (methods, properties, events, indexers, operators, instance constructors, destructors and static constructors), and nested types. (Microsoft, 2006). Classes describe a collection of encapsulated variables and methods. Encapsulation is another important principle of OO that will be covered further in this document. 
+
+A class is not an object. Objects and classes are used synonymously, but an object could not exist without the class to specify its definition. A class defines a type of object. When we create a new instance of a class, we are creating an object that exhibits all the characteristics of the class. 
+
+Classes can inherit from other classes, and implement interfaces. In C# and Java, a class can extend only one class, but it can implement one to many interfaces. When a class inherits from a base class, it derives characteristics from the base class that become part of the new class. When a class implements an interface, it enters into a contract in which the class must provide the events, methods, properties, and indexers declared in the interface. The class fulfills the contract by providing the implementation set forth in the interface declaration. 
+
+Types of Classes 
+
+Classes can be abstract, final, static, and concrete, among others. An abstract class is a class that cannot be instantiated. Abstract classes may declare some functionality, but are incomplete, and rely on derived classes to provide their implementations, and create object instances. They are useful in design hierarchies, and as base classes for which concrete, or derived classes, extend functionality. Abstract classes typically contain one or more abstract methods or properties which are not implemented. Derived classes must override the abstract methods and properties and provide their implementations. A virtual method in an abstract class is one that does provide an implementation, and allows the derived class the choice to override that functionality, whereas an abstract method provides no implementation and must be overridden. 
+
+Final classes and methods are those that cannot be extended by derivation. In C#, a final class is a sealed class. A final class cannot be inherited. Final methods and properties that are not part of a final class override their methods in the derived class. 
+
+Concrete classes are simply classes that are object instances. These classes are the implementations of base classes, inheriting their characteristics, and providing a functional instance. In a concrete class, all of its methods have implementations. 
+
+Static classes and class members are used to create data and functions that can be accessed without having to create an instance of the class (MS Static, 2006). Static classes and members are useful when functionality is needed that is not dependent upon an object’s instance. 
+
+References: 
+
+Microsoft. (n.d.). Retrieve May 19, 2006, from http://msdn.microsoft.com/library/default.asp?url=/library/en-us/csspec/html/vclrfcsharpspec_10.asp 
+MS Static. (n.d.). Retrieve May 19, 2006, from http://msdn2.microsoft.com/en-us/library/79b3xss3(VS.80).aspx 
+Weisfeld, M. (2000). The Object-Oriented Thought Process (1st ed.). Indianapolis, IN: Sams Publishing.
+
+What is inheritance? 
+
+See My OO Presentation Notes as a preface. 
+Inheritance is concept that should be familiar with all of us, since we inherit physical characteristics from our parents. In object-oriented programming, the general concept of inheritance works similarly, but is different than genetic inheritance. In C# and Java, inheritance is where new classes can be formed by inheriting from one abstract or concrete class. The new classes are considered derived or concrete classes, and the classes from which they inherit are known as base classes. When a derived class inherits from a base class, the former can do everything the latter can do, and whatever specialized functionality it provides in addition. 
+
+The basic concept of inheritance in OO can be represented as an “Is-a” relationship. For example, we can say that “Dog” is a generalization of dog types, such as “Dalmatian,” “Golden Retriever,” “Border Collie,” and others. When a “Dalmation” class inherits from the “Dog” class, the “Dalmation” object “Is-a” dog. The “Dalmation” object inherits all the functionality and properties common to all dogs. We can say that “Dog” is an abstraction of “Dalmation.” Abstraction will be discussed in a later post. 
+
+There are several uses for inheritance, some of these include specialization, overriding, extension, and reuse (InheritanceWiki, 2006). Specialization is used to create specialized functionality for a new class or object. With specialization, the new, derived class inherits the characteristics of the base class, and then implements something new that is unique, and not a part of the base class. Using our “Dog” concept, the “Dog” class might have a bark method. Using specialization, we could create an “AttackDog” class that inherits the bark method from the “Dog” class, and adds a new feature, the ability to attack. Specialization is also used when derived classes implement the behavior of abstract classes that only declare functionality and do not implement it. 
+
+public class Dog
+{
+    string eyeColor;
+    string coatLenght;
+    public void Bark()
+    {
+        // make a barking noise
+    }
+}
+
+public class AttackDog : Dog
+{
+    // AttackDog inherits eyeColor,
+    // coatLength, and Bark()
+
+    // add specialization
+    public void Attack()
+    {
+        // do some attacking
+    }
+}
+
+Overriding is the ability to inherit methods from a base class, and to supersede those methods with new implementations. The derived class must provide the same method signature as the base class, and return the same type. Using our “Dog” model, a “MuteDog” class would override the bark method it inherits from “Dog,” and implement new functionality, such as silence, or no bark. Overriding is commonly used with abstract classes that expect derived classes to implement more specific functionality. Another good opportunity for overriding is with the “ToString” method inherited from the object class in C#. 
+
+public class MuteDog : Dog
+{
+    // AttackDog inherits eyeColor,
+    // coatLength, and Bark()
+
+    // add specialization
+    public override void Bark()
+    {
+        // todo: bark in silence
+    }
+} 
+
+Extension is term describing when a derived class inherits from a base class and provides additional functionality or characteristics. In specialization, the new class implements functionality or characteristics that are not part of the inherited class. With extension, the functionality or characteristics could be present in the inherited class. Extension is also the term used to describe the relationship of class inheritance. “Dalmation,” “Golden Retriever,” and “Border Collie” are extensions of “Dog.” 
+
+One of the most powerful advantages of object-oriented programming is code reuse. Simply put, the ability to reuse modules and their functionality in multiple projects saves time and money. Code reuse, when used properly, reduces coding time, testing, and maintenance. Code reuse can be as simple as two derived classes using the same functionality they inherited from their base class, or more extensive such as multiple projects sharing a class library. The idea encouraging code reuse is that functionality can be reused and not rewritten, if design properly. 
+
+References: 
+
+InheritanceWiki. (n.d.). Retrieve May 22, 2006, from http://en.wikipedia.org/wiki/Inheritance_%28object-oriented_programming%29
+
+What is encapsulation? 
+
+See My OO Presentation Notes as a preface. 
+One major advantage of using objects is that they do not need to reveal all of their attributes and behaviors. When designing a class, it is generally a good practice to only reveal the necessary interfaces needed to interact with the object, and hide the implementation details that are not precisely relevant. This hiding of details is known as encapsulation. 
+
+The concept of encapsulation is better enforced with the definitions of interfaces and implementations. An interface is defined by the services of communication between objects. Classes declare some methods and properties as visible to outside objects, and hide the other details. The visible, or public, methods and properties become the interface to the object. Interfaces typically only include methods, since any need to access an attribute should be made available through a public method. This is an important concept, especially in the realm of testing, since outside objects can only interact with the public interface methods, and not with internal operations that could inadvertently change the object’s state. 
+
+Public methods and properties comprise the interface, and the remaining methods and attributes make up the implementation. The benefit of this relationship is that the implementation can change while the interface remains constant. 
+
+An example of the interface and implementation paradigm could be described with a post-office mailbox. What the user sees is a box with an identification number, a key slot, and a door. The implementation is what is behind the scenes, and that is basically how the mail is deposited and retrieved. The user does not care how the implementation works, just as long as they can see their box number, insert their key, open the door, and deposit or retrieve mail. 
+
+Encapsulation is important because is maintains object integrity. By providing only the most necessary means of data access in the interface, we can prevent unwanted changes to the object’s state through hidden, or encapsulated, methods and properties. With well defined interfaces that rarely change, user interactions and unit testing become oblivious to changes in implementation. 
+
+In software design, encapsulation is important since is hides the functionality that is most likely to change, thus protecting other objects that reference its public interface. If encapsulation is a technique, then information hiding is its principle (EncapWiki, 2006). Two main principles of information hiding are discussed further in this article, polymorphism and separation of concerns. 
+
+References: 
+
+EncapWiki. (n.d.). Retrieve May 26, 2006, from http://en.wikipedia.org/wiki/Information_hiding
+
+What is polymorphism? 
+
+See My OO Presentation Notes as a preface. 
+Polymorphism is often considered the most power feature of object-oriented programming. Greek for “many forms,” polymorphism is the ability to hide alternative implementations behind a common interface. This concept leverages inheritance and encapsulation among other OO concepts. 
+
+Polymorphism is the ability for objects of different types to respond to messages of the same type. The concept behind polymorphism is that a function or data type can be written in a generic way, so that it can handle any interactions to it regardless of the acting object’s type. 
+
+Using the abstract interfaces of objects, polymorphism can be used to create extensible and loosely-coupled programs. The benefit of this is that if new types are added, and they adhere to the common interface specified, then their impact on changing the system will be minimal. 
+
+When using inheritance based polymorphism, a class can be used as more than one type (MS Polymorphism, 2006). It can be used as its own type, any base types, or any interface type that implements its interface. In C#, every type is polymorphic. Types can be used as their own type, or as an object instance, since object is the base class of all types (MS Polymorphism, 2006). 
+
+The following scenario helps explain polymorphism. Let us assume two classes for now, class A and class B. Class A is our base class. With inheritance we know that any class that inherits from class A will inherit all of class A’s methods, fields, properties, and events. In the example below, when class B derives from A, it can choose to override the base class’s functionality. 
+
+Example 1 
+
+public class A 
+{
+    public virtual void DoSomething() {}
+    public virtual int SomeValue { Get { return 0; } }
+}
+
+public class B : A
+{
+    public override void DoSomething() {}
+    public override int SomeValue { get { return 0; } }
+}
+
+B b = new B();
+b.DoSomething(); // calls the override method in class B
+
+Now, let’s create an instance of class A, casting our class B instance to it.
+
+A a = (A)b; // create an instance of A casting our instance of B
+a.DoSomething(); // calls the override method in class B
+
+In Example 1, an instance of class A is created using the instance of object B. If this is confusing, then think of it as if class A were created using “A a = new B();” The object instance of class A is now using an object of the derived class B that has been cast to the base class type A. What does this mean? Well, think of it as though Class B is now being represented by a more generic object, class A. 
+
+Example 2
+
+For another example, consider the following scenario. Human beings, whales, and dogs are related in that they are all part of the mammal class, or Mammalia. Mammals are grouped into another classification, phylum Chordata, or animals with vertebrae, or Vertebrata. I am using this example because animals of many differing species are all related in some sense, so they share similar characteristics. In the following examples, we will use less science and more OO concepts. 
+
+The Vertebrate class represents all objects that have a skull and a vertebra. This group includes mammals as well as non-mammals. These objects are able to show their skull and return a total vertebrae count. A spinal column is comprised of individual units, or vertebra. 
+
+The Mammal class represents all objects that can grow hair, have mammary glands, and without getting too scientific, have a higher rate of metabolism. For our example, all Mammal objects are able to grow hair and return their total number of mammary glands. 
+
+class Vertebrate 
+{ 
+    public virtual void ShowSkull() {}
+    public virtual int GetVertebraeCount( ) {}
+}
+
+class Mammal : Vertebrate 
+{
+    public virtual void GrowHair() {}
+    public virtual int GetMammaryGlandCount( ) {}
+}
+
+
+Canines are a type of Mammal. Before we can jump into our Beagle example, we need to see that a Beagle is a type of Canine, but it also inherits from more specific types of Canines, where each derived class offers something more specialized then its base class. 
+
+class Canine : Mammal {}
+class Wolf : Canine {}
+class DomesticDog : Wolf {}
+class Beagle : DomesticDog {}
+
+
+Human and Whale objects do not derive from Canine, but they do derive from Mammal, so they will share similar traits with all mammals. 
+
+class Human : Mammal {}
+class Whale : Mammal {}
+
+To emphasize our point of polymorphism, we have the following code. Beagles, humans, and whales are all able to grow hair. 
+
+Beagle beagle = new Beagle();
+beagle.GrowHair();
+
+Human human = new Human();
+human.GrowHair();
+
+Whale whale = new Whale();
+whale.GrowHair();
+
+
+In a more abstract, or generalized way, we can also say. 
+
+Mammal b = new Beagle();
+b.GrowHair();
+
+Mammal h = new Human();
+h.GrowHair();
+
+Mammal w = new Whale();
+w.GrowHair();
+
+When we create a new Mammal object, giving it the type of Beagle, we are using polymorphism. Any time we are using a base class, we could be actually using an object of the base class type, or any object that derives from the base class. The Beagle class derives from the DomesticDog, which in turn derives from the Wolf, which in turn derives from the Canine, which in turn derives from Mammal. We are four generations deep in our inheritance hierarchy, but we are still able to represent a Beagle object using the Mammal class. 
+At the same time, humans and whales may not seem remotely related, but they are, since they both inherit from class Mammal. We are able to represent these objects as well, using polymorphism, as seen with the following. 
+
+Mammal whale = new Whale(); 
+whale.GrowHair(); 
+
+Mammal human = new Human(); 
+human.GrowHair();
+
+
+If we wanted to go a step further, we could include sharks in our example, but we would need to use the Vertebrate class, since sharks are not derived from Mammals. We lose more specific functionality when moving up the hierarchy chain. For example, when casting a Human object to a Vertebrate object, we can no longer request human.GrowHair(); This gives us something to think about when designing systems. 
+
+Vertebrate shark = new Shark();
+shark.GetVertebraeCount();
+
+Vertebrate human = new Human();
+human.GetVertebraeCount();
+
+More on Polymorphism
+
+As messages are sent to objects, each object must have a predefined method to respond to that message. In an inheritance hierarchy, each derived class inherits its interface from its base class. Since each derived class is a separate entity, each may require a separate response to the same message (Weisfeld, 2000). 
+
+For example, when a message is sent to GetVertebraeCount, the first thing we ask is, get vertebrae count of what? We cannot get a vertebrae count because it is too abstract, so we must provide an implementation of a concrete Vertebrate, such as Shark or Human. While Vertebrate has a GetVertebraeCount method, we need to use the more specific overridden methods found in the derived classes. We can treat Human, Shark, and Snake as Vertebrate objects, and send a GetVertebraeCount message. The end result of these messages will be different since each provides a specific implementation. Each class is able to respond in its own unique way to the same GetVertebraeCount message. This is polymorphism. 
+
+Polymorphism in Design  
+
+Polymorphism solves an important piece of the puzzle when it comes to designing a system. Good design principles tell us to program to an interface, not to an implementation. When using polymorphism, we are able to adhere to this concept, and abstract out implementations in such a way our system’s interface will not change when implementation requirements do. Once our system depends on interfaces only, we are decoupled from the implementation. The implementations can vary while our interfaces remain the same. This promotes flexibility. 
+
+References: 
+
+MS Polymorphism. (n.d.). Retrieve May 29, 2006, from http://msdn2.microsoft.com/en-us/library/ms173152(VS.80).aspx 
+
+Weisfeld, M. (2000). The Object-Oriented Thought Process (1st ed.). Indianapolis, IN: Sams Publishing.
+
+
+What is composition? 
+
+See My OO Presentation Notes as a preface. 
+It is natural to think of objects as containing other objects. For example, a computer is an object. A computer is also comprised of other objects, such as a motherboard, keyboard, and hard drives. A motherboard is an object, but is too is also composed of other objects, such as a processor, video card, and ram. Objects are often built, or composed, or other objects. This concept is known as composition (Weisfeld, 2000). 
+
+When we discuss inheritance, we talk about inheritance as an “Is-a” relationship. Where a Border Collie is a dog. When we talk about composition, we use the “Has-a” relationship to describe it. A computer is an object, and it has a motherboard, and it has a keyboard. The motherboard and the keyboard are both objects. A computer is obviously not a motherboard, nor a keyboard. 
+
+Using composition combines systems in much less complex parts. In everyday situations, we find it easier to communicate and associate with more abstract concepts, such as a car. Instead of referring to the car as a large unit with tires, a steering wheel, engine, and so forth, we associate it as an object composed of several smaller objects. Many of us approach problem solving in the same fashion. 
+
+Composition is important in software design because it represents modularity and essentially reuse. The computer object may have a monitor. That monitor can be swapped out with many different types of monitors. It does not matter which monitor goes with which computer. 
+
+When we design objects, we like to be able to swap out components easily. Our classes, which may be comprised of other objects, should reference the more abstract interfaces. For example, consider our computer object. Our computer object should contain a keyboard, perhaps an abstract keyboard class, or a keyboard interface as a reference. We would not want to associate our computer object with a more specific keyboard, such as an ergonomic keyboard, because this creates a dependency on our computer class with a specific keyboard reference. If we associate our computer with a more generalized type of keyboard, we can use polymorphism to handle the more specific types of keyboards, such as a wireless keyboard, or a touchpad. 
+
+Computer computer = new Computer();
+computer.Keyboard = new ErgonomicKeyboard();
+
+If we want to change our keyboard type, we can, without affecting the computer object, because the computer object only cares about a keyboard, not a specific instance of a keyboard. How we associate our composed objects with our computer is a matter of design choice. For instance, we can choose to inject all of our dependencies into our constructor, such as the following example. This is known as dependency injection, and it will not be covered in this document. 
+
+Computer computer = new Computer(Keyboard, Motherboard, Monitor);
+
+The main point is that we can design our classes in many ways to leverage the modularity of our components, reusing objects as much as possible. 
+
+Other Advantages of Composition 
+
+Another advantage to composition is that systems can be built and maintained independently from smaller subsystems. Since our objects are composed of other objects, those objects can be created separately and independently. This forms the basis of functional decomposition, a process which is familiar to software development. Typically, we build software systems using independent components. The smaller the system, the easier it is to maintain. If our DVD drive should break, we can locate the source of the problem more easily than in an integrated system where the parts are not as easily decomposable. 
+
+Composition promotes another good practice, testability. In a larger system, using our computer example, we can put tests in place to maintain the integrity of each component. As we add new components to the system, we test that the others still function properly. In our computer example, if our DVD drive should break, we can remove it from the system to have it fixed. If the computer system were a single unit, we would need to repair the entire system, which is much more timely and costly. 
+
+Types of Composition 
+
+There are two types of composition, association and aggregation. Both forms adhere to the “has-a” relationship seen in composition. “An aggregation is a complex object composed of other objects. An association is used when one object wants another object to perform a service for it” (Weisfeld, 2000). Depending on how we perceive the relationship of these objects, we can choose to classify them as aggregations or associations. 
+
+Aggregation implies that a complex object is composed of other objects. For example, a computer is made up of a motherboard, keyboard, and monitor. We have seen this example mentioned above. With aggregation, we tend to see the whole before we see the components that comprise it. We think of a computer as a computer, and not as a motherboard, keyboard, and monitor. We think of a car as a car, and not as a large unit containing tires, an engine, a steering wheel, et cetera. 
+
+Association is where relationships exist between objects because one object needs the other to perform a service for it. For example, our computer is made up of a keyboard, mouse, and monitor. These are each separate objects, and that is aggregation. The computer delegates some of its work to the mouse, some to the keyboard, and some to the monitor. The computer needs the services of these objects to work, since it cannot provide these capabilities by itself. This relationship is association. 
+
+When using aggregation and association, there is often no one right answer when design decisions are made. There is a gray area that separates the two concepts. In our computer example, some of our associations also contain aggregations, and vice versa. This may be the case time and time again in the real world. 
+
+Favor Composition Over Inheritance 
+
+One principle of object-oriented design mentioned by the Gang of Four is, “Favor object composition over class inheritance.” By nature, inheritance is brittle. This is true because derived classes inherit behavior by sub-classing, and that behavior is set statically at compile time. All derived classes must inherit the same behavior. 
+
+Composition increases system flexibility. If we use composition, we can extend an object’s behavior dynamically, at runtime, adding new responsibilities to objects that we may not have thought about during design time. Another benefit of this technique is that we do not need to change existing code, and so the chances of introducing new bugs or unwanted effects are reduced. 
+
+For more on composition versus inheritance... 
+
+References: 
+
+Weisfeld, M. (2000). The Object-Oriented Thought Process (1st ed.). Indianapolis, IN: Sams Publishing.
+
+
+What is abstraction? 
+
+See My OO Presentation Notes as a preface. 
+Separation of Concerns 
+
+In software engineering, separation of concerns is a term used to describe the process of breaking down a system into distinct components, where each component performs a unique task that does not overlap with another. Separation of concerns is an approach to problem solving where we break the complexity of a problem into more simple, loosely-coupled components. By modularizing our concerns, we promote software testability, reuse, comprehensibility, maintainability, and extensibility just to name a few. 
+
+Abstraction is the principle method for separating concerns. Concerns are individual pieces of interest, or focus, in a program (SoCWiki, 2006). Object-oriented programming languages aid in the process of separating concerns with classes and methods. To separate components, we need to think about what that component truly needs to do, and how much it needs to know in order to perform its functionality. When implementing the separation of concerns concept, determine the desired functionality of the component, and the minimum amount of information required for it to function. 
+
+Abstraction 
+
+Abstraction, in my opinion, is one of the more complex concepts to understand in object-oriented programming. First, the understanding of abstraction requires a good cognizance of objects, classes, inheritance, encapsulation, and polymorphism. Second, the definition of abstraction is somewhat abstract, in that it is not specific. Third, the ability to apply abstraction when designing a system demands OO concept recognition, which takes time and practice. In the following sections describing abstraction, I hope to define abstraction and provide examples that will make this concept less intimidating. 
+
+Defining Abstraction 
+
+Abstraction is a process of recognizing common attributes and behaviors that are shared among concepts, and designing a system that leverages these generalizations. Abstraction helps identify commonalities in concepts that can be arranged in a way that will promote object reusability in more than one context, without having to repeat the details of each context. 
+
+Abstraction is the process of reducing system complexity. It is the presentation of a simple concept to the external world, while hiding or delegating the detailed implementations. In abstraction, one captures only the essential attributes and behaviors of a component. "Abstraction is the elimination of the irrelevant and the amplification of the essential" (Martin, 1995). 
+
+Advantages of abstraction are the hiding of implementation details, component reuse, extensibility, and testability. When we hide implementation details, we reveal a cleaner, more comprehensible and usable interface to our users. We are separating our interface from our implementation, and this makes component reuse more practical. Many, if not all of the object-oriented concepts we have discussed throughout this document play a role in the abstraction principle. Working together, their end goal is the same, to produce software that is flexible, testable, maintainable, and extensible. 
+
+References: 
+
+Martin, R. (1995). Designing Object Oriented C++ Applications Using The Booch Method (1st ed.). Upper Saddle River, NJ: Prentice-Hall, Inc. 
+
+SoCWiki. (n.d.). Retrieve May 30, 2006, from http://en.wikipedia.org/wiki/Separation_of_concerns
+

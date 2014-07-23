@@ -1,0 +1,407 @@
+Building Plugins Resilient To Versioning
+
+UPDATE: Added a followup part 2 to this post on the topic of granular control.
+
+ We have all experienced the trouble caused by plugins that break when an application that hosts the plugins get upgraded. This seems to happen everytime I upgrade Firefox or Reflector. 
+
+On a certain level, this is the inevitable result of balancing stability with innovation and improvements. But I believe it is possible to insulate your plugin architecture from versioning so that such changes happen very infrequently. In designing a plugin architecture for Subtext, I hope to avoid breaking existing plugins during upgrades except for major version upgrades. Even then I would hope to avoid breaking changes unless absolutely necessary. 
+
+I am not going to focus on how to build a plugin architecture that dynamically loads plugins. There are many examples of that out there. The focus of this post is how to design plugins for change. 
+
+Common Plugin Design Pattern
+A common plugin design defines a base interface for all plugins. This interface typically has an initialization method that takes in a parameter which represents the application via an interface. This might be a reference to the actual application or some other instance that can represent the application to the plugin on the application’s behalf (such as an application context). 
+
+public interface IPlugin
+{
+   void Initialize(IApplicationHost host);
+}
+
+public interface IApplicationHost
+{
+   //To be determined.
+}This plugin interface not only provides the application with a means to initialize the plugin, but it also serves as a marker interface which helps the application find it and determine that it is a plugin. 
+
+For application with simple plugin needs, this plugin interface might also have a method that provides a service to the application. For example, suppose we are building a SPAM filtering plugin. We might add a method to the interface like so: 
+
+public interface IPlugin
+{
+   void Initialize(IApplicationHost host);
+
+   bool IsSpam(IMessage message);
+}Now we can write an actual plugin class that implements this interface. 
+
+public class KillSpamPlugin : IPlugin
+{
+    public void Initialize(IApplicationHost host)
+    {
+    }
+
+    public bool IsSpam(IMessage message)
+    {
+        //It is all spam to me!
+        return true;
+    }
+}For applications that will have many different plugins, it is common to have multiple plugin interfaces that all inherit from IPlugin such as ISpamFilterPlugin, ISendMessagePlugin, etc... 
+
+Problems with this approach
+This approach is not resilient to change. The application and plugin interface is tightly coupled. Should we want to add a new operation to the application that this plugin can handle, we would have to add a new method to the interface. This would break any plugins that have been already been written to the interface. We would like to be able to add new features to the application without having to change the plugin interface. 
+
+Immutable Interfaces
+When discussing interfaces, you often hear that an interface is an invariant contract. This is true when considering code that implements the interface. Adding a method to an interface in truth creates a new interface. Any existing classes that implemented the old interface are broken by changing the interface. 
+
+As an example, consider our plugin example above. Suppose IPlugin is compiled in its own assembly. We also compile KillSpamPlugin in the assembly KillSpamPlugin, which references the IPlugin assembly. Now in our host application, we try and load our plugin. The following example is for demonstration purposes only. 
+
+string pluginType  = "KillSpamPlugin, KillSpamPlugin";
+Type t = Type.GetType(pluginType);
+ConstructorInfo ctor = t.GetConstructor(Type.EmptyTypes);
+IPlugin plugin = (IPlugin)ctor.Invoke(null);
+This works just fine. Now add a method to IPlugin and just compile that assembly. When you run this client code, you get a System.TypeLoadException. 
+
+A Loophole In Invariant Interfaces?
+However in some cases this invariance does not apply to the client code that references an object via an interface. In this case, there is a bit of room for change. Specifically, you can add new methods and properties to that interface without breaking the client code. Of course the code that implements the interface has to be recompiled, but at least you do not have to recompile the client. 
+
+In the above example, did you notice that we didn’ have to recompile the application when we changed the IPlugin interface? This is true for two reasons. First, the application does not reference the new method added to the IPlugin interface. If you had changed the existing signature, there would have been problems. Second, the application doesn’t implement the interface, so changing it doesn’t require the application to be rebuilt. 
+
+A better approach.
+So how can we apply this to our plugin design? First, we need to look at our goal. In this case, we want to isolate changes in the application from the plugin. In particular, we want to make it so that the plugin interface does not have to change, but allow the application interface to change. 
+
+We can accomplish this by creating a looser coupling between the application and the plugin interface. One means of doing this is with events. So rather than having the plugin define various methods that the application can call, we return to the first plugin definition above which only has one method, Initialize which takes in an instance of IApplicationHost. IApplicationHost looks like the following: 
+
+public interface IApplicationHost
+{
+    event EventHandler<CommentArgs> CommentReceived;
+}
+    
+//For Demonstration purposes only.
+public class CommentArgs : EventArgs
+{
+    public bool IsSpam;
+}Now if we wish to write a spam plugin, it might look like this: 
+
+public class KillSpamPlugin
+{
+    public void Initialize(IApplicationHost host)
+    {
+        host.CommentReceived 
+               += new EventHandler<CommentArgs>(OnReceived);
+    }
+
+    void OnReceived(object sender, CommentArgs e)
+    {
+        //It is still all spam to me!
+        e.IsSpam = true;
+    }
+}Now, the application knows very little about a plugin other than it has a single method. Rather than the application calling methods on the plugin, plugins simply choose which application events it wishes to respond to. 
+
+This is the loose coupling we hoped to achieve. The benefit of this approach is that the plugin interface pretty much never needs to change, yet we can change the application without breaking existing plugins. Specifically, we are free to add new events to the IApplicationHost interface without problems. Existing plugins will ignore these new events while new plugins can take advantage of them. 
+
+Of course it is still possible to break existing plugins with changes to the application. By tracking dependencies, we can see that the plugin references both IApplicationHost and CommentArgs classes. Any changes to the signature for an existing property or method in these classes could break an existing plugin. 
+
+Event Overload
+One danger of this approach is that if your application is highly extensible, IApplicationHost could end up with a laundry list of events. One way around that is to categorize events into groups via properties of the IApplicationHost. Here is an example of how that can be done: 
+
+public interface IApplicationHost
+{
+    UIEventSource UIEvents { get; }
+    MessageEventSource MessageEvents { get; }
+    SecurityEventSource SecurityEvents { get; }
+}
+
+public class UIEventSource
+{
+    event EventHandler PageLoad;
+}
+
+public class SecurityEventSource
+{
+    event EventHandler UserAuthenticating;
+    event EventHandler UserAuthenticated;
+}
+
+public class MessageEventSource
+{
+    event EventHandler Receiving;
+    event EventHandler Received;
+    event EventHandler Sending;
+    event EventHandler Sent;
+}    In the above example, I group events into event source classes. This way, the IApplicationHost interface stays a bit more uncluttered. 
+
+Caveats and Summary
+So in the end, having the plugins respond to application events gives the application the luxury of not having to know much about the plugin interfaces. This insulates existing plugins from breaking when the application changes because there is less need for the plugin interface to change often. Note that I did not cover dealing with strongly typed assemblies. In that scenario, you may have to take the additional step of publishing publisher policies to redirect the version of the application interface that the plugin expects. 
+
+
+===================================================================================================
+
+
+Comments on this post
+# Re: Building Plugins Resilient To Versioning
+Left by Simone at 6/27/2006 1:05 AM
+Phil, I totally agree with what you are saying...
+Also this is the same approach used by CommunityServer and, even if PHP doesn't have "embedded" events, by WordPress (they call it hooks). 
+# re: Building Plugins Resilient To Versioning
+Left by Gurkan Yeniceri at 6/27/2006 5:20 AM
+You wrote very well Phil. I agree with what you said and also would like to add Castle Project's Inversion of Control design pattern which can be found at IoC. I don't have any experience with it but looks like can be implemented for a plugin architecture. 
+# re: Building Plugins Resilient To Versioning
+Left by Craig at 6/27/2006 6:15 AM
+Of course, using an abstract base instead of an interface solves the "Adding a method breaks the client" problem neatly by giving you a way to default in a new implementation. If no default applies, then perhaps plugins with the old interface *should* break. Or we can fall back on the old COM approach of defining a new interface which extends the old, and requiring the client of the plugin to figure out how to handle old plugins (this approach also works with abstract bases). 
+
+My COM background has made me tend towards interface-based approaches in the past, but I've been experimenting with abstract bases instead, and I have to say I've been pleased with the results. The biggest complaint I had "But you only get one base class!" seems to fall by the wayside in 99% of the cases, as the plugin is happy to accept whatever constraints on its heritage I care to apply: it simply doesn't care. 
+
+Of course, one can also mix abstract bases and interfaces, but I've found that this approach generally requires enough cognitive overhead as not to be worth it. 
+# re: Building Plugins Resilient To Versioning
+Left by Dimitri Glazkov at 6/27/2006 6:41 AM
+I think the problem starts when it's assumed that there will be only one interface (i.e. IPlugin)
+
+Interfaces, as immutable as they are offer another important advantage: they are declarative. By looking at the interfaces the class implements, you can figure out what the plug in does. Which means, in turn, that the host can decide whether to involve a plugin in processing of a request or not. 
+
+Allow me to illustrate. Suppose you have hooks for: a) rich-text editor plugin, b) comment spam filtering plugin in your app.
+
+These are exposed by IRichTextPlugin and ISpamFilterPlugin interfaces. By looking at the signature, I can decide whether to initialize and hook up the plugin for any specific request. If I have 10 plugins installed, why do I need to treat them as black boxes and initialize them for each request?
+
+So, these are my thoughts. 
+# re: Building Plugins Resilient To Versioning
+Left by Arian at 6/27/2006 6:50 AM
+Great post Phil! I really like the idea. I too have stuggled with compatibility issues when changing interfaces. The event-based model makes a lot of sense.
+
+Dimitri, I see what you are saying, but I think that it's a moot point. If I have ten plugins installed, they would always be initialized -- I wouldn't initialize them per operation. When something occurs, such as a comment needing to be spam checked, I invoke the event handler using the delegate model. Of those ten plugins, maybe only one is registered for the event, but there is no additional overhead. The beauty of this is how easy it is to handle a mixture of different functions. I could implement more than one interface, but maybe I only really want to handle one sub-function of one of those interfaces. This makes it easy.
+
+Phil, thanks for the great post! 
+# re: Building Plugins Resilient To Versioning
+Left by Haacked at 6/27/2006 7:51 AM
+Dimitry: I agree with Arian on this point. Only the plugins that subscribe to the specific event will be involved. We wouldn't examine every plugin for every operation. This approach simply inverts the decision making to the plugin and not the application concerning who will fulfill which operation.
+
+This decouples the application from the plugin and couples the plugin to the application. I think this is the better direction of knowledge. Personal opinion of course.
+
+Craig: Good point. But in order not to break your existing plugin when you add a new operation to your plugin abstract base class, you can't mark it as abstract, or you run into the same problem as an interface. Right? So your base class might end up with several virtual methods with no implementation. How does the application know NOT to call those method on an old plugin that didn't implement the method?
+
+With the event based approach, the plugin has to specifically subscribe to the event. 
+# re: Building Plugins Resilient To Versioning
+Left by Haacked at 6/27/2006 7:53 AM
+Simone, HttpModules also use this approach, which was my original inspiration in thinking about why this approach works nicely. 
+# re: Building Plugins Resilient To Versioning
+Left by Dimitri Glazkov at 6/27/2006 8:39 AM
+I'll continue being the dissenting voice for a bit. Not to say, that self-subscription is a bad idea -- it may be exactly what Subtext needs. However ...
+
+When you go with self-subscription, you actually have tighter coupling than advertised-interface strategy. Now, the plug in is free to do whatever they want, which offers little granularity of control to the hosting application. With advertised-interface, the host decides what's allowed to run, and what is not. With self-subscription, the binding logic is hard-coded into the plugin itself.
+
+I am just saying. 
+# Re: Building Plugins Resilient To Versioning
+Left by Simone at 6/27/2006 8:56 AM
+Another option could be have a mraker interface (without methods) and an abstract base class to inherit from.
+It should solve both the problem of identiying a plugin correctly, and it should also solve the versioning problem: if you don't override a method nobody will complain, and thing will go fine. 
+# re: Building Plugins Resilient To Versioning
+Left by Haacked at 6/27/2006 10:00 AM
+Dimitri, I am still not convinced. The host still decides what is allowed to run and what is not by choosing to raise the event or not. A self-subscription plugin only has power to execute code if the event it subscribes to is raised in the first place.
+
+Think of it this way, an event handler is just another way for the application to call a method on the plugin, albeit indirectly via what is analogously a function pointer. 
+# re: Building Plugins Resilient To Versioning
+Left by Steve Harman at 6/27/2006 10:44 AM
+...via what is analogously a function pointer...
+Whoa, I suddenly found myself back in Emacs, burried in way too many lines C/C++, with pointers pointing to pointers pointing back to... wait, where am I again? 
+# re: Building Plugins Resilient To Versioning
+Left by Simone Chiaretta at 6/27/2006 11:07 AM
+Oh no!!! pointer to functions!!!
+
+Wait, wait, but aren't we talking of delegates? 
+# re: Building Plugins Resilient To Versioning
+Left by Haacked at 6/27/2006 11:17 AM
+Ha ha, no need to fear, of course we are talking about delegates. Notice I said analagous. I didn't say we are using function pointers. Just something that is similar in usage. 
+# re: Building Plugins Resilient To Versioning
+Left by Craig at 6/28/2006 4:38 AM
+Phil: there are two situations. One is that a new operation has a reasonable default implementation. The other is that it does not. If a reasonable default implementation exists, then abstract bases are an obvious good choice. If it doesn't, then they're nearly equivalent to interfaces - the one caveat being that you "use up" your one base class. 
+
+So most of the time they're better. Sometimes they're no better. Occasionally they're worse. 
+
+As you point out, the event mechanism is a good one when the number of events is fairly small *and* when you don't want to provide a default implementation *and* when you don't care if more than one person hooks up. This will often but not always be the case. 
+
+At the end of the day I think we largely agree that the best approach is a function of the requirements. My only difference with you (I think) is that I'm finding that abstract bases are a good choice more often than I used to think. 
+
+(BTW, typing long comments like this one is painful with your preview thingy - I can type fast enough to get ahead of it. It must be rerendering the entire comment on every keystroke.) 
+# re: Building Plugins Resilient To Versioning
+Left by Haacked at 6/28/2006 9:27 AM
+Hmmm, I need to tune the preview code. I am actually not opposed to the abstract base class. It could still work with an event based approach.
+
+One good point you mention is that there may be some events in which you only want a single plugin hooking up to it. 
+
+How would you handle the case where two plugins implement a method that only one should handle? Do you just call the first one? 
+# re: Building Plugins Resilient To Versioning
+Left by Craig at 7/2/2006 4:44 AM
+Bah - I never remember to check comments. Now the thread has moved on to a new post and I've really lost my window for replying. Nevertheless. :) 
+
+In the case where two plugins implement a method that only one should handle, maybe you're better off going with events. :) But there's also nothing wrong with an occasonal NotImplementedException or two - it really depends on the particular situation. 
+
+Also, there's nothing wrong with using abstract bases in conjunction with events. This is similar to how HttpModules work, whereby an Init method is implemented by all plugins, but after that events are used to hook up to particular points in the pipeline. IHttpModule is obviously an interface, but it could be an abstract base. 
+
+I guess what I'm saying is that events look appropriate for "sometimes yes, sometimes no" things, and when more than one "listener" might hook the same event. My work has tended to look more like chains of interceptors than groups of listeners, and in that case an abstract base is a pretty good metaphor. 
+# re: Building Plugins Resilient To Versioning
+Left by Haacked at 7/2/2006 11:39 AM
+Craig, interesting point on the "chains of interceptors" vs "groups of listeners". I think I was getting at the same thing when I said this in the comments to part 2:
+
+
+I think this (event-based approach) works especially well when a plugin extends functionality and may be less suited for when it replaces functionality.
+
+
+So by "chains of interceptors" are you referring to plugins that replace behavior?
+
+Right now I'm thinking through the problem of redundancy.
+
+For example, in some situations an application wants a plugin to replace behavior but only one. This constraint can't be modeled by an interface or by an event based approach. It is purely application logic, so it seems that either approach would work.
+
+However, from the application's perspective, the interface (or abstract base class) approach is more natural.
+
+When I call a method on a plugin, I only expect one plugin to execute the method. When I raise an event, I might expect one or more plugins to execute in response.
+
+So when multiple plugins are loaded that implement the same plugin, how have you handled it? Do you have instances in your framework that require multiple listeners? In that situation did you just cycle through plugins? 
+# re: Building Plugins Resilient To Versioning
+Left by Craig at 7/3/2006 8:43 AM
+Yes - for the applications I've written, I've tended to leverage more of a "provider" model than a "plugin" model. That is, my code actually wanted to *modify* the result of a method call (or series of method call) rather than simply know that something happened. Events are a good solution when you just want to know "Hey, the application just did X". 
+
+I think events can still work when minor modifications to a particular result are required. E.g. give everyone a chance to cancel an event (think BeforeXxx/CancelEventArgs). But the very nature of events (multicast) means that it's harder to model complex return types. 
+
+As for systems I've worked with, the best example is probably FlexWiki. There I have an abstract base called ContentProviderBase. A chain of objects implementing the abstract base exist. Each one has a reference to the next (except the last). The last one does things like store the content in a database, a filesystem, or whatever. Intermediate ones modify the results, doing things like providing security, caching, or synthesizing topics that aren't stored anywhere. 
+
+
+
+
+
+***************************************************************************************************
+
+
+
+
+
+
+Resilient Plugins Part Deux - Granular Control
+Jul 01, 2006 4 Comments Print  I got a lot of great feedback from my post on Building Plugins Resilient to Versioning, which proposes an event-based self-subscription model to plugins. 
+
+Craig Andera points out that we can get many of the same benefits by having plugins implement an abstract base class instead of an interface. This is definitely a workable solution and is probably isomorphic to this event based approach. 
+
+Dimitri Glazkov was the voice of dissent in the comments to the post pointing out that the application loses granular control over plugins in this approach. I was not convinced at the time as I was focused on keeping the surface area of the plugin interface that is exposed to the application very small. When the surface area is small, there is less reason for the interface to change and the less reason to break the interface. 
+
+However a simple thought experiment makes me realize that we do need to have the application retain granular control over which plugins can respond to which events. This is the scenario. 
+
+Suppose our plugin framework defines three events, MessageSending, MessageSent, MessageReceiving and someone writes a plugin that responds to all three events. Later, someone else writes a plugin that only responds to MessageReceiving. If the blog user wants to chain the functionality of that plugin to the existing plugin, so that both fire when a message is received, then all is well.
+
+But suppose this new plugin’s handling of the MessageReceiving event should replace the handling of the old plugin. How would we do this? We can’t just remove the old plugin because then we lose its handling of the other two events. Dimitri was right all along on this point, we need more granular control. 
+
+It makes sense to have some sort of admin interface in which we can check and uncheck individual plugins and whether or not they are allowed to respond to specific events. However, this is not too difficult with the event based approach. 
+
+.NET’s event pattern is really an implementation of the Observer pattern, but using delegates rather than interfaces. After all, what is a delegate under the hood but yet another class? When any code attaches a method to an event, it is in effect registering a callback method with the event source. This is the step where we can obtain more granular information about our plugins. 
+
+In the Application that hosts the plugin, events that require this granular control (not every event will) could be defined like so. 
+
+private event EventHandler messageReceived;
+
+public event EventHandler MessageReceived
+{
+    add
+    {
+        RegisterPlugin(value.Method.DeclaringType);
+        AddEvent(value);
+    }
+    
+    remove
+    {
+        UnRegisterPlugin(value.Method.DeclaringType);
+        RemoveEvent(value);
+    }
+}So when adding and removing the event, we register the plugin with the system and then we add the event to some internal structure. For the purposes of this discussion, I’ll present some simple implementations. 
+
+void AddEvent(EventHandler someEvent)
+{
+    //We could choose to add the event 
+    //to a hash table or some other structure
+    this.messageReceived += someEvent;
+}
+
+void RemoveEvent(EventHandler someEvent)
+{
+    this.messageReceived -= someEvent;
+}
+                
+private void RegisterPlugin(Type type)
+{
+    //using System.Diagnostics;
+    StackTrace stack = new StackTrace();
+    StackFrame currentFrame = stack.GetFrame(1);
+    Console.WriteLine("Registering: " + type.Name 
+         + " to event " + currentFrame.GetMethod().Name);
+}
+
+private void UnRegisterPlugin(Type type)
+{
+    StackTrace stack = new StackTrace();
+    StackFrame currentFrame = stack.GetFrame(1);
+
+    Console.WriteLine("UnRegistering: " + type.Name 
+        + " to event " + currentFrame.GetMethod().Name);
+}As stated in the comments, the AddEvent method attaches the event handler in the standard way. I could have chosen to put it in a hash table or some other structure. Perhaps in a real implementation I would. 
+
+The RegisterPlugin method examines the call stack so that it knows which event to register. In a real implementation this would probably insert or update some record in a database somewhere so the application knows about it. Note that this should happen when the application is starting up or sometime before the user can start using the plugin. Otherwise there is no point to having access control. 
+
+public void OnMessageReceived()
+{
+    EventHandler messageEvent = this.messageReceived;
+    if(messageEvent != null)
+    {
+        Delegate[] delegates = messageEvent.GetInvocationList();
+        foreach(Delegate del in delegates)
+        {
+            if (EnabledForEvent(del.Method.DeclaringType, 
+                "MessageReceived"))
+            {
+                del.DynamicInvoke(this, EventArgs.Empty);
+            }
+        }
+    }
+}Now, when we invoke the event handler, instead of simply invoking the event, we examine the delegate chain (depending on how we store the event handlers) and dynamically invoke only the event handlers that we allow. How is that for granular control? 
+
+In this approach, the implementation for the application host is a bit more complicated, but that complexity is totally hidden from the plugin developer, as it should be. 
+
+
+===================================================================================================
+
+
+Share this Post: email it bookmark It digg It kick It Comments on this post
+# re: Resilient Plugins Part Deux - Granular Control
+Left by Joe Brinkman at 7/1/2006 1:36 PM
+Phil,
+I tried posting to your earlier blog, but a RSS Reader problem trashed my post so I will try again here.
+
+Often when people talk about interface based programming (whether they are talking about interfaces or abstract classes is immaterial) they focus on the syntactic nature of the interface and tend to ignore the semantic nature which is not as well defined. 
+
+In your previous blog, you talked about replacing the use of interfaces to define extensibility points and instead use an event based approach. Unfortunately, this approach only addresses part of benefit provided by interfaces (both Interfaces and abstract classes), and that is that an interface not only defines individual methods, properties and events, it also defines a "group" of these constructs. 
+
+Quite often, when building plugin frameworks with an interface, I expect a plugin to provide several properties, methods or events to properly function. Seldom do I write an interface that is "choose one of the above" from a list of methods. Often I need the plugin to implement all, or most of the defined interface in order to properly function.
+
+With an interface I can group methods and it becomes very clear to the programmer that he is expected to "do something" with each defined portion of the interface. A developer must take specific action to "do nothing" with a method by at least implementing a stub. This is enforced by the compiler and aids the developer.
+
+With an event based approach, this feature is lost. Any required dependencies between events is lost or must be recreated by the plugin framework. In addition, if implemented by the framework, it becomes a runtime check instead of a design-time/compile-time check which is less developer friendly.
+
+While I like the event based approach, I think it is wise to tread lightly and not be so quick to dismiss an interface based plugin architecture. Personally, I think both have their uses and depending on the nature of the extension, one may be a better fit than the other. 
+
+# re: Resilient Plugins Part Deux - Granular Control
+Left by Haacked at 7/1/2006 2:46 PM
+Good points Joe.
+
+As you pointed out, when implementing a plugin, an interface is a guide to the developer on what actions need to take place. Of course, even implementing every interface member doesn't guarantee it is done correctly as we cannot (in C# anyways) specify a contract and invariants on an interface. As you pointed out, a developer could stub out a stub method.
+
+With an event based approach, the only guidance a developer is given is that the event handler receives a parameter of a type that inherits EventArgs. This can also be a cohesive *interface*, but rather than implementing it, the plugin makes use of it to get its job done.
+
+By examining that type, they will get some semblance of what they are supposed to do with it in order to extend functionality.
+
+I think this works especially well when a plugin extends functionality and may be less suited for when it replaces functionality. In the latter case I may be more inclined to use a provider model. 
+# re: Resilient Plugins Part Deux - Granular Control
+Left by davidacoder at 7/2/2006 4:25 PM
+There was a presentation by Miller at PDC2005 that was excellent on add in architecturing and how you can deal with versioning there. The sessions are not online anymore, but I found the ppt here: 
+
+http://blog.blanar.net/files/FUN309_Miller.ppt
+
+Have a look, I think this applies to this problem. 
+# re: Resilient Plugins Part Deux - Granular Control
+Left by davidacoder at 7/3/2006 4:04 AM
+I looked around a bit more and found this blog on the System add-in work Microsoft is doing:
+
+http://msdn.technetweb3.orcsweb.com/jackg/default.aspx
+
+Essentially they have a solution for managed add-ins that solves most of the difficult versioning, security, isolation etc problems. It ships with VSTA and will also be part of Orcas. You should certainly check this out if you are thinking about plug-ins! 

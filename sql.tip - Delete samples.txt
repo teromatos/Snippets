@@ -1,0 +1,22 @@
+/* SQL-92-Standard subquery */
+USE pubs
+DELETE FROM titleauthor
+WHERE title_id IN 
+   (SELECT title_id 
+   FROM titles
+   WHERE title LIKE '%computers%')
+
+/* Transact-SQL extension */
+USE pubs
+DELETE titleauthor
+FROM titleauthor INNER JOIN titles 
+   ON titleauthor.title_id = titles.title_id
+WHERE titles.title LIKE '%computers%'
+
+E. Use DELETE and a SELECT with the TOP Clause
+Because a SELECT statement can be specified in a DELETE statement, the TOP clause can also be used within the SELECT statement. For example, this example deletes the top 10 authors from the authors table.
+
+DELETE authors 
+FROM (SELECT TOP 10 * FROM authors) AS t1
+WHERE authors.au_id = t1.au_id
+

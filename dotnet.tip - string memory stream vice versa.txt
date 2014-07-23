@@ -1,0 +1,23 @@
+===========================
+String to MemoryStream (C#) 
+===========================
+
+string testString = "Hello World";
+MemoryStream myStream = new MemoryStream(Encoding.UTF8.GetBytes(testString));
+
+
+=====================
+Stream to String (C#) 
+=====================
+
+string testString;
+testString = new StreamReader(someStream).ReadToEnd();
+
+
+or
+
+
+string testString;
+using (StreamReader reader = new StreamReader(someStream)) {
+testString = reader.ReadToEnd();
+}

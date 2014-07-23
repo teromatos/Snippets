@@ -1,0 +1,19 @@
+<Script language="JavaScript"> 
+<!-- begin hide 
+
+function goElseWhere() 
+{ 
+
+var oldURL = window.location.hostname + window.location.pathname; 
+
+
+var newURL = "https://" + oldURL; 
+
+
+window.location = newURL; 
+
+} 
+goElseWhere(); 
+
+// end hide --> 
+</script> 

@@ -1,0 +1,48 @@
+This is the algorithm we use to get a scaled images' size, while preserving its aspect. If we want an image that's inside say a 16x16 box, we'd pass in:
+
+Size newSize = GetAspect( image.Size, new Size( 16, 16 ) );
+
+If the image is 30x40, the newsize will come back as 12x16.
+
+
+
+/// <summary>
+/// Get's the largest size which will fit inside newSize, 
+/// while preserving the aspect ration of currentSize
+/// </summary>
+/// <param name="currentSize">The size whose aspect must 
+/// be preserved</param>
+/// <param name="newSize">The maximum bounds of the result. 
+/// negative numbers represent unbounded dimension
+/// convenient for creating fixed width or fixed height 
+/// images with a scaling second dimension</param>
+/// <returns>the appropriate size</returns>
+public static Size GetAspect( Size currentSize, Size newSize )
+{
+   if( newSize.Width < 0 && newSize.Height < 0 )
+   {
+      // Well, not quite unbounded 
+      return currentSize;
+   }
+   float aspect = (float)currentSize.Width / (float)currentSize.Height;
+   if( ( (float)newSize.Width / aspect > (float)newSize.Height && 
+      newSize.Height >= 0 ) || 
+      newSize.Width < 0 )
+   {
+      newSize.Width = (int)Math.Round( (float)newSize.Height * aspect );
+   }
+   else
+   {
+      newSize.Height = (int)Math.Round( (float)newSize.Width / aspect );
+   }
+   return new Size( NewWidth, NewHeight );
+}
+
+
+Hope this helps. 
+
+PS... The interpolation used in GetThumbnailImage isn't exactly stellar. We draw the image onto a graphics object using InterpolationMode.HighQualityBiCubic. 
+
+PPS... I know people have complained about the resizing that we do, but actually it's a CSS problem, the CSS is stretching the image by about 4 pixels and it looks like crap, I'll fix that sometime soon.
+
+-Bryn

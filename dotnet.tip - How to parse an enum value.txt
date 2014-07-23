@@ -1,0 +1,11 @@
+    Private Function GetSpecialFolder(ByVal enumName As String) As Environment.SpecialFolder
+        If enumName Is Nothing OrElse enumName.Length = 0 Then Return Nothing
+
+        Dim o As Object
+        Dim sp As Environment.SpecialFolder
+
+        o = System.Enum.Parse(GetType(Environment.SpecialFolder), enumName)
+        sp = CType(o, Environment.SpecialFolder)
+
+        Return sp
+    End Function
