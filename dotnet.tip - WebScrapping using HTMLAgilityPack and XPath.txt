@@ -1,0 +1,34 @@
+URL: http://stackoverflow.com/questions/15826875/html-agility-pack-using-xpath-to-get-a-single-node-object-reference-not-set
+
+This is my first attempt to get an element value using HAP. I'm getting a null object error when I try to use InnerText.
+the URL I am scraping is :- http://www.mypivots.com/dailynotes/symbol/659/-1/e-mini-sp500-june-2013 I am trying to get the value for current high from the Day Change Summary Table.
+My code is at the bottom. Firstly, I would just like to know if I am going about this the right way? If so, then is it simply that my XPath value is incorrect?
+the XPath value was obtained using a utility I found called htmlagility helper. The firebug version of the XPath below, also gives the same error :- /html/body/div[3]/div/table/tbody/tr[3]/td/table/tbody/tr[5]/td[3]
+
+My code :-
+
+WebClient myPivotsWC = new WebClient();
+string nodeValue;
+string htmlCode = myPivotsWC.DownloadString("http://www.mypivots.com/dailynotes/symbol/659/-1/e-mini-sp500-june-2013");
+HtmlAgilityPack.HtmlDocument doc = new HtmlAgilityPack.HtmlDocument();
+doc.LoadHtml(htmlCode);
+HtmlNode node = doc.DocumentNode.SelectSingleNode("/html[1]/body[1]/div[3]/div[1]/table[1]/tbody[1]/tr[3]/td[1]/table[1]/tbody[1]/tr[5]/td[3]");
+nodeValue=(node.InnerText);
+
+
+--------------------------------------------------------
+Good way to do it
+
+You can't rely on a developper tools such as FireBug or Chrome, etc... to determine the XPATH for the nodes you're after, as the XPATH given by such tools correspond to the in memory HTML DOM while the Html Agility Pack only knows about the raw HTML sent back by the server.
+What you need to do is look visually at what's sent back (or just do a view source). You'll see there is no TBODY element for example. So you want to find anything discriminant, and use XPATH axes for example. Also, your XPATH, even if it worked, would not be very resistant to changes in the document, so you need to find something more "stable" for the scraping to be more future-proof.
+
+Here is a code that seems to work:
+
+HtmlNode node = doc.DocumentNode.SelectSingleNode("//td[@class='dnTableCell']//a[text()='High']/../../td[3]");
+
+This is what it does:
+
+find a TD element with a CLASS attribute set to 'dnTableCell'. The // token means the search is recursive in the XML hierarchy.
+find an A element that contains a text (inner text) equals to 'High'.
+navigate two parents up (we'll get to the closest TR element)
+select the 3rd TD element from there

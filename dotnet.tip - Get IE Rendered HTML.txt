@@ -1,0 +1,11 @@
+URL: http://stackoverflow.com/questions/15826875/html-agility-pack-using-xpath-to-get-a-single-node-object-reference-not-set
+
+like Simon Mourier explaind, you obtained the raw HTML sent by the server. The element which you need has not been rendered yet therefor you can't retrieve it yet because it does not exist in the DOM. a simple work around to this problem is to use a web renderer to build the DOM, than you can grab the HTML and scrape it. I use WatiN like this:
+
+WatiN.Core.Settings.MakeNewInstanceVisible = false;
+WatiN.Core.Settings.AutoMoveMousePointerToTopLeft = false; 
+IE ie = new IE();
+ie.GoTo(urlLink); 
+ie.WaitForComplete();
+string html = ie.Html;
+ie.close();
