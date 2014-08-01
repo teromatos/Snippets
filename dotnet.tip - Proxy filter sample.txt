@@ -1,0 +1,101 @@
+//You can start out with a proxy server when the kids are less than about 10 years old. After that, they will figure out how to get around the proxy (or run their own client applications that bypass the proxy). In the early teen years, you can use raw sockets. Type this program into Visual Studio (C#).
+
+//class Program
+//{
+//    static void Main(string[] args)
+//    {
+//        try
+//        {
+//            byte[] input = BitConverter.GetBytes(1);
+//            byte[] buffer = new byte[4096];
+//            Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
+//            s.Bind(new IPEndPoint(IPAddress.Parse("192.168.1.91"), 0));
+//            s.IOControl(IOControlCode.ReceiveAll, input, null);
+
+//            int bytes = 0;
+//            do
+//            {
+//                bytes = s.Receive(buffer);
+//                if (bytes > 0)
+//                {
+//                    Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, bytes));
+//                }
+//            } while (bytes > 0);
+//        }
+//        catch (Exception ex)
+//        {
+//            Console.WriteLine(ex);
+//        }
+//    }
+//}
+
+//Note that this is just a “snippet”, lacking appropriate design and error checking. [Please do not use 'as-is' - you did request just a head start] Change the IP address to your machine. Run the program AS Administrator (use “runas” on the command line, or right-click “Run as Administrator”). Only administrators can create and use raw sockets on modern versions of windows. Sit back and watch the show.
+
+//All network traffic is delivered to your code (displayed on the screen, which will not look nice, with this program).
+
+//Your next step is to create some protocol filters. Learn about the various internet application protocols (assuming you don't already know), modify the program to examine the packets. Look for HTTP protocol, and save the appropriate data (like GET requests).
+
+//I personally have setup filters for AIM (AOL Instant Messenger), HTTP, MSN messenger (Windows Live Messenger), POP, and SMTP. Today, HTTP gets just about everything since the kids prefer the facebook wall to AIM nowadays.
+
+//As the kids reach their early-to-mid teenage years, you will want to back-off on the monitoring. Some say this is to enable the kids to “grow up”, but the real reason is that “you don’t wanna know”. I backed off to just collecting URLs of get requests, and username/passwords (for emergency situations) that are in clear text (pop, basic auth, etc.).
+
+//I don't know what happens in late teen years; I cannot image things getting much worse, but I am told that "I have not seen anything yet".
+
+//Like someone earlier said, this only works when run on the target machine (I run a copy on all of the machines in the house). Otherwise, for simple monitoring check your router - mine has some nice logging features.
+
+//My final comment is that this application should be written in C/C++ against the Win32 API directly, and installed as a service running with administrative rights on the machine. I don't think this type of code is appropriate for managed c#. You can attach a UI in C# for monitoring and control. You have to engineer the code so as to have zero noticeable effect on the system.
+//share|edit
+
+//edited May 16 '10 at 17:09
+//abatishchev
+//42.5k38148280
+
+//answered Jun 9 '09 at 1:39
+//Bill
+//1,26121222
+
+
+
+//You shouldn't use Console.WriteLine(ex); - it ha no sense. Either ex.Message (or something like that) or don't use try-catch block at all. Exception's message will be written to the output automatically. –  abatishchev May 16 '10 at 17:11
+
+
+//Create a secure ssh-tunnel with Proxifier Portable and Putty to an external proxy and all that work has been in vain :P Nevertheless +1 as I found this answer very interesting and this will make a nice start for a new project of mine. –  Sascha Hennig Oct 7 '11 at 12:52 
+
+using System;
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+
+namespace LaunchUrls
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            try
+            {
+                byte[] input = BitConverter.GetBytes(1);
+                byte[] buffer = new byte[4096];
+                Socket s = new Socket(AddressFamily.InterNetwork, SocketType.Raw, ProtocolType.IP);
+                s.Bind(new IPEndPoint(IPAddress.Parse("10.20.20.101"), 0));
+                s.IOControl(IOControlCode.ReceiveAll, input, null);
+
+                int bytes = 0;
+                do
+                {
+                    bytes = s.Receive(buffer);
+                    if (bytes > 0)
+                    {
+                        Console.WriteLine(Encoding.ASCII.GetString(buffer, 0, bytes));
+                    }
+                } while (bytes > 0);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
+
+            Console.ReadLine();
+        }
+    }
+}

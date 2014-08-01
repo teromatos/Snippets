@@ -1,0 +1,57 @@
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using Microsoft.Win32;
+
+namespace LaunchUrls
+{
+    
+    class Program
+    {        
+        static void Main(string[] args)
+        {
+            var urls = new List<string>();
+            urls.Add(@"http://www.google.com");
+            urls.Add(@"http://www.apple.com");
+
+            LaunchUrls(urls);
+
+            Console.ReadLine();
+        }
+
+        public static void LaunchUrls(List<string> urls)
+        {
+
+            object browserPath;
+            browserPath = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\chrome.exe", "", null);
+            browserPath = Registry.GetValue(@"HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\App Paths\iexplore.exe", "", null);
+            browserPath = Registry.GetValue(@"HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\App Paths\firefox.exe", "", null);
+            var browserExe = (string)browserPath;
+
+            Console.WriteLine("Broswer: {0}", Path.GetFileNameWithoutExtension(browserExe));
+            Console.WriteLine();
+
+            for (int i = 0; i < urls.Count; i++)
+            {
+                var url = urls[i];
+                Console.WriteLine("Processing: {0}\\{1}\nUrl: {2}\n", i + 1, urls.Count, url);
+                try
+                {
+                    using (var p = new Process())
+                    {
+                        p.StartInfo.FileName = browserExe;
+                        p.StartInfo.Arguments = url;
+                        p.Start();
+                        p.WaitForExit();
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine("Exception occurred:");
+                    Console.WriteLine(ex.Message);
+                }
+            }
+        }
+    }
+}

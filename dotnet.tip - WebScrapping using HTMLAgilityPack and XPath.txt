@@ -32,3 +32,9 @@ find a TD element with a CLASS attribute set to 'dnTableCell'. The // token mean
 find an A element that contains a text (inner text) equals to 'High'.
 navigate two parents up (we'll get to the closest TR element)
 select the 3rd TD element from there
+
+
+--------------------------------------------------------
+
+            //var rootNodes = doc.DocumentNode.SelectNodes("//note-attributes//source-url") ?? doc.DocumentNode.SelectNodes("//note-attributes//source");
+            //var rootNodes = doc.DocumentNode.SelectNodes("//a[@href]");
