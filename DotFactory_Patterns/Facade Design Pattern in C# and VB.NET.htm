@@ -1,0 +1,736 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>
+	Facade Design Pattern in C# and VB.NET.
+</title><meta name="copyright" content="Copyright © dofactory.com. All rights reserved."><link rel="stylesheet" href="media/do.css">
+    <script type="text/javascript" src="media/do.js"></script>
+    
+<link rel="shortcut icon" type="image/x-icon" href="http://www.dofactory.com/favicon.ico"><link rel="canonical" href="http://www.dofactory.com/Patterns/PatternFacade.aspx"><meta name="keywords" content="Facade Design Pattern, Object Oriented Design, Microsoft .NET, ASP.NET, C#, VB.Net, Java, UML"><meta name="description" content="Facade Design Pattern C# and VB.NET. Beyond OO Design and Development. Valuable source code and UML"></head>
+<body id="dofactory-com">
+  <div id="container">
+    <form method="post" action="PatternFacade.aspx" id="form1">
+<div class="aspNetHidden">
+<input name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJMjEwMDEyNjAyZGRoOKXavpmt4ulKRDhLl/BMkRRTkQ==" type="hidden">
+</div>
+
+    
+    
+        
+    <div id="header">
+        <div id="logo">
+           <a id="HyperLinkLogo" href="http://www.dofactory.com/Default.aspx" style="display:inline-block;height:85px;width:85px;"><img src="media/logotm.gif" alt=""></a>
+        </div>
+        
+        <div id="userbox">
+          
+
+<table border="0" cellpadding="0" cellspacing="0" width="224">
+  <tbody><tr>
+   <td style="height:24px; vertical-align:middle; text-align:center">
+   <a class="user-link" href="http://www.dofactory.com/join.aspx">Join Now</a></td>
+   <td style="height:24px;"><font color="#aaaaaa">|</font></td>
+   <td style="height:24px; vertical-align:middle; text-align:center"><a class="user-link" href="http://www.dofactory.com/login.aspx">Login</a></td>
+  </tr>
+</tbody></table>
+
+
+
+        </div>
+    </div>
+    
+    
+        
+    <table border="0" cellpadding="0" cellspacing="0">
+     <tbody><tr>
+      
+      <td align="left" valign="top" width="240">
+        
+        <div id="TheMenu">
+	<div id="menuhead"></div>  <div id="menu"><div class="menuitem"><a href="http://www.dofactory.com/Default.aspx">home</a></div><div class="menuitem"><a href="http://www.dofactory.com/login.aspx">login</a></div><div class="menuitem"><a href="http://www.dofactory.com/join.aspx">join now</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-products.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/Framework/Framework.aspx">.NET pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/pro-net-design-patterns.aspx">PRO .NET pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/javascript-jquery-patterns.aspx">javascript + jquery patterns</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/database-design-patterns.aspx">database pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/products/products.aspx">products and pricing</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-reference.jpg" alt="" height="13"></div><div class="menuitemactive"><a href="http://www.dofactory.com/Patterns/Patterns.aspx" class="active">.NET design patterns</a></div><div class="menuitem"><a href="http://www.dofactory.com/javascript-patterns.aspx">javascript design patterns</a></div><div style="border-bottom:solid 1px #bbb;height:5px;margin:0 30px 2px 30px;"></div><div class="menuitem"><a href="http://www.dofactory.com/tutorial/javascript.aspx">javascript tutorial</a></div><div class="menuitem"><a href="http://www.dofactory.com/tutorial/sql-and-database.aspx">sql + database tutorial</a></div><div style="border-bottom:solid 1px #bbb;height:5px;margin:0 30px 2px 30px;"></div><div class="menuitem"><a href="http://www.dofactory.com/Connect/Connect.aspx">connection strings</a></div><div class="menuitem"><a href="http://www.dofactory.com/ShortCutKeys/ShortCutKeys.aspx">visual studio shortcuts</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/csharp-coding-standards.aspx">c# coding standards</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/html-color-codes.aspx">html color codes</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/reference.aspx">all references</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-community.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/topic/search.aspx">explore</a></div><div class="menuitem"><a href="http://www.dofactory.com/topic/topics.aspx">questions</a></div><div class="menuitem"><a href="http://www.dofactory.com/topic/add.aspx">ask question</a></div><div class="menuitem"><a href="http://www.dofactory.com/tag/tags.aspx">tags</a></div><div class="menuitem"><a href="http://www.dofactory.com/user/users.aspx">users</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-company.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/Contact/Contact.aspx">contact us</a></div><div class="menuitem"><a href="http://www.dofactory.com/Courses/Courses.aspx">training courses</a></div><div class="menuitem"><a href="http://www.dofactory.com/Schedule/Schedule.aspx">schedule</a></div><div class="menuitem"><a href="http://www.dofactory.com/About/About.aspx">about us</a></div><div class="menudivider"></div><div class="menudivider"></div></div><div id="training">training and education for professional developers</div>
+</div>
+        
+        <div id="menuoverlay">
+          
+
+<div style="padding-left:3px;">
+  <a class="menuitem-overlay" href="http://www.dofactory.com/login.aspx">login</a>
+</div>
+<div style="padding-left:3px;">
+  <a class="menuitem-overlay" href="http://www.dofactory.com/join.aspx">join now</a>
+</div>
+
+        </div>
+      </td>
+      
+      
+      <td align="left" valign="top" width="820">
+       
+         
+         <div id="subheader-wide">
+           <div id="TheBanner">
+	<div id="banner"><div class="dash-wide"></div><div class="ban"><div class="banleft"></div></div></div>
+</div>
+         </div>
+               
+         <div id="content-xwide">
+           
+
+<div id="ContentPlaceHolder1_Crumbs" class="breadcrumb">
+	<div class="crumbs-all"><a class="breadcrumb" href="http://www.dofactory.com/Default.aspx">Home</a>&nbsp;&nbsp;<img src="media/more.gif">&nbsp;&nbsp;<a class="breadcrumb" href="http://www.dofactory.com/Patterns/Patterns.aspx">.NET Design Patterns</a>&nbsp;&nbsp;<img src="media/more.gif">&nbsp;&nbsp;<span class="lastcrumb">Facade</span></div>
+</div>
+
+<table id="contentTable" border="0" cellpadding="0" cellspacing="0">
+
+
+<tbody><tr>
+
+<td id="contentMain" valign="top" width="595">
+
+
+
+
+
+
+
+
+
+  <h1>Facade <span class="dp">Design Pattern</span></h1>
+ 
+  
+
+	
+
+	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tbody><tr>
+  		<td style="PADDING-LEFT: 20px" valign="top" width="160">
+				<img id="ContentPlaceHolder1_Image1" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#intent" class="alwayson1">definition</a><br>
+				<img id="ContentPlaceHolder1_Image2" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#UML" class="alwayson1">UML diagram</a><br>
+				<img id="ContentPlaceHolder1_Image3" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#participants" class="alwayson1">participants</a><br>
+			</td>
+  		<td align="left" valign="top" width="300">
+	  		<img id="ContentPlaceHolder1_Image4" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#csharp" class="alwayson1">sample code in C#</a><br><br>
+	  		
+		  </td>
+	  </tr>
+  </tbody></table>
+			    
+  <br>
+  <div class="dash-wide"></div>
+	<br>
+
+  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tbody><tr>
+	  	<td>
+	  	  <a name="intent"></a>
+	  	  <h3 id="definition-scroll">definition</h3>
+						
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+					<tbody><tr>
+						<td width="1"><img id="ContentPlaceHolder1_Image6" src="media/pixel.gif" style="border-width:0px;height:1px;width:1px;"></td>
+						<td>
+               
+    Provide a unified interface to a set of interfaces in a subsystem. Façade
+    defines a higher-level interface that makes the subsystem easier to use.
+  
+               <br><br>
+			    		Frequency of use: <img src="media/use_high.gif" style="border-width:0px;height:20px;width:101px;">&nbsp;&nbsp;high
+            </td>
+					</tr>
+        </tbody></table>
+        
+		  </td>
+      <td align="right" width="95"><img id="ContentPlaceHolder1_Image53" src="media/552092_4.jpg" style="border-width:0px;height:75px;width:75px;"></td>
+	  </tr>
+	</tbody></table>
+<br>
+  <div id="ContentPlaceHolder1_Totop1">
+	<div class="totop"><p class="returntotop"><a name="UML"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-wide"></div></div>
+</div>
+	
+    <h3 id="uml-scroll">UML class diagram</h3>
+	<br>	
+   <div style="padding-left:20px;">
+	<img src="media/facade.gif" border="0">
+   </div>		
+   
+  <div id="ContentPlaceHolder1_Totop2">
+	<div class="totop"><p class="returntotop"><a name="participants"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-wide"></div></div>
+</div>
+
+  <h3 id="participants-scroll">participants</h3>
+	<p>
+	&nbsp;&nbsp;&nbsp;&nbsp;The classes and/or objects participating in this pattern are:
+  </p>
+
+	
+						<ul>
+					<li><font color="#aa0000"><b>Facade </b></font>
+					&nbsp;&nbsp;<font color="#007733"><b>(MortgageApplication)</b></font>
+
+					<ul>
+					<li>knows which subsystem classes are responsible for a request. 
+					</li><li>delegates client requests to appropriate subsystem objects. </li></ul>
+					</li><li><font color="#aa0000"><b>Subsystem classes </b> </font>
+					&nbsp;&nbsp;<font color="#007733"><b>(Bank, Credit, Loan)</b></font>
+
+					<ul>
+					<li>implement subsystem functionality. 
+					</li><li>handle work assigned by the Facade object. 
+					</li><li>have no knowledge of the facade and keep no reference to it. 
+					</li></ul></li></ul>
+        
+		
+  <div id="ContentPlaceHolder1_Totop4">
+	<div class="totop"><p class="returntotop"><a name="csharp"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-wide"></div></div>
+</div>
+
+  <h3 id="csharp-scroll">sample code in C#</h3>
+
+	<p>
+	
+		This <font color="#bb0000">structural</font> code demonstrates the Facade pattern which provides a simplified 
+		and uniform interface to a large subsystem of classes.
+        
+  </p>
+
+
+
+
+   <a href="#_self1" id="xStructure" onclick="ShowHide('Structure');"><font color="#aa0000" face="Arial,helvetica" size="2"><b><u>Show code</u></b></font></a>
+   <br><br>
+
+    <table border="0" cellpadding="0" cellspacing="0" bgcolor="#fffaef" width="100%">
+     <tbody><tr>
+      <td>
+       <div class="sourcecode"><font color="green">
+        // Facade pattern -- Structural example      
+       </font>
+      </div>
+      </td>        
+     </tr>
+
+    </tbody><tbody id="Structure" style="DISPLAY:none">
+
+    <tr>
+     <td>
+      <div class="sourcecode"><br>
+       
+<div class="divsource">
+<p style="margin: 0px;"><span style="color: blue;">using</span> System;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;"><span style="color: blue;">namespace</span> DoFactory.GangOfFour.Facade.Structural</p>
+<p style="margin: 0px;">{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> MainApp startup class for Structural</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Facade Design Pattern.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">MainApp</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Entry point into console application.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">static</span> <span style="color: blue;">void</span> Main()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Facade</span> facade = <span style="color: blue;">new</span> <span style="color: #2b91af;">Facade</span>();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;facade.MethodA();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;facade.MethodB();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Wait for user</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.ReadKey();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassA' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">SubSystemOne</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> MethodOne()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">" SubSystemOne Method"</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassB' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">SubSystemTwo</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> MethodTwo()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">" SubSystemTwo Method"</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassC' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">SubSystemThree</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> MethodThree()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">" SubSystemThree Method"</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassD' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">SubSystemFour</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> MethodFour()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">" SubSystemFour Method"</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Facade' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Facade</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">SubSystemOne</span> _one;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">SubSystemTwo</span> _two;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">SubSystemThree</span> _three;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">SubSystemFour</span> _four;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> Facade()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_one = <span style="color: blue;">new</span> <span style="color: #2b91af;">SubSystemOne</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_two = <span style="color: blue;">new</span> <span style="color: #2b91af;">SubSystemTwo</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_three = <span style="color: blue;">new</span> <span style="color: #2b91af;">SubSystemThree</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_four = <span style="color: blue;">new</span> <span style="color: #2b91af;">SubSystemFour</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> MethodA()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"\nMethodA() ---- "</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_one.MethodOne();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_two.MethodTwo();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_four.MethodFour();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> MethodB()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"\nMethodB() ---- "</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_two.MethodTwo();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_three.MethodThree();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">}</p>
+</div>
+        
+      </div>
+    </td>
+   </tr>
+   <tr>
+    <td bgcolor="white">
+     <br>
+      <font face="arial, helvetica" size="2">Output</font> 
+       <div class="output">
+        
+MethodA() ----<br>
+SubSystemOne Method<br>
+SubSystemTwo Method<br>
+SubSystemFour Method<br>
+<br>
+MethodB() ----<br>
+SubSystemTwo Method<br>
+SubSystemThree Method<br>
+        
+       </div>
+     </td>
+    </tr>
+  </tbody>
+  
+ </table>
+
+   <br>
+   <br>            
+   <hr size="1" width="100%">
+   <br>
+   <p>  
+   
+This <font color="#00aa55">real-world</font> code demonstrates the Facade pattern as a MortgageApplication 
+object which provides a simplified interface to a large subsystem of classes
+measuring the creditworthyness of an applicant.                  
+   </p>
+   
+   <a href="#_self2" id="xRealWorld" onclick="ShowHide('RealWorld');"> 
+   <font color="#007733" face="Arial,helvetica" size="2"><b><u>Show code</u></b></font></a>   <br><br>
+
+   <table border="0" cellpadding="0" cellspacing="0" bgcolor="#fffaef" width="100%">
+    <tbody><tr>
+     <td>
+     <div class="sourcecode"><font color="green">
+     // Facade pattern -- Real World example
+     </font></div>
+     </td>        
+    </tr>
+
+   </tbody><tbody id="RealWorld" style="DISPLAY:none">
+    <tr>
+     <td>
+      <div class="sourcecode">
+		    <br>
+		    
+<div class="divsource">
+<p style="margin: 0px;"><span style="color: blue;">using</span> System;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;"><span style="color: blue;">namespace</span> DoFactory.GangOfFour.Facade.RealWorld</p>
+<p style="margin: 0px;">{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> MainApp startup class for Real-World </span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Facade Design Pattern.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">MainApp</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Entry point into console application.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">static</span> <span style="color: blue;">void</span> Main()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Facade</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Mortgage</span> mortgage = <span style="color: blue;">new</span> <span style="color: #2b91af;">Mortgage</span>();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Evaluate mortgage eligibility for customer</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Customer</span> customer = <span style="color: blue;">new</span> <span style="color: #2b91af;">Customer</span>(<span style="color: #a31515;">"Ann McKinsey"</span>);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">bool</span> eligible = mortgage.IsEligible(customer, 125000);</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"\n"</span> + customer.Name +</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #a31515;">" has been "</span> + (eligible ? <span style="color: #a31515;">"Approved"</span> : <span style="color: #a31515;">"Rejected"</span>));</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Wait for user</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.ReadKey();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassA' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Bank</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">bool</span> HasSufficientSavings(<span style="color: #2b91af;">Customer</span> c, <span style="color: blue;">int</span> amount)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"Check bank for "</span> + c.Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">true</span>;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassB' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Credit</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">bool</span> HasGoodCredit(<span style="color: #2b91af;">Customer</span> c)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"Check credit for "</span> + c.Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">true</span>;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Subsystem ClassC' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Loan</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">bool</span> HasNoBadLoans(<span style="color: #2b91af;">Customer</span> c)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"Check loans for "</span> + c.Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">true</span>;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Customer class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Customer</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: blue;">string</span> _name;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Constructor</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> Customer(<span style="color: blue;">string</span> name)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">this</span>._name = name;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Gets the name</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">string</span> Name</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">get</span> { <span style="color: blue;">return</span> _name; }</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Facade' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Mortgage</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">Bank</span> _bank = <span style="color: blue;">new</span> <span style="color: #2b91af;">Bank</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">Loan</span> _loan = <span style="color: blue;">new</span> <span style="color: #2b91af;">Loan</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">Credit</span> _credit = <span style="color: blue;">new</span> <span style="color: #2b91af;">Credit</span>();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">bool</span> IsEligible(<span style="color: #2b91af;">Customer</span> cust, <span style="color: blue;">int</span> amount)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: #a31515;">"{0} applies for {1:C} loan\n"</span>,</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;cust.Name, amount);</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">bool</span> eligible = <span style="color: blue;">true</span>;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Check creditworthyness of applicant</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">if</span> (!_bank.HasSufficientSavings(cust, amount))</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eligible = <span style="color: blue;">false</span>;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">else</span> <span style="color: blue;">if</span> (!_loan.HasNoBadLoans(cust))</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eligible = <span style="color: blue;">false</span>;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">else</span> <span style="color: blue;">if</span> (!_credit.HasGoodCredit(cust))</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;eligible = <span style="color: blue;">false</span>;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> eligible;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">}</p>
+</div>
+
+        
+		  </div>
+     </td>
+    </tr>
+    <tr>
+     <td bgcolor="white"><br>
+       <font face="arial, helvetica" size="2">Output</font><br>
+        <div class="output">
+         
+Ann McKinsey applies for $125,000.00 loan<br>
+<br>
+Check bank for Ann McKinsey<br>
+Check loans for Ann McKinsey<br>
+Check credit for Ann McKinsey<br>
+<br>
+Ann McKinsey has been Approved<br>
+         
+       </div>
+     </td>
+    </tr>
+
+   </tbody>
+   </table>
+
+   <br>
+   <br>            
+   <hr size="1" width="100%">
+   <br>
+   <p>            
+    
+     This <font color="#0044aa">.NET optimized</font> code demonstrates the 
+     same real-world situation as above but uses modern, built-in .NET features,
+     such as, generics, reflection, object initializers, automatic properties, etc.
+        
+   </p>
+
+   <a href="#_self1" id="xNetOptimized" onclick="ShowHide('NetOptimized');">
+   <font color="#0044aa" face="Arial,helvetica" size="2"><b><u>Show code</u></b></font></a>
+   <br><br>
+
+    <table border="0" cellpadding="0" cellspacing="0" bgcolor="#fffaef" width="100%">
+     <tbody><tr>
+      <td>
+       <div class="sourcecode"><font color="green">
+        // Facade pattern -- .NET optimized      
+        </font>
+       </div>
+      </td>        
+     </tr>
+    
+    </tbody><tbody id="NetOptimized" style="DISPLAY:none">
+   
+     <tr>
+      <td>
+        <div class="sourcecode">
+         <br>
+           <table style="border: 1px dotted #000;" border="0" cellpadding="0" cellspacing="0" bgcolor="white" width="560">  <tbody><tr>   <td align="left" valign="middle" width="240">    <br><a href="http://www.dofactory.com/Framework/Framework.aspx">    <img src="media/2boxes45medium.jpg" style="padding-left:20px;" border="0" height="158" width="210"></a><br>    &nbsp;&nbsp;&nbsp;<a href="http://www.dofactory.com/Framework/Framework.aspx"><font color="#191970"><b>Two editions: C# and VB.NET</b></font></a><br>   </td><td width="16">&nbsp;</td>   <td valign="top" width="314"><br>The .NET optimized code is part of our<br>    <a href="http://www.dofactory.com/Framework/Framework.aspx" class="alwaysonb">Design Pattern Framework 4.5</a><sup>TM</sup> with:     <br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">69 gang-of-four pattern projects</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">46 head-first pattern projects</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Fowler's enterprise patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Multi-tier patterns </font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Convention over configuration</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Active Record and CQRS patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Repository and Unit-of-Work patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">MVC, MVP, &amp; MVVM patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">REST patterns with Web API</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Spark<sup>TM</sup> Rapid App Dev (RAD) platform!</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Art Shop MVC Reference Application</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">100% pure source code</font><br><br>   <font color="black">Instant download. <a href="http://www.dofactory.com/products/products.aspx" class="alwaysonb">Order now!</a></font><br>   <br>   </td>   </tr> </tbody></table>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font face="arial">See our <a href="http://www.dofactory.com/Patterns/PatternSingleton.aspx" class="alwayson">Singleton</a> page for a <i>.NET optimized</i> code sample.</font><div class="sourcecode"><br></div>
+        </div>
+      </td>
+     </tr>
+     <tr>
+      <td bgcolor="white">
+      
+      </td>
+     </tr>
+    </tbody>
+   </table>
+
+   <br>
+   <br>
+ 
+   <br>
+
+</td>
+<td id="contentRight" align="right" valign="top" width="225">
+
+
+
+
+
+
+
+<div style="margin-left:10px; border-left:1px solid #bbb;">
+
+<table style="width:210px;" border="0" cellpadding="0" cellspacing="0">
+ <tbody><tr>
+  <td style="text-align:center;">
+  <br>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+      <td align="left">
+          <div style="margin:0 0 0 40px;">
+              <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Code&nbsp;<br>
+              <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Career&nbsp;<br>
+              <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Lifestyle&nbsp;<br>
+          </div>
+      </td>
+    </tr>
+  </tbody></table>
+      
+  <br>
+      
+  <br>
+     
+  
+<a href="http://www.dofactory.com/Framework/Framework.aspx" class="alwaysonb">
+      <span style="line-height:17pt; font-size:13pt; text-decoration: none; font-weight:bold;">
+        .NET <br>Design Pattern<br>
+        Framework 4.5
+      </span>
+  </a>
+      
+  <br><br>
+   <a id="ContentPlaceHolder1_FrameworkSmallControl1_HyperLink1" href="http://www.dofactory.com/Framework/Framework.aspx"><img id="ContentPlaceHolder1_FrameworkSmallControl1_ImageBox" src="media/2boxes45small.jpg" style="border-width:0px;height:128px;width:170px;"></a>  
+  &nbsp;<br>
+ 
+
+  <a id="ContentPlaceHolder1_FrameworkSmallControl1_HyperLink2" class="alwaysonb" href="http://www.dofactory.com/Framework/Framework.aspx">
+   <b>C# and VB.NET</b>
+  </a>
+
+  <br><br>
+       <div style="padding: 0 0 0 30px; text-align:left;">
+<br>
+      &nbsp;&nbsp;&nbsp;<span style="font-weight:bold;">Includes:</span>
+        <br>
+        <br>
+        
+           
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Gang of Four Patterns<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Head First Patterns<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Enterprise Patterns<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Multi-Tier Patterns<br><br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Repository Pattern<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Unit-of-Work Pattern<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;CQRS Pattern<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Active Record Pattern<br><br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Model View Controller<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Model View Presenter<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Model View ViewModel<br><br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Spark<sup>TM</sup> RAD Platform<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Art Shop MVC Application<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Much more...
+            </div>
+        
+  <br>
+  <a href="http://www.dofactory.com/framework/framework.aspx" class="alwayson1" style="background-color:#FF4500;color:#ffffff;padding:8px;">Click here for details</a>
+  <br><br>
+  
+
+ <b>-- Instant Access --<br>
+ Instant Download</b><br><br>
+
+               
+ </td>
+ </tr>
+</tbody></table>
+</div>
+<br>
+
+
+
+</td>
+</tr>
+</tbody></table>
+
+<script type="text/javascript">
+    //<![CDATA[
+    function ShowHide(ref) 
+    {
+        var color;
+        if (ref.indexOf('Structure') > -1) color = 'aa0000';
+        if (ref.indexOf('RealWorld') > -1) color = '007733';
+        if (ref.indexOf('NetOptimized') > -1) color = '0044aa';
+
+        var structure = document.getElementById(ref);
+        var xstructure = document.getElementById("x" + ref);
+
+        if (structure.style.display == 'none') {
+            xstructure.innerHTML = '<font face="Arial,helvetica" color=' + color + ' size=2><b><u>Hide code</u></b></font>';
+            structure.style.display = '';
+        }
+        else {
+            xstructure.innerHTML = '<font face="Arial,helvetica" color=' + color + ' size=2><b><u>Show code</u></b></font>';
+            structure.style.display = 'none';
+        }
+    } 
+//]]>
+</script>
+
+
+
+
+         </div>
+         
+         <div id="TheToTop">
+	<div class="totop"><p class="returntotop"><a name="home"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-xwide"></div></div>
+</div>
+       
+      </td>
+     </tr>
+    </tbody></table>
+    
+    <div id="TheFooter">
+	<br><table border="0" cellpadding="0" cellspacing="0" width="1000"><tbody><tr><td width="200">&nbsp;</td><td align="center" valign="top" width="800"><div id="footer"><a href="http://www.dofactory.com/Default.aspx">home</a><span>|</span><a href="http://www.dofactory.com/join.aspx">join</a><span>|</span><a href="http://www.dofactory.com/login.aspx">login</a><span>|</span><a href="http://www.dofactory.com/Patterns/Patterns.aspx">.net patterns</a><span>|</span><a href="http://www.dofactory.com/javascript-patterns.aspx">javascript patterns</a><span>|</span><a href="http://www.dofactory.com/Framework/Framework.aspx">.net pattern framework</a><span>|</span><a href="http://www.dofactory.com/framework/javascript-jquery-patterns.aspx">javascript pattern framework</a><span>|</span><a href="http://www.dofactory.com/framework/database-design-patterns.aspx">database pattern framework</a><div align="center"><a href="http://www.dofactory.com/tutorial/javascript.aspx">javascript tutorial</a><span>|</span><a href="http://www.dofactory.com/tutorial/sql-and-database.aspx">sql + database tutorial</a><span>|</span><a href="http://www.dofactory.com/Connect/Connect.aspx">connection strings</a><span>|</span><a href="http://www.dofactory.com/ShortCutKeys/ShortCutKeys.aspx">visual studio shortcuts</a><span>|</span><a href="http://www.dofactory.com/reference/csharp-coding-standards.aspx">C# coding standards</a><span>|</span><a href="http://www.dofactory.com/About/About.aspx">about us</a><hr><div id="copyright">Copyright © 2001 - 2014 Data &amp; Object Factory, LLC. All rights reserved.<br>
+ Data &amp; Object Factory™, dofactory.com™, DoFactory™, Design Pattern 
+Framework™, and the 'slanting do' logo are trademarks of Data &amp; 
+Object Factory, LLC.</div><div id="terms"><a href="http://www.dofactory.com/terms.aspx">terms of service</a><span>&nbsp;|&nbsp;</span><a href="http://www.dofactory.com/licensing.aspx">product licensing</a><span>&nbsp;|&nbsp;</span><a href="http://www.dofactory.com/privacy.aspx">privacy statement</a></div><!-- terms --></div><!-- footer --></div></td></tr></tbody></table>
+</div>
+        
+    </form>
+   </div> <!-- container -->
+ 
+
+  
+   
+    <script type="text/javascript">
+    //<![CDATA[
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    //]]>
+    </script><script src="media/ga.js" type="text/javascript"></script>
+    <script type="text/javascript">
+     //<![CDATA[
+      try {
+        var pageTracker = _gat._getTracker("UA-1223200-3");
+        pageTracker._trackPageview();
+      } catch (err) { }
+    //]]>
+    </script>
+
+  
+
+
+</body></html>

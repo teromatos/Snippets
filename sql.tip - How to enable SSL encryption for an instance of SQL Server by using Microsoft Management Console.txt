@@ -1,0 +1,140 @@
+URL: http://support.microsoft.com/kb/316898
+
+How to enable SSL encryption for an instance of SQL Server by using Microsoft Management Console
+Print Print
+Email Email
+Article translations Article translations
+Article ID: 316898 - View products that this article applies to.
+This article was previously published under Q316898
+Expand all | Collapse all
+Collapse imageOn This Page
+Collapse imageSummary
+This step-by-step article describes how to install a certificate on a computer that is running Microsoft SQL Server by using Microsoft Management Console (MMC) and describes how to enable SSL Encryption at the server, or for specific clients.
+
+Note You cannot use this method to put a certificate on a SQL Server clustered server. For a clustered instance, see the method described under "Enable a certificate for SSL on a SQL Server clustered installation," later in this article. 
+
+If your company has implemented an Enterprise Certificate Authority, you can request certificates for a SQL Server stand-alone server, and then use the certificate for Secure Sockets Layer (SSL) encryption.
+
+You can enable the Force Protocol Encryption option on the server or on the client. 
+
+Note Do not enable the Force Protocol Encryption option on both the client and the server. To enable Force Protocol Encryption on the server, use the Server Network Utility or SQL Server Configuration Manager, depending on the version of SQL Server. To enable Force Protocol Encryption on the client, use the Client Network Utility or SQL Server Configuration Manager.  
+
+Important If you enable SSL encryption by using the Client Network Utility (for SQL Server 2000 clients) or SQL Native Client <version> Configuration (32 bit) or SQL Native Client <version> Configuration pages in SQL Server Configuration Manager, all connections from that client will request SSL encryption to any SQL Server to which that client connects.
+
+If you enable Force Protocol Encryption on the server, you must install a certificate on the server.
+
+If you want to enable Force Protocol Encryption on the client, you must have a certificate on the server and the client must have the Trusted Root Authority updated to trust the server certificate.
+
+Note If you are using SQL Server to enable encrypted connections for an instance of SQL Server, you can set the value of the ForceEncryption option to Yes. For more information, see "Enable Encryption Connections to the Database Engine (SQL Server Configuration Manager)" in SQL Server Books Online:
+
+http://msdn.microsoft.com/en-us/library/ms191192(v=sql.110).aspx#ConfigureServerConnections
+
+Install a certificate on a server with Microsoft Management Console (MMC)
+To use SSL encryption, you must install a certificate on the server. Follow these steps to install the certificate by using the Microsoft Management Console (MMC) snap-in.
+
+How to Configure the MMC Snap-in
+
+    To open the Certificates snap-in, follow these steps:
+        To open the MMC console, click Start, and then click Run. In the Run dialog box type:
+
+        MMC
+        On the Console menu, click Add/Remove Snap-in....
+        Click Add, and then click Certificates. Click Add again.
+        You are prompted to open the snap-in for the current user account, the service account, or for the computer account. Select the Computer Account.
+        Select Local computer, and then click Finish.
+        Click Close in the Add Standalone Snap-in dialog box.
+        Click OK in the Add/Remove Snap-in dialog box. Your installed certificates are located in the Certificates folder in the Personal container.
+    Use the MMC snap-in to install the certificate on the server:
+        Click to select the Personal folder in the left-hand pane.
+        Right-click in the right-hand pane, point to All Tasks, and then click Request New Certificate....
+        The Certificate Request Wizard dialog box opens. Click Next. Select Certificate type is "computer".
+        In the Friendly Name text box you can type a friendly name for the certificate or leave the text box blank, and then complete the wizard. After the wizard finishes, you will see the certificate in the folder with the fully qualified computer domain name.
+        If you want to enable encryption for a specific client or clients, skip this step and proceed to the Enable encryption for a specific client section of this article.
+
+        For SQL Server 2000, to enable encryption at the server, open the Server Network Utility on the server where the certificate is installed, and then click to select the Force protocol encryption check box. Restart the MSSQLServer (SQL Server) service for the encryption to take effect. Your server is now ready to use SSL encryption.
+
+        For SQL Server 2005 and later versions, to enable encryption at the server, open the SQL Server Configuration Manager and do the following:
+            In SQL Server Configuration Manager, expand SQL Server Network Configuration, right-click Protocols for <server instance>, and then select Properties.
+            On the Certificate tab, select the desired certificate from the Certificate drop-down menu, and then click OK.
+            On the Flags tab, select Yes in the ForceEncryption box, and then click OK to close the dialog box.
+            Restart the SQL Server service.
+
+Enable a certificate for SSL on a SQL Server clustered installation
+The certificate used by SQL Server to encrypt connections is specified in the following registry key:
+
+HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Microsoft SQL Server\MSSQL.x\MSSQLServer\SuperSocketNetLib\Certificate
+
+This key contains a property of the certificate known as thumbprint that identifies each certificate in the server. In a clustered environment, this key will be set to Null even though the correct certificate exists in the store. To resolve this issue, you must take these additional steps on each of your cluster nodes after you installed the certificate to each node):
+
+    Navigate to the certificate store where the FQDN certificate is stored. On the properties page for the certificate, go to the Details tab and copy the thumbprint value of the certificate to a Notepad window.
+    Remove the spaces between the hex characters in the thumbprint value in Notepad.
+    Start regedit, navigate to the following registry key, and copy the value from step 2:
+    HKLM\SOFTWARE\Microsoft\Microsoft SQL Server\<instance>\MSSQLServer\SuperSocketNetLib\Certificate
+    If the SQL virtual server is currently on this node, failover to another node in your cluster, and then reboot the node where the registry change occurred.
+    Repeat this procedure on all the nodes.
+
+
+For screenshots of this procedure, see the following blog post on MSDN:
+
+http://blogs.msdn.com/b/jorgepc/archive/2008/02/19/enabling-certificates-for-ssl-connection-on-sql-server-2005-clustered-installation.aspx
+Enable encryption for a specific client
+For the client to request the SSL encryption, the client computer must trust the server certificate and the certificate must already exist on the server. You have to use the MMC snap-in to export the Trusted Root Certification Authority used by the server certificate:
+
+    To export the server certificate's Trusted Root Certificate Authority (CA), follow these steps:
+        Open MMC, and then locate your certificate in the Personal folder.
+        Right-click the certificate name, and then click Open.
+        Review the Certification Path tab. Note the top most item.
+        Navigate to the Trusted Root Certification Authorities folder, and then locate the Certificate Authority noted in step c..
+        Right-click CA, point to All Tasks, and then click Export.
+        Select all the defaults, and then save the exported file to your disk where the client computer can access the file.
+    Follow these steps to import the certificate on the client computer:
+        Navigate to the client computer by using the MMC snap-in, and then browse to the Trusted Root Certification Authorities folder.
+        Right-click the Trusted Root Certification Authorities folder, point to All Tasks, and then click Import.
+        Browse, and then select the certificate (.cer file) that you generated in step 1. Select the defaults to complete the remaining part of the wizard.
+        Use the SQL Server Client Network Utility.
+        Click to select the Force Protocol encryption option. Your client is now ready to use SSL encryption. 
+
+How to test your client connection
+To test your client connection you can either:
+
+    Use SQL Management Studio.
+
+    -or-
+    Use any ODBC or OLEDB application in which you can change the connection string. 
+
+SQL Server Management Studio
+
+
+To test with SQL Server Management Studio, follow these steps:  
+
+    Navigate to the SQL Server Client <version> Configuration page in SQL Server Configuration Manager.
+    In the properties windows, set the Force protocol encryption option to "Yes."
+    Connect to the server that is running SQL Server by using SQL Server Management Studio.
+    Monitor the communication by using Microsoft Network Monitor or a network sniffer.
+
+
+ODBC or OLEDB application sample connection strings
+
+If you use ODBC or OLEDB connection strings from a provider like SQL Native Client, add the Encrypt keyword and set it to true in your connection string, and then monitor the communication using a tool like Microsoft Network Monitor or a network sniffer
+
+Troubleshooting
+After you successfully install the certificate, the certificate does not appear in the Certificate list on the Certificate tab.
+
+Note The Certificate tab is in the Protocols for <InstanceName> Properties dialog box that is opened from SQL Server Configuration Manager.
+
+This issue occurs because you may have installed an invalid certificate. If the certificate is invalid, it will not be listed on the Certificate tab. To determine whether the certificate that you installed is valid, follow these steps:
+
+    Open the Certificates snap-in. To do this, see step 1 in the "How to Configure the MMC Snap-in" section.
+    In the Certificates snap-in, expand Personal, and then expand Certificates.
+    In the right pane, locate the certificate that you installed.
+    Determine whether the certificate meets the following requirements:
+        In the right pane, the value in the Intended Purpose column for this certificate must be Server Authentication.
+        In the right pane, the value in the Issued To column must be the server name.
+    Double-click the certificate, and then determine whether the certificate meets the following requirements:
+        On the General tab, you receive the following message:
+        You have a private key that corresponds to this certificate.
+        On the Details tab, the value for the Subject field must be server name.
+        The value for the Enhanced Key Usage field must be Server Authentication (<number>).
+        On the Certification Path tab, the server name must appear under Certification path.
+
+If any one of these requirements is not met, the certificate is invalid.

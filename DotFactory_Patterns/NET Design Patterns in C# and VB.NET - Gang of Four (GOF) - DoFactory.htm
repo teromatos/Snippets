@@ -1,0 +1,385 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>
+	.NET Design Patterns in C# and VB.NET - Gang of Four (GOF) - DoFactory
+</title><meta name="copyright" content="Copyright © dofactory.com. All rights reserved."><link rel="stylesheet" href="media/do.css">
+    <script type="text/javascript" src="media/do.js"></script>
+    
+<link rel="shortcut icon" type="image/x-icon" href="http://www.dofactory.com/favicon.ico"><link rel="canonical" href="http://www.dofactory.com/Patterns/Patterns.aspx"><meta name="keywords" content=".NET Design Patterns, C#, VB, WPF, Silverlight, WCF, LINQ, ASP.NET MVC, SQL Server, forum, community, training, education"><meta name="description" content="Data &amp; Object Factory helps developers succeed with .NET Design Patterns through training, products, and a .NET Design Pattern and Practices community"></head>
+<body id="dofactory-com">
+  <div id="container">
+    <form method="post" action="Patterns.aspx" id="form1">
+<div class="aspNetHidden">
+<input name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUKLTc2NjE3ODk2NmRk6B1CapWhHEr9GDM54Mzrm9bAlsc=" type="hidden">
+</div>
+
+    
+    
+        
+    <div id="header">
+        <div id="logo">
+           <a id="HyperLinkLogo" href="http://www.dofactory.com/Default.aspx" style="display:inline-block;height:85px;width:85px;"><img src="media/logotm.gif" alt=""></a>
+        </div>
+        
+        <div id="userbox">
+          
+
+<table border="0" cellpadding="0" cellspacing="0" width="224">
+  <tbody><tr>
+   <td style="height:24px; vertical-align:middle; text-align:center">
+   <a class="user-link" href="http://www.dofactory.com/join.aspx">Join Now</a></td>
+   <td style="height:24px;"><font color="#aaaaaa">|</font></td>
+   <td style="height:24px; vertical-align:middle; text-align:center"><a class="user-link" href="http://www.dofactory.com/login.aspx">Login</a></td>
+  </tr>
+</tbody></table>
+
+
+
+        </div>
+    </div>
+    
+    
+        
+    <table border="0" cellpadding="0" cellspacing="0">
+     <tbody><tr>
+      
+      <td align="left" valign="top" width="240">
+        
+        <div id="TheMenu">
+	<div id="menuhead"></div>  <div id="menu"><div class="menuitem"><a href="http://www.dofactory.com/Default.aspx">home</a></div><div class="menuitem"><a href="http://www.dofactory.com/member/account.aspx">my account</a></div><div class="menuitem"><a href="http://www.dofactory.com/logout.aspx">logout</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-products.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/Framework/Framework.aspx">.NET pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/pro-net-design-patterns.aspx">PRO .NET pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/javascript-jquery-patterns.aspx">javascript + jquery patterns</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/database-design-patterns.aspx">database pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/products/products.aspx">products and pricing</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-reference.jpg" alt="" height="13"></div><div class="menuitemactive"><a href="http://www.dofactory.com/Patterns/Patterns.aspx" class="active">.NET design patterns</a></div><div class="menuitem"><a href="http://www.dofactory.com/javascript-patterns.aspx">javascript design patterns</a></div><div style="border-bottom:solid 1px #bbb;height:5px;margin:0 30px 2px 30px;"></div><div class="menuitem"><a href="http://www.dofactory.com/tutorial/javascript.aspx">javascript tutorial</a></div><div class="menuitem"><a href="http://www.dofactory.com/tutorial/sql-and-database.aspx">sql + database tutorial</a></div><div style="border-bottom:solid 1px #bbb;height:5px;margin:0 30px 2px 30px;"></div><div class="menuitem"><a href="http://www.dofactory.com/Connect/Connect.aspx">connection strings</a></div><div class="menuitem"><a href="http://www.dofactory.com/ShortCutKeys/ShortCutKeys.aspx">visual studio shortcuts</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/csharp-coding-standards.aspx">c# coding standards</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/html-color-codes.aspx">html color codes</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/reference.aspx">all references</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-community.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/topic/search.aspx">explore</a></div><div class="menuitem"><a href="http://www.dofactory.com/topic/topics.aspx">questions</a></div><div class="menuitem"><a href="http://www.dofactory.com/topic/add.aspx">ask question</a></div><div class="menuitem"><a href="http://www.dofactory.com/tag/tags.aspx">tags</a></div><div class="menuitem"><a href="http://www.dofactory.com/user/users.aspx">users</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-company.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/Contact/Contact.aspx">contact us</a></div><div class="menuitem"><a href="http://www.dofactory.com/Courses/Courses.aspx">training courses</a></div><div class="menuitem"><a href="http://www.dofactory.com/Schedule/Schedule.aspx">schedule</a></div><div class="menuitem"><a href="http://www.dofactory.com/About/About.aspx">about us</a></div><div class="menudivider"></div><div class="menudivider"></div></div><div id="training">training and education for professional developers</div>
+</div>
+        
+        <div id="menuoverlay">
+          
+
+<div style="padding-left:3px;">
+  <a class="menuitem-overlay" href="http://www.dofactory.com/login.aspx">login</a>
+</div>
+<div style="padding-left:3px;">
+  <a class="menuitem-overlay" href="http://www.dofactory.com/join.aspx">join now</a>
+</div>
+
+        </div>
+      </td>
+      
+      
+      <td align="left" valign="top" width="820">
+       
+         
+         <div id="subheader-wide">
+           <div id="TheBanner">
+	<div id="banner"><div class="dash-wide"></div><div class="ban"><div class="banleft"></div></div></div>
+</div>
+         </div>
+               
+         <div id="content-xwide">
+           
+
+<div id="ContentPlaceHolder1_Crumbs" class="breadcrumb">
+	<div class="crumbs-all"><a class="breadcrumb" href="http://www.dofactory.com/Default.aspx">Home</a>&nbsp;&nbsp;<img src="media/more.gif">&nbsp;&nbsp;<span class="lastcrumb">.NET Design Patterns</span></div>
+</div>
+
+<table id="contentTable" border="0" cellpadding="0" cellspacing="0">
+<tbody><tr>
+<td id="contentMain" valign="top" width="590">
+
+
+
+
+
+<h1 style="font-size:17pt; color:black;padding:40px 0 10px 0;">.NET Design Patterns</h1>
+
+<img id="ContentPlaceHolder1_Image2" src="media/552029_3.jpg" style="border-width:0px;height:130px;width:100px;float:left;margin: 7px 20px 8px 0;">
+<p style="font-size:11pt;">
+            Design patterns are solutions to 
+            software design problems you find again and again in real-world application 
+            development. Patterns are about reusable designs and interactions of objects..
+</p>
+
+<p style="font-size:11pt;">
+
+The 23 Gang of Four (GoF) patterns are generally considered the foundation for all 
+other patterns. They are categorized in three groups: Creational, Structural, and 
+Behavioral (for a complete list see below). 
+</p>
+
+<p style="font-size:11pt;">
+To give you a head start, the C# source code for each pattern is provided 
+in 2 forms: <i>structural</i> and <i>real-world</i>. Structural code
+uses type names as defined in the pattern definition and UML diagrams.
+Real-world code provides real-world programming situations where you may use 
+these patterns.  
+</p>
+
+<p style="font-size:11pt;">
+A third form, <i>.NET optimized</i>, demonstrates
+design patterns that exploit built-in .NET 4.5 features, such as, generics, attributes, 
+delegates, reflection, and more. These and much more are available in 
+our <a href="http://www.dofactory.com/Framework/Framework.aspx" class="alwayson" style="font-size:11pt;">.NET Design Pattern Framework 4.5</a>.
+See our <a href="http://www.dofactory.com/Patterns/PatternSingleton.aspx" class="alwayson" style="font-size:11pt;">Singleton</a> page
+for a .NET 4.5 Optimized code sample.
+</p>
+<a name="list"></a>
+
+<br>
+
+
+
+
+<br>
+
+
+<table cellpadding="1" cellspacing="1" bgcolor="white" width="100%">
+    <tbody><tr>
+        <td colspan="2" align="left" bgcolor="beige" height="14">&nbsp;&nbsp;<b>Creational Patterns</b></td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternAbstract.aspx" class="alwayson">Abstract Factory</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Creates an instance of several families of classes</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternBuilder.aspx" class="alwayson">Builder</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Separates object construction from its representation</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternFactory.aspx" class="alwayson">Factory Method</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Creates an instance of several derived classes</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternPrototype.aspx" class="alwayson">Prototype</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A fully initialized instance to be copied or cloned</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternSingleton.aspx" class="alwayson">Singleton</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A class of which only a single instance can exist</td>
+    </tr>
+</tbody></table>
+    
+<br>
+
+<table cellpadding="1" cellspacing="1" bgcolor="#ffffff" width="100%">
+    <tbody><tr>
+        <td colspan="2" align="left" bgcolor="beige" height="14">&nbsp;&nbsp;<b>Structural Patterns</b></td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternAdapter.aspx" class="alwayson">Adapter</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Match interfaces of different classes</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternBridge.aspx" class="alwayson">Bridge</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Separates an object’s interface from its implementation</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternComposite.aspx" class="alwayson">Composite</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A tree structure of simple and composite objects</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternDecorator.aspx" class="alwayson">Decorator</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Add responsibilities to objects dynamically</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternFacade.aspx" class="alwayson">Facade</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A single class that represents an entire subsystem</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternFlyweight.aspx" class="alwayson">Flyweight</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A fine-grained instance used for efficient sharing</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternProxy.aspx" class="alwayson">Proxy</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;An object representing another object</td>
+    </tr>
+</tbody></table>
+<br>
+<table cellpadding="1" cellspacing="1" bgcolor="white" width="100%">
+    <tbody><tr>
+        <td colspan="2" align="left" bgcolor="beige" height="14">&nbsp;&nbsp;<b>Behavioral Patterns</b></td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternChain.aspx" class="alwayson">Chain of Resp.</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A way of passing a request between a chain of objects</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternCommand.aspx" class="alwayson">Command</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Encapsulate a command request as an object</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternInterpreter.aspx" class="alwayson">Interpreter</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A way to include language elements in a program</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternIterator.aspx" class="alwayson">Iterator</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Sequentially access the elements of a collection</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternMediator.aspx" class="alwayson">Mediator</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Defines simplified communication between classes</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternMemento.aspx" class="alwayson">Memento</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Capture and restore an object's internal state</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternObserver.aspx" class="alwayson">Observer</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;A way of notifying change to a number of classes</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternState.aspx" class="alwayson">State</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Alter an object's behavior when its state changes</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternStrategy.aspx" class="alwayson">Strategy</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Encapsulates an algorithm inside a class</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternTemplate.aspx" class="alwayson">Template Method</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Defer the exact steps of an algorithm to a subclass</td>
+    </tr>
+    <tr>
+        <td align="left" bgcolor="#ffffff" width="120">&nbsp;&nbsp;<a href="http://www.dofactory.com/Patterns/PatternVisitor.aspx" class="alwayson">Visitor</a></td>
+        <td align="left" bgcolor="#ffffff" height="14">&nbsp;&nbsp;Defines a new operation to a class without change</td>
+    </tr>
+</tbody></table>
+
+<br>
+<br>
+<br>
+
+
+</td>
+<td id="contentRight" valign="top" width="230">
+
+
+<br>
+<br>
+
+
+
+<div style="margin-left:10px; border-left:1px solid #bbb;">
+
+<table style="width:210px;" border="0" cellpadding="0" cellspacing="0">
+ <tbody><tr>
+  <td style="text-align:center;">
+  <br>
+
+ 
+    <div style="margin:0 0 0 45px; text-align:left;">
+        <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Code&nbsp;<br>
+        <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Career&nbsp;<br>
+        <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Lifestyle&nbsp;<br>
+    </div>
+      
+  <br>
+ 
+     
+  <a href="http://www.dofactory.com/framework/framework.aspx" class="alwaysonb" style="font-size:14pt;line-height:22pt; font-weight:bold;">
+       .NET<br>Design Pattern<br>Framework 4.5
+  </a>
+      
+  <br><br>
+  <a href="http://www.dofactory.com/framework/framework.aspx">
+    <img src="media/dotnet_cs_4.png" alt=".NET Design Pattern Framework 4.5" style="margin-left:10px;padding-top:4px;" height="248" width="170">
+  </a>
+  <br>
+  <a href="http://www.dofactory.com/framework/framework.aspx" class="alwaysonb"><b>C# and VB</b></a>
+  <br>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+      <td><br>
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="background:#ffffff;color:#000000; font-weight:bold;">Here's what you get:</span>
+      <div style="text-align:left; padding: 0 0 0 10px;">
+        <ul>
+          <li>Gang of Four Patterns</li>
+          <li>Head First Patterns</li>
+          <li>Enterprise Patterns</li>
+          <li>Multi-Tier Patterns<br><br></li>
+          <li>Repository Pattern</li>
+          <li>Unit-of-Work Pattern</li>
+          <li>Active Record Pattern</li>
+          <li>CQRS Pattern<br><br></li>
+          <li>Model View Controller</li>
+          <li>Model View Presenter</li>
+          <li>Model View ViewModel<br><br></li>
+          <li>Spark<sup>TM</sup> RAD Platform</li>
+          <li>Art Shop MVC application</li>
+          <li>More...</li>
+        </ul>
+        </div>
+      </td>
+    </tr>
+  </tbody></table>
+  <br>
+  <div style="text-align:left; padding: 0 0 0 40px;">
+  <a href="http://www.dofactory.com/framework/framework.aspx">
+  <img src="media/upgrade-your-skills_small.jpg" alt="Upgrade your .NET Design Pattern Skills" class="img-border" height="139" width="130">
+  </a>
+  <span style="color:brown">Upgrade your .NET skills</span>
+  <br>
+  </div>
+              
+  <br>
+  <a href="http://www.dofactory.com/framework/framework.aspx" class="alwayson1" style="background-color:#FF4500;color:#ffffff;padding:8px;">Click here for details</a>
+  <br><br>
+
+ <b>-- Instant Access --<br>
+ Instant Download</b><br><br>
+
+               
+ </td>
+ </tr>
+</tbody></table>
+</div>
+<br>
+
+
+
+
+</td>
+</tr>
+</tbody></table>
+
+
+
+         </div>
+         
+         <div id="TheToTop">
+	<div class="totop"><p class="returntotop"><a name="home"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-xwide"></div></div>
+</div>
+       
+      </td>
+     </tr>
+    </tbody></table>
+    
+    <div id="TheFooter">
+	<br><table border="0" cellpadding="0" cellspacing="0" width="1000"><tbody><tr><td width="200">&nbsp;</td><td align="center" valign="top" width="800"><div id="footer"><a href="http://www.dofactory.com/Default.aspx">home</a><span>|</span><a href="http://www.dofactory.com/join.aspx">join</a><span>|</span><a href="http://www.dofactory.com/login.aspx">login</a><span>|</span><a href="http://www.dofactory.com/Patterns/Patterns.aspx">.net patterns</a><span>|</span><a href="http://www.dofactory.com/javascript-patterns.aspx">javascript patterns</a><span>|</span><a href="http://www.dofactory.com/Framework/Framework.aspx">.net pattern framework</a><span>|</span><a href="http://www.dofactory.com/framework/javascript-jquery-patterns.aspx">javascript pattern framework</a><span>|</span><a href="http://www.dofactory.com/framework/database-design-patterns.aspx">database pattern framework</a><div align="center"><a href="http://www.dofactory.com/tutorial/javascript.aspx">javascript tutorial</a><span>|</span><a href="http://www.dofactory.com/tutorial/sql-and-database.aspx">sql + database tutorial</a><span>|</span><a href="http://www.dofactory.com/Connect/Connect.aspx">connection strings</a><span>|</span><a href="http://www.dofactory.com/ShortCutKeys/ShortCutKeys.aspx">visual studio shortcuts</a><span>|</span><a href="http://www.dofactory.com/reference/csharp-coding-standards.aspx">C# coding standards</a><span>|</span><a href="http://www.dofactory.com/About/About.aspx">about us</a><hr><div id="copyright">Copyright © 2001 - 2014 Data &amp; Object Factory, LLC. All rights reserved.<br>
+ Data &amp; Object Factory™, dofactory.com™, DoFactory™, Design Pattern 
+Framework™, and the 'slanting do' logo are trademarks of Data &amp; 
+Object Factory, LLC.</div><div id="terms"><a href="http://www.dofactory.com/terms.aspx">terms of service</a><span>&nbsp;|&nbsp;</span><a href="http://www.dofactory.com/licensing.aspx">product licensing</a><span>&nbsp;|&nbsp;</span><a href="http://www.dofactory.com/privacy.aspx">privacy statement</a></div><!-- terms --></div><!-- footer --></div></td></tr></tbody></table>
+</div>
+        
+    </form>
+   </div> <!-- container -->
+ 
+
+  
+   
+    <script type="text/javascript">
+    //<![CDATA[
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    //]]>
+    </script><script src="media/ga.js" type="text/javascript"></script>
+    <script type="text/javascript">
+     //<![CDATA[
+      try {
+        var pageTracker = _gat._getTracker("UA-1223200-3");
+        pageTracker._trackPageview();
+      } catch (err) { }
+    //]]>
+    </script>
+
+  
+
+
+</body></html>

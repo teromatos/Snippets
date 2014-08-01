@@ -1,0 +1,794 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>
+	Abstract Factory Design Pattern in C# and VB.NET.
+</title><meta name="copyright" content="Copyright © dofactory.com. All rights reserved."><link rel="stylesheet" href="media/do.css">
+    <script type="text/javascript" src="media/do.js"></script>
+    
+<link rel="shortcut icon" type="image/x-icon" href="http://www.dofactory.com/favicon.ico"><link rel="canonical" href="http://www.dofactory.com/Patterns/PatternAbstract.aspx"><meta name="keywords" content="Abstract Factory Design Pattern, Object Oriented Design, Microsoft .NET, ASP.NET, C#, VB.Net, Java, UML"><meta name="description" content="Abstract Factory Design Pattern C# and VB.NET. Beyond OO Design and Development. Valuable source code and UML"></head>
+<body id="dofactory-com">
+  <div id="container">
+    <form method="post" action="PatternAbstract.aspx" id="form1">
+<div class="aspNetHidden">
+<input name="__VIEWSTATE" id="__VIEWSTATE" value="/wEPDwUJMjEwMDEyNjAyZGRoOKXavpmt4ulKRDhLl/BMkRRTkQ==" type="hidden">
+</div>
+
+    
+    
+        
+    <div id="header">
+        <div id="logo">
+           <a id="HyperLinkLogo" href="http://www.dofactory.com/Default.aspx" style="display:inline-block;height:85px;width:85px;"><img src="media/logotm.gif" alt=""></a>
+        </div>
+        
+        <div id="userbox">
+          
+
+<table border="0" cellpadding="0" cellspacing="0" width="224">
+  <tbody><tr>
+   <td style="height:24px; vertical-align:middle; text-align:center">
+   <a class="user-link" href="http://www.dofactory.com/join.aspx">Join Now</a></td>
+   <td style="height:24px;"><font color="#aaaaaa">|</font></td>
+   <td style="height:24px; vertical-align:middle; text-align:center"><a class="user-link" href="http://www.dofactory.com/login.aspx">Login</a></td>
+  </tr>
+</tbody></table>
+
+
+
+        </div>
+    </div>
+    
+    
+        
+    <table border="0" cellpadding="0" cellspacing="0">
+     <tbody><tr>
+      
+      <td align="left" valign="top" width="240">
+        
+        <div id="TheMenu">
+	<div id="menuhead"></div>  <div id="menu"><div class="menuitem"><a href="http://www.dofactory.com/Default.aspx">home</a></div><div class="menuitem"><a href="http://www.dofactory.com/member/account.aspx">my account</a></div><div class="menuitem"><a href="http://www.dofactory.com/logout.aspx">logout</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-products.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/Framework/Framework.aspx">.NET pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/pro-net-design-patterns.aspx">PRO .NET pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/javascript-jquery-patterns.aspx">javascript + jquery patterns</a></div><div class="menuitem"><a href="http://www.dofactory.com/framework/database-design-patterns.aspx">database pattern framework</a></div><div class="menuitem"><a href="http://www.dofactory.com/products/products.aspx">products and pricing</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-reference.jpg" alt="" height="13"></div><div class="menuitemactive"><a href="http://www.dofactory.com/Patterns/Patterns.aspx" class="active">.NET design patterns</a></div><div class="menuitem"><a href="http://www.dofactory.com/javascript-patterns.aspx">javascript design patterns</a></div><div style="border-bottom:solid 1px #bbb;height:5px;margin:0 30px 2px 30px;"></div><div class="menuitem"><a href="http://www.dofactory.com/tutorial/javascript.aspx">javascript tutorial</a></div><div class="menuitem"><a href="http://www.dofactory.com/tutorial/sql-and-database.aspx">sql + database tutorial</a></div><div style="border-bottom:solid 1px #bbb;height:5px;margin:0 30px 2px 30px;"></div><div class="menuitem"><a href="http://www.dofactory.com/Connect/Connect.aspx">connection strings</a></div><div class="menuitem"><a href="http://www.dofactory.com/ShortCutKeys/ShortCutKeys.aspx">visual studio shortcuts</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/csharp-coding-standards.aspx">c# coding standards</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/html-color-codes.aspx">html color codes</a></div><div class="menuitem"><a href="http://www.dofactory.com/reference/reference.aspx">all references</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-community.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/topic/search.aspx">explore</a></div><div class="menuitem"><a href="http://www.dofactory.com/topic/topics.aspx">questions</a></div><div class="menuitem"><a href="http://www.dofactory.com/topic/add.aspx">ask question</a></div><div class="menuitem"><a href="http://www.dofactory.com/tag/tags.aspx">tags</a></div><div class="menuitem"><a href="http://www.dofactory.com/user/users.aspx">users</a></div><div class="menudivider">&nbsp;</div><div class="menuheading"><img src="media/menu-heading-company.jpg" alt="" height="13"></div><div class="menuitem"><a href="http://www.dofactory.com/Contact/Contact.aspx">contact us</a></div><div class="menuitem"><a href="http://www.dofactory.com/Courses/Courses.aspx">training courses</a></div><div class="menuitem"><a href="http://www.dofactory.com/Schedule/Schedule.aspx">schedule</a></div><div class="menuitem"><a href="http://www.dofactory.com/About/About.aspx">about us</a></div><div class="menudivider"></div><div class="menudivider"></div></div><div id="training">training and education for professional developers</div>
+</div>
+        
+        <div id="menuoverlay">
+          
+
+<div style="padding-left:3px;">
+  <a class="menuitem-overlay" href="http://www.dofactory.com/login.aspx">login</a>
+</div>
+<div style="padding-left:3px;">
+  <a class="menuitem-overlay" href="http://www.dofactory.com/join.aspx">join now</a>
+</div>
+
+        </div>
+      </td>
+      
+      
+      <td align="left" valign="top" width="820">
+       
+         
+         <div id="subheader-wide">
+           <div id="TheBanner">
+	<div id="banner"><div class="dash-wide"></div><div class="ban"><div class="banleft"></div></div></div>
+</div>
+         </div>
+               
+         <div id="content-xwide">
+           
+
+<div id="ContentPlaceHolder1_Crumbs" class="breadcrumb">
+	<div class="crumbs-all"><a class="breadcrumb" href="http://www.dofactory.com/Default.aspx">Home</a>&nbsp;&nbsp;<img src="media/more.gif">&nbsp;&nbsp;<a class="breadcrumb" href="http://www.dofactory.com/Patterns/Patterns.aspx">.NET Design Patterns</a>&nbsp;&nbsp;<img src="media/more.gif">&nbsp;&nbsp;<span class="lastcrumb">Abstract Factory</span></div>
+</div>
+
+<table id="contentTable" border="0" cellpadding="0" cellspacing="0">
+
+
+<tbody><tr>
+
+<td id="contentMain" valign="top" width="595">
+
+
+
+
+
+
+
+
+
+  <h1>Abstract Factory <span class="dp">Design Pattern</span></h1>
+ 
+  
+
+	
+
+	<table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tbody><tr>
+  		<td style="PADDING-LEFT: 20px" valign="top" width="160">
+				<img id="ContentPlaceHolder1_Image1" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#intent" class="alwayson1">definition</a><br>
+				<img id="ContentPlaceHolder1_Image2" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#UML" class="alwayson1">UML diagram</a><br>
+				<img id="ContentPlaceHolder1_Image3" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#participants" class="alwayson1">participants</a><br>
+			</td>
+  		<td align="left" valign="top" width="300">
+	  		<img id="ContentPlaceHolder1_Image4" src="media/redarrow.gif" style="border-width:0px;height:7px;width:8px;">&nbsp;<a href="#csharp" class="alwayson1">sample code in C#</a><br><br>
+	  		
+		  </td>
+	  </tr>
+  </tbody></table>
+			    
+  <br>
+  <div class="dash-wide"></div>
+	<br>
+
+  <table border="0" cellpadding="0" cellspacing="0" width="100%">
+		<tbody><tr>
+	  	<td>
+	  	  <a name="intent"></a>
+	  	  <h3 id="definition-scroll">definition</h3>
+						
+				<table border="0" cellpadding="0" cellspacing="0" width="100%">
+					<tbody><tr>
+						<td width="1"><img id="ContentPlaceHolder1_Image6" src="media/pixel.gif" style="border-width:0px;height:1px;width:1px;"></td>
+						<td>
+               Provide an interface for creating families of related or 
+dependent objects without specifying their concrete classes.
+               <br><br>
+			    		Frequency of use: <img src="media/use_high.gif" style="border-width:0px;height:20px;width:101px;">&nbsp;&nbsp;high
+            </td>
+					</tr>
+        </tbody></table>
+        
+		  </td>
+      <td align="right" width="95"><img id="ContentPlaceHolder1_Image53" src="media/552092_4.jpg" style="border-width:0px;height:75px;width:75px;"></td>
+	  </tr>
+	</tbody></table>
+<br>
+  <div id="ContentPlaceHolder1_Totop1">
+	<div class="totop"><p class="returntotop"><a name="UML"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-wide"></div></div>
+</div>
+	
+    <h3 id="uml-scroll">UML class diagram</h3>
+	<br>	
+   <div style="padding-left:20px;">
+	<img src="media/abstract.gif" border="0">
+   </div>		
+   
+  <div id="ContentPlaceHolder1_Totop2">
+	<div class="totop"><p class="returntotop"><a name="participants"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-wide"></div></div>
+</div>
+
+  <h3 id="participants-scroll">participants</h3>
+	<p>
+	&nbsp;&nbsp;&nbsp;&nbsp;The classes and/or objects participating in this pattern are:
+  </p>
+
+	
+    <ul>
+	    <li><font color="#aa0000"><b>AbstractFactory</b></font>&nbsp;&nbsp;<font color="#007733"><b>(ContinentFactory)</b></font> 
+	    <ul><li>declares an interface for operations that create abstract products </li></ul>
+    	    </li><li><font color="#aa0000"><b>ConcreteFactory</b></font> &nbsp;&nbsp;<font color="#007733"><b>(AfricaFactory, AmericaFactory)</b></font> 
+	    <ul><li>implements the operations to create concrete product objects </li></ul>
+	    </li><li><font color="#aa0000"><b>AbstractProduct</b></font> &nbsp;&nbsp;<font color="#007733"><b>(Herbivore, Carnivore)</b></font> 
+	    <ul><li>declares an interface for a type of product object </li></ul>
+        </li><li><font color="#aa0000"><b>Product</b></font>&nbsp;&nbsp;<font color="#007733"><b>(Wildebeest, Lion, Bison, Wolf)</b></font> 
+	    <ul><li>defines a product object to be created by the corresponding concrete factory 
+	    </li><li>implements the AbstractProduct interface </li></ul>
+	    </li><li><font color="#aa0000"><b>Client</b></font>&nbsp;&nbsp;<font color="#007733"><b>(AnimalWorld)</b></font> 
+	    <ul><li>uses interfaces declared by AbstractFactory and AbstractProduct classes </li></ul></li>
+	    </ul>
+        
+		
+  <div id="ContentPlaceHolder1_Totop4">
+	<div class="totop"><p class="returntotop"><a name="csharp"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-wide"></div></div>
+</div>
+
+  <h3 id="csharp-scroll">sample code in C#</h3>
+
+	<p>
+	
+        This <font color="#bb0000">structural</font> code demonstrates the
+        Abstract Factory pattern creating parallel hierarchies of objects.
+        Object creation has been abstracted and there is no need for
+        hard-coded class names in the client code.
+        
+  </p>
+
+
+
+
+   <a href="#_self1" id="xStructure" onclick="ShowHide('Structure');"><font color="aa0000" face="Arial,helvetica" size="2"><b><u>Hide code</u></b></font></a>
+   <br><br>
+
+    <table border="0" cellpadding="0" cellspacing="0" bgcolor="#fffaef" width="100%">
+     <tbody><tr>
+      <td>
+       <div class="sourcecode"><font color="green">
+        // Abstract Factory pattern -- Structural example      
+       </font>
+      </div>
+      </td>        
+     </tr>
+
+    </tbody><tbody id="Structure" style="">
+
+    <tr>
+     <td>
+      <div class="sourcecode"><br>
+       
+        <div class="divsource">
+
+<p style="margin: 0px;"><span style="color: blue;">using</span> System;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;"><span style="color: blue;">namespace</span> DoFactory.GangOfFour.Abstract.Structural</p>
+<p style="margin: 0px;">{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> MainApp startup class for Structural</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Abstract Factory Design Pattern.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">MainApp</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Entry point into console application.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">static</span> <span style="color: blue;">void</span> Main()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Abstract factory #1</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">AbstractFactory</span> factory1 = <span style="color: blue;">new</span> <span style="color: #2b91af;">ConcreteFactory1</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Client</span> client1 = <span style="color: blue;">new</span> <span style="color: #2b91af;">Client</span>(factory1);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client1.Run();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Abstract factory #2</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">AbstractFactory</span> factory2 = <span style="color: blue;">new</span> <span style="color: #2b91af;">ConcreteFactory2</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Client</span> client2 = <span style="color: blue;">new</span> <span style="color: #2b91af;">Client</span>(factory2);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;client2.Run();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Wait for user input</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.ReadKey();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'AbstractFactory' abstract class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">abstract</span> <span style="color: blue;">class</span> <span style="color: #2b91af;">AbstractFactory</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">abstract</span> <span style="color: #2b91af;">AbstractProductA</span> CreateProductA();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">abstract</span> <span style="color: #2b91af;">AbstractProductB</span> CreateProductB();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ConcreteFactory1' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">ConcreteFactory1</span> : <span style="color: #2b91af;">AbstractFactory</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">AbstractProductA</span> CreateProductA()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">ProductA1</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">AbstractProductB</span> CreateProductB()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">ProductB1</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ConcreteFactory2' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">ConcreteFactory2</span> : <span style="color: #2b91af;">AbstractFactory</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">AbstractProductA</span> CreateProductA()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">ProductA2</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">AbstractProductB</span> CreateProductB()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">ProductB2</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'AbstractProductA' abstract class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">abstract</span> <span style="color: blue;">class</span> <span style="color: #2b91af;">AbstractProductA</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'AbstractProductB' abstract class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">abstract</span> <span style="color: blue;">class</span> <span style="color: #2b91af;">AbstractProductB</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">abstract</span> <span style="color: blue;">void</span> Interact(<span style="color: #2b91af;">AbstractProductA</span> a);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductA1' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">ProductA1</span> : <span style="color: #2b91af;">AbstractProductA</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductB1' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">ProductB1</span> : <span style="color: #2b91af;">AbstractProductB</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: blue;">void</span> Interact(<span style="color: #2b91af;">AbstractProductA</span> a)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: blue;">this</span>.GetType().Name +</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #a31515;">" interacts with "</span> + a.GetType().Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductA2' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">ProductA2</span> : <span style="color: #2b91af;">AbstractProductA</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductB2' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">ProductB2</span> : <span style="color: #2b91af;">AbstractProductB</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: blue;">void</span> Interact(<span style="color: #2b91af;">AbstractProductA</span> a)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: blue;">this</span>.GetType().Name +</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #a31515;">" interacts with "</span> + a.GetType().Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Client' class. Interaction environment for the products.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Client</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">AbstractProductA</span> _abstractProductA;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">AbstractProductB</span> _abstractProductB;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Constructor</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> Client(<span style="color: #2b91af;">AbstractFactory</span> factory)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_abstractProductB = factory.CreateProductB();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_abstractProductA = factory.CreateProductA();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> Run()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_abstractProductB.Interact(_abstractProductA);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">}</p>
+<p style="margin: 0px;">&nbsp;</p>
+</div>
+          
+      </div>
+    </td>
+   </tr>
+   <tr>
+    <td bgcolor="white">
+     <br>
+      <font face="arial, helvetica" size="2">Output</font> 
+       <div class="output">
+        
+ProductB1 interacts with ProductA1<br>
+ProductB2 interacts with ProductA2
+          
+       </div>
+     </td>
+    </tr>
+  </tbody>
+  
+ </table>
+
+   <br>
+   <br>            
+   <hr size="1" width="100%">
+   <br>
+   <p>  
+   
+          This <font color="#00aa55">real-world</font> code demonstrates the 
+          creation of different animal worlds for a computer game using 
+          different factories. Although the animals created by the Continent 
+          factories are different, the interactions among the animals remain 
+          the same. 
+                    
+   </p>
+   
+   <a href="#_self2" id="xRealWorld" onclick="ShowHide('RealWorld');"> 
+   <font color="#007733" face="Arial,helvetica" size="2"><b><u>Show code</u></b></font></a>   <br><br>
+
+   <table border="0" cellpadding="0" cellspacing="0" bgcolor="#fffaef" width="100%">
+    <tbody><tr>
+     <td>
+     <div class="sourcecode"><font color="green">
+     // Abstract Factory pattern -- Real World example
+     </font></div>
+     </td>        
+    </tr>
+
+   </tbody><tbody id="RealWorld" style="DISPLAY:none">
+    <tr>
+     <td>
+      <div class="sourcecode">
+		    <br>
+		    
+<div class="divsource">
+<p style="margin: 0px;"><span style="color: blue;">using</span> System;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;"><span style="color: blue;">namespace</span> DoFactory.GangOfFour.Abstract.RealWorld</p>
+<p style="margin: 0px;">{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> MainApp startup class for Real-World</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Abstract Factory Design Pattern.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">MainApp</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> Entry point into console application.</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">static</span> <span style="color: blue;">void</span> Main()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Create and run the African animal world</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">ContinentFactory</span> africa = <span style="color: blue;">new</span> <span style="color: #2b91af;">AfricaFactory</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">AnimalWorld</span> world = <span style="color: blue;">new</span> <span style="color: #2b91af;">AnimalWorld</span>(africa);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world.RunFoodChain();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Create and run the American animal world</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">ContinentFactory</span> america = <span style="color: blue;">new</span> <span style="color: #2b91af;">AmericaFactory</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world = <span style="color: blue;">new</span> <span style="color: #2b91af;">AnimalWorld</span>(america);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;world.RunFoodChain();</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Wait for user input</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.ReadKey();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'AbstractFactory' abstract class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">abstract</span> <span style="color: blue;">class</span> <span style="color: #2b91af;">ContinentFactory</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">abstract</span> <span style="color: #2b91af;">Herbivore</span> CreateHerbivore();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">abstract</span> <span style="color: #2b91af;">Carnivore</span> CreateCarnivore();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ConcreteFactory1' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">AfricaFactory</span> : <span style="color: #2b91af;">ContinentFactory</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">Herbivore</span> CreateHerbivore()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">Wildebeest</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">Carnivore</span> CreateCarnivore()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">Lion</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ConcreteFactory2' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">AmericaFactory</span> : <span style="color: #2b91af;">ContinentFactory</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">Herbivore</span> CreateHerbivore()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">Bison</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: #2b91af;">Carnivore</span> CreateCarnivore()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">return</span> <span style="color: blue;">new</span> <span style="color: #2b91af;">Wolf</span>();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'AbstractProductA' abstract class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">abstract</span> <span style="color: blue;">class</span> <span style="color: #2b91af;">Herbivore</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'AbstractProductB' abstract class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">abstract</span> <span style="color: blue;">class</span> <span style="color: #2b91af;">Carnivore</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">abstract</span> <span style="color: blue;">void</span> Eat(<span style="color: #2b91af;">Herbivore</span> h);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductA1' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Wildebeest</span> : <span style="color: #2b91af;">Herbivore</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductB1' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Lion</span> : <span style="color: #2b91af;">Carnivore</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: blue;">void</span> Eat(<span style="color: #2b91af;">Herbivore</span> h)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Eat Wildebeest</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: blue;">this</span>.GetType().Name +</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #a31515;">" eats "</span> + h.GetType().Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductA2' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Bison</span> : <span style="color: #2b91af;">Herbivore</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'ProductB2' class</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">Wolf</span> : <span style="color: #2b91af;">Carnivore</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">override</span> <span style="color: blue;">void</span> Eat(<span style="color: #2b91af;">Herbivore</span> h)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Eat Bison</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #2b91af;">Console</span>.WriteLine(<span style="color: blue;">this</span>.GetType().Name +</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #a31515;">" eats "</span> + h.GetType().Name);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> The 'Client' class </span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: gray;">///</span><span style="color: green;"> </span><span style="color: gray;">&lt;/summary&gt;</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;<span style="color: blue;">class</span> <span style="color: #2b91af;">AnimalWorld</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">Herbivore</span> _herbivore;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">private</span> <span style="color: #2b91af;">Carnivore</span> _carnivore;</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: green;">// Constructor</span></p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> AnimalWorld(<span style="color: #2b91af;">ContinentFactory</span> factory)</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_carnivore = factory.CreateCarnivore();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_herbivore = factory.CreateHerbivore();</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: blue;">public</span> <span style="color: blue;">void</span> RunFoodChain()</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;{</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;_carnivore.Eat(_herbivore);</p>
+<p style="margin: 0px;">&nbsp;&nbsp;&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">&nbsp;&nbsp;}</p>
+<p style="margin: 0px;">}</p>
+</div>
+         
+		  </div>
+     </td>
+    </tr>
+    <tr>
+     <td bgcolor="white"><br>
+       <font face="arial, helvetica" size="2">Output</font><br>
+        <div class="output">
+         
+       Lion eats Wildebeest<br>
+       Wolf eats Bison
+         
+       </div>
+     </td>
+    </tr>
+
+   </tbody>
+   </table>
+
+   <br>
+   <br>            
+   <hr size="1" width="100%">
+   <br>
+   <p>            
+    
+     This <font color="#0044aa">.NET optimized</font> code demonstrates the 
+     same real-world situation as above but uses modern, built-in .NET features,
+     such as, generics, reflection, object initializers, automatic properties, etc.
+        
+   </p>
+
+   <a href="#_self1" id="xNetOptimized" onclick="ShowHide('NetOptimized');"><font color="0044aa" face="Arial,helvetica" size="2"><b><u>Hide code</u></b></font></a>
+   <br><br>
+
+    <table border="0" cellpadding="0" cellspacing="0" bgcolor="#fffaef" width="100%">
+     <tbody><tr>
+      <td>
+       <div class="sourcecode"><font color="green">
+        // Abstract Factory pattern -- .NET optimized      
+        </font>
+       </div>
+      </td>        
+     </tr>
+    
+    </tbody><tbody id="NetOptimized" style="">
+   
+     <tr>
+      <td>
+        <div class="sourcecode">
+         <br>
+           <table style="border: 1px dotted #000;" border="0" cellpadding="0" cellspacing="0" bgcolor="white" width="560">  <tbody><tr>   <td align="left" valign="middle" width="240">    <br><a href="http://www.dofactory.com/Framework/Framework.aspx">    <img src="media/2boxes45medium.jpg" style="padding-left:20px;" border="0" height="158" width="210"></a><br>    &nbsp;&nbsp;&nbsp;<a href="http://www.dofactory.com/Framework/Framework.aspx"><font color="#191970"><b>Two editions: C# and VB.NET</b></font></a><br>   </td><td width="16">&nbsp;</td>   <td valign="top" width="314"><br>The .NET optimized code is part of our<br>    <a href="http://www.dofactory.com/Framework/Framework.aspx" class="alwaysonb">Design Pattern Framework 4.5</a><sup>TM</sup> with:     <br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">69 gang-of-four pattern projects</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">46 head-first pattern projects</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Fowler's enterprise patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Multi-tier patterns </font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Convention over configuration</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Active Record and CQRS patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Repository and Unit-of-Work patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">MVC, MVP, &amp; MVVM patterns</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">REST patterns with Web API</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Spark<sup>TM</sup> Rapid App Dev (RAD) platform!</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">Art Shop MVC Reference Application</font><br>   <font style="margin-left:2px;margin-right:8px;top:3px" color="#FF4500" face="arial" size="3"><b>•</b></font><font color="#FF4500">100% pure source code</font><br><br>   <font color="black">Instant download. <a href="http://www.dofactory.com/products/products.aspx" class="alwaysonb">Order now!</a></font><br>   <br>   </td>   </tr> </tbody></table>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<font face="arial">See our <a href="http://www.dofactory.com/Patterns/PatternSingleton.aspx" class="alwayson">Singleton</a> page for a <i>.NET optimized</i> code sample.</font><div class="sourcecode"><br></div>
+        </div>
+      </td>
+     </tr>
+     <tr>
+      <td bgcolor="white">
+      
+      </td>
+     </tr>
+    </tbody>
+   </table>
+
+   <br>
+   <br>
+ 
+   <br>
+
+</td>
+<td id="contentRight" align="right" valign="top" width="225">
+
+
+
+
+
+
+
+<div style="margin-left:10px; border-left:1px solid #bbb;">
+
+<table style="width:210px;" border="0" cellpadding="0" cellspacing="0">
+ <tbody><tr>
+  <td style="text-align:center;">
+  <br>
+
+  <table border="0" cellpadding="0" cellspacing="0">
+    <tbody><tr>
+      <td align="left">
+          <div style="margin:0 0 0 40px;">
+              <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Code&nbsp;<br>
+              <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Career&nbsp;<br>
+              <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;&nbsp;Better Lifestyle&nbsp;<br>
+          </div>
+      </td>
+    </tr>
+  </tbody></table>
+      
+  <br>
+      
+  <br>
+     
+  
+<a href="http://www.dofactory.com/Framework/Framework.aspx" class="alwaysonb">
+      <span style="line-height:17pt; font-size:13pt; text-decoration: none; font-weight:bold;">
+        .NET <br>Design Pattern<br>
+        Framework 4.5
+      </span>
+  </a>
+      
+  <br><br>
+   <a id="ContentPlaceHolder1_FrameworkSmallControl1_HyperLink1" href="http://www.dofactory.com/Framework/Framework.aspx"><img id="ContentPlaceHolder1_FrameworkSmallControl1_ImageBox" src="media/2boxes45small.jpg" style="border-width:0px;height:128px;width:170px;"></a>  
+  &nbsp;<br>
+ 
+
+  <a id="ContentPlaceHolder1_FrameworkSmallControl1_HyperLink2" class="alwaysonb" href="http://www.dofactory.com/Framework/Framework.aspx">
+   <b>C# and VB.NET</b>
+  </a>
+
+  <br><br>
+       <div style="padding: 0 0 0 30px; text-align:left;">
+<br>
+      &nbsp;&nbsp;&nbsp;<span style="font-weight:bold;">Includes:</span>
+        <br>
+        <br>
+        
+           
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Gang of Four Patterns<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Head First Patterns<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Enterprise Patterns<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Multi-Tier Patterns<br><br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Repository Pattern<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Unit-of-Work Pattern<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;CQRS Pattern<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Active Record Pattern<br><br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Model View Controller<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Model View Presenter<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Model View ViewModel<br><br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Spark<sup>TM</sup> RAD Platform<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Art Shop MVC Application<br>
+          <img src="media/circular_arrow.png" style="vertical-align:middle;" alt="">&nbsp;&nbsp;Much more...
+            </div>
+        
+  <br>
+  <a href="http://www.dofactory.com/framework/framework.aspx" class="alwayson1" style="background-color:#FF4500;color:#ffffff;padding:8px;">Click here for details</a>
+  <br><br>
+  
+
+ <b>-- Instant Access --<br>
+ Instant Download</b><br><br>
+
+               
+ </td>
+ </tr>
+</tbody></table>
+</div>
+<br>
+
+
+
+</td>
+</tr>
+</tbody></table>
+
+<script type="text/javascript">
+    //<![CDATA[
+    function ShowHide(ref) 
+    {
+        var color;
+        if (ref.indexOf('Structure') > -1) color = 'aa0000';
+        if (ref.indexOf('RealWorld') > -1) color = '007733';
+        if (ref.indexOf('NetOptimized') > -1) color = '0044aa';
+
+        var structure = document.getElementById(ref);
+        var xstructure = document.getElementById("x" + ref);
+
+        if (structure.style.display == 'none') {
+            xstructure.innerHTML = '<font face="Arial,helvetica" color=' + color + ' size=2><b><u>Hide code</u></b></font>';
+            structure.style.display = '';
+        }
+        else {
+            xstructure.innerHTML = '<font face="Arial,helvetica" color=' + color + ' size=2><b><u>Show code</u></b></font>';
+            structure.style.display = 'none';
+        }
+    } 
+//]]>
+</script>
+
+
+
+
+         </div>
+         
+         <div id="TheToTop">
+	<div class="totop"><p class="returntotop"><a name="home"></a><a href="#"><img src="media/up.gif" align="absbottom"></a><a href="#">return to top</a></p><div class="dash-xwide"></div></div>
+</div>
+       
+      </td>
+     </tr>
+    </tbody></table>
+    
+    <div id="TheFooter">
+	<br><table border="0" cellpadding="0" cellspacing="0" width="1000"><tbody><tr><td width="200">&nbsp;</td><td align="center" valign="top" width="800"><div id="footer"><a href="http://www.dofactory.com/Default.aspx">home</a><span>|</span><a href="http://www.dofactory.com/join.aspx">join</a><span>|</span><a href="http://www.dofactory.com/login.aspx">login</a><span>|</span><a href="http://www.dofactory.com/Patterns/Patterns.aspx">.net patterns</a><span>|</span><a href="http://www.dofactory.com/javascript-patterns.aspx">javascript patterns</a><span>|</span><a href="http://www.dofactory.com/Framework/Framework.aspx">.net pattern framework</a><span>|</span><a href="http://www.dofactory.com/framework/javascript-jquery-patterns.aspx">javascript pattern framework</a><span>|</span><a href="http://www.dofactory.com/framework/database-design-patterns.aspx">database pattern framework</a><div align="center"><a href="http://www.dofactory.com/tutorial/javascript.aspx">javascript tutorial</a><span>|</span><a href="http://www.dofactory.com/tutorial/sql-and-database.aspx">sql + database tutorial</a><span>|</span><a href="http://www.dofactory.com/Connect/Connect.aspx">connection strings</a><span>|</span><a href="http://www.dofactory.com/ShortCutKeys/ShortCutKeys.aspx">visual studio shortcuts</a><span>|</span><a href="http://www.dofactory.com/reference/csharp-coding-standards.aspx">C# coding standards</a><span>|</span><a href="http://www.dofactory.com/About/About.aspx">about us</a><hr><div id="copyright">Copyright © 2001 - 2014 Data &amp; Object Factory, LLC. All rights reserved.<br>
+ Data &amp; Object Factory™, dofactory.com™, DoFactory™, Design Pattern 
+Framework™, and the 'slanting do' logo are trademarks of Data &amp; 
+Object Factory, LLC.</div><div id="terms"><a href="http://www.dofactory.com/terms.aspx">terms of service</a><span>&nbsp;|&nbsp;</span><a href="http://www.dofactory.com/licensing.aspx">product licensing</a><span>&nbsp;|&nbsp;</span><a href="http://www.dofactory.com/privacy.aspx">privacy statement</a></div><!-- terms --></div><!-- footer --></div></td></tr></tbody></table>
+</div>
+        
+    </form>
+   </div> <!-- container -->
+ 
+
+  
+   
+    <script type="text/javascript">
+    //<![CDATA[
+      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+    //]]>
+    </script><script src="media/ga.js" type="text/javascript"></script>
+    <script type="text/javascript">
+     //<![CDATA[
+      try {
+        var pageTracker = _gat._getTracker("UA-1223200-3");
+        pageTracker._trackPageview();
+      } catch (err) { }
+    //]]>
+    </script>
+
+  
+
+
+</body></html>

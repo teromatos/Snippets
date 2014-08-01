@@ -1,0 +1,296 @@
+URL: http://msdn.microsoft.com/en-us/library/ff649255.aspx
+
+How To: Use SSL to Secure Communication with SQL Server
+
+J.D. Meier, Alex Mackman, Michael Dunner, and Srinath Vasireddy
+Microsoft Corporation
+
+Published: November 2002
+
+Last Revised: January 2006
+
+Applies to:
+
+    Microsoft® .NET Framework 1.1 and 2.0
+    Microsoft Windows® 2000 Server and Windows Server 2003
+
+See the "patterns & practices Security Guidance for Applications Index" for links to additional security resources.
+
+See the Landing Page for a starting point and complete overview of Building Secure ASP.NET Applications.
+
+Summary: It is often vital for applications to be able to secure the data passed to and from a SQL Server database server. With SQL Server, you can use SSL to create an encrypted channel. This How To shows you how to install a certificate on the database server, configure SQL Server for SSL and to verify that the channel is secure. (9 printed pages)
+Contents
+
+Notes
+Summary of Steps
+Step 1. Request and Install a Server Authentication CertificateStep 2. Verify that the Certificate Has Been Installed Step 3. Install the Issuing CA's Certificate on the Client Step 4. Force All Clients to Use SSL Step 5. Allow Clients to Determine Whether to Use SSL Step 6. Verify that Communication Is Encrypted
+Additional Resources
+
+You can use the Secure Sockets Layer (SSL) protocol to secure the communication link between clients (direct callers) and Microsoft® SQL Server?. When you configure SQL Server for SSL, all of the data transmitted between client and server (and vice versa) may be encrypted to ensure that the data remains confidential while in transit between the client and SQL Server.
+Notes
+
+    SSL is an alternative to using IPSec to secure database traffic.
+
+    For more information about how to use IPSec to secure database traffic, see How To: Use IPSec to Provide Secure Communication Between Two Servers in the Reference section of this guide.
+    Unlike IPSec, configuration changes are not required if the client or server IP addresses change.
+    For SSL to work, you must install a server certificate on the database server computer. The client computer must also have a root certificate authority (CA) certificate from the same authority.
+    Clients must have the SQL Server 2000 or later connectivity libraries installed. Earlier versions or generic libraries will not work.
+    SSL only works for TCP/IP (the recommended communication protocol for SQL Server) and named pipes.
+    You can configure the server to force the use of encryption for all connections.
+    On the client, you can:
+        Force the use of encryption for all outgoing connections.
+        Allow client applications to choose whether or not to use encryption on a per-connection basis, by using the connection string.
+
+Summary of Steps
+
+This How To includes the following steps:
+
+    Step 1. Request and Install a Server Authentication Certificate
+    Step 2. Verify that the Certificate Has Been Installed
+    Step 3. Install the Issuing CA's Certificate on the Client
+    Step 4. Force All Clients to Use SSL
+    Step 5. Allow Clients to Determine Whether to Use SSL
+    Step 6. Verify that Communication Is Encrypted
+
+Step 1. Request and Install a Server Authentication Certificate
+
+SSL requires that the server possess a server authentication certificate issued by a certificate authority (CA) that is trusted by connecting clients.
+
+To install a server certificate
+
+    Logon to the database server computer using an administrator account.
+    Start Internet Explorer and browse to Microsoft Certificate Services, for example:
+
+    http://MyCA/certsrv
+
+    Click Request a certificate, and then click Next.
+    Click Advanced request, and then click Next
+    Click Submit a certificate request to this CA using a form, and then click Next.
+    Fill out the certificate request form noting the following:
+        Enter the fully-qualified domain name of the computer running SQL Server into the Name field. For example:
+
+        sql01.nwtraders.com
+
+        In the Intended Purpose (or Type of Certificate Needed) field, click Server Authentication Certificate.
+        For the Cryptographic Service Provider (CSP), click Microsoft RSA SChannel Cryptographic Provider.
+
+            Note   Microsoft Base Cryptographic Provider version 1.0 and Microsoft Enhanced Cryptographic providers also work. Microsoft Strong Cryptographic Provider does not.
+
+        Select the Use local machine store check box.
+
+            Note   Do NOT select Enable strong private key protection.
+
+    Click Submit to submit the request.
+    If the certificate server automatically issues certificates, you can install the certificate now. Select the certificate and then click Install this Certificate.
+
+    If the server does not issue certificates automatically, perform the following steps:
+        From the Administrative Tools program group, start the Certification Authority tool.
+        Expand your certificate authority, and then select the Pending Requests folder.
+        Select the certificate request you just submitted, and then on the Action menu, point to All Tasks, and then click Issue.
+        Confirm that the certificate is displayed in the Issued Certificates folder, and then double-click the certificate to view it.
+        On the Details tab, click Copy to File to save the certificate as a Base-64 encoded X.509 certificate.
+        Close the properties window for the certificate.
+        Close the Certification Authority tool.
+
+    To install the issued certificate, perform the following steps:
+        To view the certificate, start Windows Explorer, navigate to the .cer file saved in the previous procedure, and then double-click it.
+        Click Install Certificate, and then on the first page of the Certificate Import Wizard, click Next.
+        Select Automatically select the certificate store based on the type of certificate, and then click Next.
+        Click Finish to complete the wizard. Close the confirmation message box, and then click OK to close the certificate.
+
+Step 2. Verify that the Certificate Has Been Installed
+
+This procedure verifies that the server certificate has been installed successfully.
+
+To verify that the certificate has been installed
+
+    On the taskbar, click the Start button, and then click Run.
+    Enter mmc, and then click OK.
+    On the Console menu, click Add/Remove Snap-in.
+    Click Add.
+    Click Certificates, and then click Add.
+    Click Computer account, and then click Next.
+    Ensure that Local computer: (the computer this console is running on) is selected, and then click Finish
+    Click Close, and then click OK.
+    In the left-pane tree view, expand Certificates (Local Computer), expand Personal, and then select Certificates.
+    Verify that there is exactly one certificate with the fully qualified domain name that you specified in the previous procedure.
+
+    You can double-click the certificate to view its details.
+
+Step 3. Install the Issuing CA's Certificate on the Client
+
+After the certificate has been installed and the SQL Server service has been restarted, SQL Server can negotiate SSL with clients. Clients that use SSL to connect to SQL Server must:
+
+    Have MDAC 2.6 or SQL Server 2000 connectivity libraries installed.
+    Trust the issuer of the SQL Server's certificate.
+
+To install the certificate of the issuing CA on the client computer
+
+    Log on to the client computer as an administrator.
+    Start Internet Explorer and browse to Microsoft Certificate Services, for example:
+
+    http://MyCA/certsrv
+
+    Click Retrieve the CA certificate or certificate revocation list, and then click Next.
+    Click Install this CA certification path, and then click Yes in response to the confirmation dialog to install the root certificate.
+
+Step 4. Force All Clients to Use SSL
+
+You can configure the server to force all clients to use SSL (as described in this procedure), or you can let clients choose whether or not to use SSL on a per-connection basis (as described in the next procedure). The advantages of configuring the server to force clients to use SSL are:
+
+    All communications are guaranteed to be secure.
+    Any unsecured connections are rejected.
+
+The disadvantages are:
+
+    All clients must have MDAC 2.6 or SQL Server 2000 connectivity libraries installed; earlier or generic libraries will fail to connect.
+    Connections that you do not need to secure suffer a slight performance overhead due to the added encryption.
+
+To force all clients to use SSL
+
+    On the computer running SQL Server, click Server Network Utility in the Microsoft SQL Server program group.
+    Click to select Force protocol encryption.
+    Verify that TCP/IP and/or named pipes are enabled.
+
+    SSL is not supported with other protocols.
+    Click OK to close the SQL Server Network Utility, and then click OK in response to the SQL Server Network Utility message box.
+    Restart the SQL Server service.
+
+    All subsequent client connections will be required to use SSL, whether they specify secure connections or not.
+
+Step 5. Allow Clients to Determine Whether to Use SSL
+
+This procedure shows you how to configure SSL to allow clients to choose whether or not to use SSL. You can either configure the client libraries to enforce the use of SSL on all connections, or you can let individual applications choose on a per-connection basis. The advantages of configuring the client are:
+
+    The overhead of SSL is incurred only for connections that truly require it.
+    Clients that do not support SSL with SQL Server can still connect.
+
+If you adopt this approach, make sure that you are willing to allow unsecured connections.
+
+To reconfigure the server
+
+    On the computer running SQL Server, run the Server Network Utility.
+    Clear the Force protocol encryption check box.
+    Restart the SQL Server service.
+    Return to the client computer.
+
+To use SSL for all client connections
+
+With this approach, you configure the client libraries to use SSL for all connections. This means that SQL Servers that do not support encryption and SQL Servers earlier than SQL Server 2000 will not be accessible.
+
+    In the Microsoft SQL Server program group, click Client Network Utility.
+    Ensure that TCP/IP and/or named pipes are enabled.
+    Select Force protocol encryption.
+
+To allow applications to choose whether or not to use encryption
+
+With this approach applications use the connection string to determine whether or not to use encryption. This allows each application to only use encryption when it is needed.
+
+    If you are using the OLE-DB data provider to connect to SQL Server, set Use Encryption for Data to true as shown in the following sample OLE-DB connection string.
+
+    "Provider=SQLOLEDB.1;Integrated Security=SSPI;Persist Security 
+      Info=False;Initial Catalog=Northwind;Data Source=sql01;Use 
+      Encryption for Data=True"
+
+    If you are using the SQL Server .NET data provider to connect to SQL Server, set Encrypt to Yes as shown in the following example.
+
+    "Server=sql01;Integrated Security=SSPI;Persist Security 
+      Info=False;Database=Northwind;Encrypt=Yes"
+
+Step 6. Verify that Communication is Encrypted
+
+In this procedure you will use Network Monitor to verify that data sent between the application server and database server is encrypted. You will start by sending data in clear text form and then enable encryption first by configuring the server and then by configuring the client.
+
+To verify that communication is encrypted
+
+    On the client computer, use Visual Studio.NET to create a new C# Console Application called SQLSecureClient.
+    Copy the following code to class1.cs replacing all of the existing code.
+
+        Note   Replace server name in the connection string with the name of your database server. 
+
+    using System;
+    using System.Data;
+    using System.Data.SqlClient;
+
+    namespace SQLSecureClient
+    {
+      class Class1
+      {
+        [STAThread]
+        static void Main(string[] args)
+        {
+          // Replace the server name in the following connection string 
+          // with the name of your database server
+          SqlConnection conn = new SqlConnection(
+            "server='sql01';database=NorthWind;Integrated 
+              Security='SSPI'");
+
+          SqlCommand cmd = new SqlCommand("SELECT * FROM Products");
+          try
+          {
+            conn.Open();
+            cmd.Connection = conn;
+            SqlDataReader reader = cmd.ExecuteReader();
+            while (reader.Read())
+            {
+              Console.WriteLine("{0} {1}", 
+                         reader.GetInt32(0).ToString(), 
+                         reader.GetString(1) );
+            }
+            reader.Close();
+          }
+          catch( Exception ex)
+          {
+          }
+          finally
+          {
+            conn.Close();
+          }
+        }
+      }
+    }
+
+    On the Build menu, click Build Solution.
+    In order for Windows authentication to succeed between the two computers, you must duplicate the account that you are currently interactively logged on to the client computer with, on the database server computer. Ensure that the user name and password matches. An alternative is to use a domain account that is recognized by both computers.
+
+    You must also use SQL Server Enterprise Manager to create a database logon for the newly created account and add a new database user for this logon to the Northwind database.
+    On the database server computer, use the SQL Server Network Utility to disable the use of encryption by ensuring that the Force protocol encryption option is not selected.
+    On the database server computer, click Network Monitor in the Administrative Tools program group.
+
+        Note   A limited version of Network Monitor is available with Windows 2000 Server and Windows Server 2003. A full version is available with Microsoft SMS.
+
+        If you do not have Network Monitor installed, go to Add/Remove Programs in Control Panel, click Add/Remove Windows Components, select Management and Monitoring Tools from the Windows Components list, click Details and select Network Monitor Tools. Click OK, and then click Next, to install the limited version of Network Monitor. You may be prompted for a Windows 2000 Server or Windows Server 2003 installation CD. 
+
+    On the Capture menu, click Filter to create a new filter configured to view TCP/IP network traffic sent between the database server and database server.
+    Click the Start Capture button.
+    Return to the client computer and run the test console application. A list of products from the Northwind database should be displayed in the console window.
+    Return to the database server and click the Stop and View Capture button within Network Monitor.
+    Double-click the first captured frame to view the captured data.
+    Scroll down through the captured frames. You should see the SELECT statement in clear text followed by the list of products retrieved from the database.
+    Now force the use of encryption for all connections by configuring the server with the SQL Server Network Utility:
+        Use the SQL Server Network Utility to select Force protocol encryption.
+        Stop and restart the SQL Server service.
+    Return to Network Monitor and click the Start Capture button. In the Save File dialog box, click No.
+    Return to the client computer and run the test console application once again.
+    Return to the database server computer and click Stop and View Capture within Network Monitor.
+    Confirm that the data is now unintelligible (because it is encrypted).
+    Reconfigure the server to no longer force encryption:
+        Use the SQL Server Network Utility and clear the Force protocol encryption check box.
+        Stop and restart the SQL Server service.
+    Start a new capture within Network Monitor and rerun the client application. Confirm that the data is once again in clear text.
+    Return to the client computer and select Client Network Utility from the Microsoft SQL Server program group.
+    Select Force protocol encryption, and then click OK to close the Client Network Utility.
+    Return to Network Monitor and click the Start Capture button. In the Save File dialog box, click No.
+    Return to the client computer and run the test console application once again.
+    Return to the database server computer and click Stop and View Capture within Network Monitor.
+    Confirm that the data is now unintelligible (because it is encrypted).
+    Note that, in all cases, SQL Server sends its server authentication certificate in the clear to the client at the beginning of the communication sequence. This is part of the SSL protocol. Note that this occurs even when neither the server nor the client requires encryption.
+
+Additional Resources
+
+For information about how to install Network Monitor in Windows 2000, see the following articles:
+
+    HOW TO: Install Network Monitor in Windows 2000 (Q243270)
+    How to enable SSL encryption for SQL Server 2000 or SQL Server 2005 if you have a valid Certificate Server (Q276553)
+
+For more information about Network Monitor, see the Network Monitor section of the Microsoft Platform SDK on MSDN.
