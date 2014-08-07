@@ -1,0 +1,38 @@
+PM> get-help uninstall-Package -examples
+
+NAME
+    Uninstall-Package
+   
+SYNOPSIS
+    Uninstalls a package.
+   
+    ----------  EXAMPLE 1  ----------
+   
+    PM> Uninstall-Package Elmah
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Uninstalls the Elmah package from the default project.
+   
+   
+    ----------  EXAMPLE 2  ----------
+   
+    PM> Uninstall-Package Elmah -RemoveDependencies
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Uninstalls the Elmah package as well as all its dependencies. If any dependency has another package that depends on it,
+    it is skipped.
+   
+   
+    ----------  EXAMPLE 3  ----------
+   
+    PM> Uninstall-Package Elmah -Force
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Uninstalls the Elmah package even if another package depends on it.
+    

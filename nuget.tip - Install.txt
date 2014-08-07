@@ -1,0 +1,65 @@
+PM> get-help Get-Package -examples
+
+NAME
+    Get-Package
+   
+SYNOPSIS
+    Gets the set of packages available from the package source. Use the -ListAvailable flag to list packages available from the package source.
+   
+    ----------  EXAMPLE 1  ----------
+   
+    PM> Get-Package
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Returns packages installed in the current solution.
+   
+   
+    ----------  EXAMPLE 2  ----------
+   
+    PM> Get-Package -ProjectName MyProject
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Returns packages installed in the "MyProject" project.
+   
+   
+    ----------  EXAMPLE 3  ----------
+   
+    PM> Get-Package -ListAvailable
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Returns a list of packages available online in the current package source.
+   
+   
+    ----------  EXAMPLE 4  ----------
+   
+    PM> Get-Package -ListAvailable -Filter Ninject
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Returns a list of packages available online using "Ninject" as a search term.
+   
+    ----------  EXAMPLE 5  ----------
+   
+    PS> Get-Package -Updates
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Returns a list of packages installed in the default project that have updates available in the current package source.
+   
+   
+    ----------  EXAMPLE 6  ----------
+   
+    PM> Get-Package -Recent
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Returns a list of recently installed packages.

@@ -1,0 +1,49 @@
+PM> get-help update-Package -examples
+
+NAME
+    Update-Package
+   
+SYNOPSIS
+    Updates a package.
+   
+    ----------  EXAMPLE 1  ----------
+   
+    PM> Update-Package Elmah
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Updates the Elmah package installed in every project to the latest version.
+   
+   
+    ----------  EXAMPLE 2  ----------
+   
+    PM> Update-Package Elmah -Version 1.1.0
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Updates the Elmah package to a specific version in every project.
+   
+   
+    ----------  EXAMPLE 3  ----------
+   
+    PM> Update-Package
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Updates every package in every project.
+   
+   
+    ----------  EXAMPLE 3  ----------
+   
+    PM> Update-Package -Safe -Project MvcApplication1
+   
+   
+    Description
+    ------------------------------------------------------------------
+    Updates every package in the project, MvcApplication1, to the latest "safe" version. For example,
+    For example, if version 1.0.0 of a package is installed, and versions 1.0.1, 1.0.2, and 1.1 are
+    available in the feed, the -Safe flag updates the package to 1.0.2.
+    
