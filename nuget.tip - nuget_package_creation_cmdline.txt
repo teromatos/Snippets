@@ -1,0 +1,21 @@
+nuget pack MyProject.csproj -Prop Configuration=Release -outputdirectory c:\dload -IncludeReferencedProjects
+
+-----
+
+Hosting Your Own NuGet Feeds
+http://docs.nuget.org/docs/creating-packages/hosting-your-own-nuget-feeds
+
+Installing NuGet
+http://docs.nuget.org/docs/start-here/installing-nuget
+
+Creating and Publishing a Package
+http://docs.nuget.org/docs/creating-packages/creating-and-publishing-a-package
+
+NuGet Frequently Asked Questions
+http://docs.nuget.org/docs/start-here/nuget-faq
+
+An Overview of the NuGet Ecosystem
+http://docs.nuget.org/docs/reference/ecosystem
+
+UpdateVersion is a command-line utility that can update .NET AssemblyInfo files in any language.
+http://updateversion.codeplex.com/documentation
