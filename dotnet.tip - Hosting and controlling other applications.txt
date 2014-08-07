@@ -1,0 +1,53 @@
+URL: http://www.sliver.com/dotnet/HostingAndControllingOtherApps/
+
+Hosting and controlling other applications  
+Jeff Key  
+September 22, 2003
+It's easy to forget that .NET executables are in fact normal assemblies since Visual Studio.NET refuses attempts at creating references to EXEs.  Given this, you can use them as you would any other assembly, even to the point of driving the application from your code.  Private or internal types and members aren't an issue thanks to our friend Reflection.
+
+I can't put my finger on why, but this seems creepy.  It's a bit unnerving knowing that your code can be easily decompiled and viewed (see Reflector), but acknowledging that the bits and pieces in your application could be used for evil is a tough pill to swallow.  Can CAS protect against this?  I have no idea.  That's one part of the .NET beast I haven't touched yet.
+
+I've created a simple sample that demonstrates this.  It loads Reflector and instructs it to show the System.Windows.Form type.
+
+
+using System.Windows.Forms;
+using System;
+using System.Reflection;
+
+public class MyClass
+{
+    [STAThread]
+    public static void Main()
+    {
+        // Load the Reflector assembly
+        Assembly assm = Assembly.LoadFrom(@"D:\Program Files\Reflector\Reflector.exe");
+        
+        // Create an instance of Application
+        Type applicationType = assm.GetType("Reflector.Application");
+        object application = Activator.CreateInstance(applicationType);
+
+        // Get a reference to the private field Application.applicationWindow
+        FieldInfo applicationWindowField = applicationType.GetField("applicationWindow", BindingFlags.NonPublic | BindingFlags.Instance);
+        Form applicationForm = (Form)applicationWindowField.GetValue(application);
+
+        // Get a reference to the treeview on the form, private field ApplicationWindow.browser
+        Type applicationWindowType = assm.GetType("Reflector.UserInterface.ApplicationWindow");
+        FieldInfo treeBrowserField = applicationWindowType.GetField("browser", BindingFlags.NonPublic | BindingFlags.Instance);
+        object treeBrowser = treeBrowserField.GetValue(applicationForm);            
+        
+        // Call the GoToMemember method on the treeview, passing the type Form
+        Type treeBrowserType = assm.GetType("Reflector.Browser.TreeBrowser");
+        treeBrowserType.InvokeMember("GoToMember", 
+            BindingFlags.Public | BindingFlags.Instance | BindingFlags.InvokeMethod, 
+            null, 
+            treeBrowser, 
+            new object[] {typeof(System.Windows.Forms.Form)});
+            
+        // Finally, show the form
+        applicationForm.ShowDialog();
+    }
+}
+Back to dotnet
+
+
+ 
