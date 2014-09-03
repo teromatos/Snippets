@@ -1,0 +1,82 @@
+***********************
+* LLLLL * BBB *       *
+* LLLLL * BBB *       *
+* LLLLL * BBB *       *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L LEFT JOIN TABLE_R R ON L.KEY = R.KEY
+
+
+
+
+
+***********************
+* LLLLL *     *       *
+* LLLLL *     *       *
+* LLLLL *     *       *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L LEFT JOIN TABLE_R R ON L.KEY = R.KEY
+WHERE R.KEY IS NULL
+
+
+
+
+
+***********************
+* LLLLL * BBB * RRRRR *
+* LLLLL * BBB * RRRRR *
+* LLLLL * BBB * RRRRR *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L FULL OUTER JOIN TABLE_R R ON L.KEY = R.KEY
+
+
+
+
+
+***********************
+* LLLLL *     * RRRRR *
+* LLLLL *     * RRRRR *
+* LLLLL *     * RRRRR *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L FULL OUTER JOIN TABLE_R R ON L.KEY = R.KEY
+WHERE L.KEY IS NULL OR R.KEY IS NULL
+
+
+
+
+
+***********************
+*       * BBB *       *
+*       * BBB *       *
+*       * BBB *       *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L INNER JOIN TABLE_R R ON L.KEY = R.KEY
+
+
+
+
+
+***********************
+*       * BBB * RRRRR *
+*       * BBB * RRRRR *
+*       * BBB * RRRRR *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L RIGHT JOIN TABLE_R R ON L.KEY = R.KEY
+
+
+
+
+
+***********************
+*       *     * RRRRR *
+*       *     * RRRRR *
+*       *     * RRRRR *
+***********************
+SELECT <FIELDS>
+FROM TABLE_L L RIGHT JOIN TABLE_R R ON L.KEY = R.KEY
+WHERE L.KEY IS NULL

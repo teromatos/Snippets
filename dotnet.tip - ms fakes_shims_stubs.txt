@@ -1,0 +1,3 @@
+fakes
+    stubs - stub based on interface which you have own/control of
+    shims - allows you to control objects details that you do not own/control
