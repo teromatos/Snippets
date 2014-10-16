@@ -1,0 +1,17 @@
+curl.exe -P -  -O --user username:"password" ftp://ftp.xxx.com/DbBackup/xxx-20140814_053004.7z
+
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+100 3659k  100 3659k    0     0   878k      0  0:00:04  0:00:04 --:--:--  878k
+
+
+
+===========================================================================================
+
+
+
+curl.exe -P -  -o x.txt --user username:"password"  -l -X LIST  ftp://ftp.xxx.com/DbBackup/*.*
+  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
+                                 Dload  Upload   Total   Spent    Left  Speed
+  0     0    0  1138    0     0   1734      0 --:--:-- --:--:-- --:--:--  1734
+

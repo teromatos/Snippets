@@ -1,0 +1,162 @@
+
+--If stored procedure already exists, drop it
+IF  EXISTS (SELECT * FROM sys.objects WHERE object_id = OBJECT_ID(N'[dbo].[sp_Generate_Inserts]') AND type in (N'P', N'PC'))
+DROP PROCEDURE [dbo].[sp_Generate_Inserts]
+GO
+
+/***********************************************************************************************************
+Procedure:	sp_Generate_Inserts
+		(Copyright © 2012 Mohammed Rashid. All rights reserved.)
+                                          
+Purpose: To generate INSERT statements from existing data. 
+
+Written by:	Mohammed Rashid
+	        http://BlogUnlimited.com/MohammedRashid
+
+Tested on: SQL Server 2005
+
+Date created: 10 March 2012
+
+Example 1:	To generate INSERT statements for table 'MyTable':
+		
+		EXEC sp_Generate_Inserts 'MyTable'
+
+Example 2: To generate INSERT statements for 'MyTable' table where COL1 > 100 and COL2 contains 'some string':
+		NOTE: The user of this SP is assumed to be aware of basic SQL WHERE clause
+
+		EXEC sp_Generate_Inserts 'MyTable', @whereClause = 'COL1 > 100 AND COL2 LIKE ''%some string%'''
+
+Example 3: To generate INSERT statements for 'MyTable' table where the data is sorted by COL1:
+
+		EXEC sp_Generate_Inserts MyTable, @orderByClause = 'ORDER BY COL1'
+
+Example 4: To generate INSERT statements for 'MyTable' table where COL1 > 100 and COL2 contains 'some string'	
+			and the data is sorted by COL3 in descending:
+
+		EXEC sp_Generate_Inserts MyTable, @whereClause = 'COL1 > 100 AND COL2 LIKE ''%some string%''', @orderByClause = 'ORDER BY COL3 DESC'
+***********************************************************************************************************/
+
+
+--Create the stored procedure
+CREATE PROCEDURE sp_Generate_Inserts
+(
+	@tableName nvarchar(100),
+	@whereClause nvarchar(MAX) = '',
+	@orderByClause nvarchar(MAX) = ''
+)
+AS
+BEGIN
+
+	--Declare variables
+	DECLARE @tableHasIdentity bit
+	DECLARE @sql nvarchar(MAX)
+	DECLARE @columnList nvarchar(MAX)
+	DECLARE @valueList nvarchar(MAX)
+	DECLARE	@Column_ID int
+	DECLARE	@Column_Name varchar(128) 
+	DECLARE	@Data_Type varchar(128)
+
+	--Initialize variables
+	SET @columnList = ''
+	SET @valueList = ''
+	SET @Column_ID = 0
+	SET @Column_Name = ''
+
+	--Check if the table has an identity column
+	SELECT @tableHasIdentity = OBJECTPROPERTY(OBJECT_ID(TABLE_NAME), 'TableHasIdentity')
+	FROM INFORMATION_SCHEMA.TABLES
+	WHERE TABLE_NAME = @tableName
+
+	--Check if we need 'SET IDENTITY_INSERT tableName ON' statement.
+	--If the table has Identity column, the IDENTITY_INSERT will be SET to ON
+	IF @tableHasIdentity = 1
+		BEGIN
+			SET @sql = 'SELECT TOP 1 ''SET IDENTITY_INSERT ' + @tableName + ' ON '' FROM ' + @tableName
+			EXEC sp_executesql @sql
+		END
+
+	--Prepare list of columns and values
+
+	--To get the first column's ID
+	SELECT	@Column_ID = MIN(ORDINAL_POSITION) 	
+	FROM	INFORMATION_SCHEMA.COLUMNS (NOLOCK) 
+	WHERE 	TABLE_NAME = @tableName
+
+	--Loop through all the columns of the table, to get the column names and their data types
+	WHILE @Column_ID IS NOT NULL
+		BEGIN
+			SELECT 	@Column_Name = QUOTENAME(COLUMN_NAME), 
+			@Data_Type = DATA_TYPE 
+			FROM 	INFORMATION_SCHEMA.COLUMNS (NOLOCK) 
+			WHERE 	ORDINAL_POSITION = @Column_ID AND 
+			TABLE_NAME = @tableName 
+			
+			--Determining the data type of the column and depending on the data type, 
+			--the VALUES part of the INSERT statement is generated.
+			SET @valueList = @valueList  +
+			CASE 
+				WHEN @Data_Type IN ('char','varchar','nchar','nvarchar') 
+					THEN 
+						'COALESCE('''''''' + REPLACE(RTRIM(' + @Column_Name + '),'''''''','''''''''''')+'''''''',''NULL'')'
+				WHEN @Data_Type IN ('datetime','smalldatetime') 
+					THEN 
+						'COALESCE('''''''' + RTRIM(CONVERT(char,' + @Column_Name + ',109))+'''''''',''NULL'')'
+				WHEN @Data_Type IN ('uniqueidentifier') 
+					THEN  
+						'COALESCE('''''''' + REPLACE(CONVERT(char(255),RTRIM(' + @Column_Name + ')),'''''''','''''''''''')+'''''''',''NULL'')'
+				WHEN @Data_Type IN ('text','ntext') 
+					THEN  
+						'COALESCE('''''''' + REPLACE(CONVERT(char(8000),' + @Column_Name + '),'''''''','''''''''''')+'''''''',''NULL'')'					
+				WHEN @Data_Type IN ('binary','varbinary') 
+					THEN  
+						'COALESCE(RTRIM(CONVERT(char,' + 'CONVERT(int,' + @Column_Name + '))),''NULL'')'  
+				WHEN @Data_Type IN ('timestamp','rowversion') 
+					THEN  
+						'COALESCE(RTRIM(CONVERT(char,' + 'CONVERT(int,' + @Column_Name + '))),''NULL'')' 
+				WHEN @Data_Type IN ('float','real','money','smallmoney')
+					THEN
+						'COALESCE(LTRIM(RTRIM(' + 'CONVERT(char, ' +  @Column_Name  + ',2)' + ')),''NULL'')' 
+				ELSE 
+					'COALESCE(LTRIM(RTRIM(' + 'CONVERT(char, ' +  @Column_Name  + ')' + ')),''NULL'')' 
+			END   + '+' +  ''',''' + ' + '
+			
+			--Generating the column list for the INSERT statement
+			SET @columnList = @columnList +  @Column_Name + ','	
+
+			SELECT 	@Column_ID = MIN(ORDINAL_POSITION) 
+			FROM 	INFORMATION_SCHEMA.COLUMNS (NOLOCK) 
+			WHERE 	TABLE_NAME = @tableName AND 
+			ORDINAL_POSITION > @Column_ID
+
+		END
+	--End of loop
+
+	PRINT @columnList
+	PRINT len(@columnList)
+
+	--Remove extra characters that got concatenated during the last run through the loop
+	SET @columnList = LEFT(@columnList,len(@columnList) - 1)
+	SET @valueList = LEFT(@valueList,len(@valueList) - 6)
+
+	--Build the SQL statement
+	SET @sql = 'SELECT ''INSERT INTO [' + @tableName + '] (' + @columnList + ') ' + 
+				'VALUES (''+' + @valueList + '+'')'' FROM ' + @tableName
+
+	--Apply filter (WHERE clause) and sorting (ORDER BY clause) if required
+	IF LEN(@whereClause) > 0
+		SET @sql = @sql + ' WHERE ' + @whereClause
+	IF LEN(@orderByClause) > 0
+		SET @sql= @sql + ' ORDER BY ' + @orderByClause
+
+	--Execute SQL statement to print INSERT statements
+	exec sp_executesql @sql
+
+	--SET IDENTITY_INSERT OFF if it is set ON above
+	IF @tableHasIdentity = 1
+		BEGIN
+			SET @sql = 'SELECT TOP 1 ''SET IDENTITY_INSERT ' + @tableName + ' OFF '' FROM ' + @tableName
+			EXEC sp_executesql @sql
+		END
+
+END
+GO

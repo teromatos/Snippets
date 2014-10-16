@@ -1,0 +1,2 @@
+SELECT (size * 8.0)/1024.0 AS size_in_mb FROM GPPMembershipOnline.sys.database_files WHERE data_space_id  = 0 
+

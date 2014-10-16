@@ -1,0 +1,20 @@
+Notes
+
+1) You may need to wrap the password withing quote for it to work
+2) It may look strange but the '-P -' option is required and it is correct
+3) This will connection to a server in active mode. If you need to connect in passive mode, remove the '-P -' option.
+
+To download file from the ftp server
+
+    curl.exe -P -  -O --user [USER]:[PASSWORD] ftp://ftp.domain.com/index.html
+
+To download listing of the files on the ftp server directory into a file named 'files_on_server.txt'
+
+    curl.exe -P -  -o files_on_server.txt --user [USER]:[PASSWORD]  -l -X LIST  ftp://ftp.domain.com/*.*
+
+
+Sample of listing of files
+
+10-06-14  01:44PM                 3690 index.html
+10-14-14  05:20AM                  906 style.css
+10-16-14  12:20PM       <DIR>          images

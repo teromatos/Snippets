@@ -12,6 +12,7 @@ if (system.args.length === 1) {
 
 t = Date.now();
 address = system.args[1];
+console.log('Loading: ' + address);    
 page.open(address, function(status) {
   if (status !== 'success') {
     console.log('FAIL to load the address');
@@ -31,6 +32,7 @@ page.open(address, function(status) {
         fs.remove(path);
 
       fs.write(path, pageBody, 'w')
+      console.log('Output: ' + path);
     } catch(e) {
       console.log(e)
     }    

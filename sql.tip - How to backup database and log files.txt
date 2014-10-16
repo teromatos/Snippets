@@ -1,0 +1,15 @@
+USE Northwind;
+GO
+BACKUP DATABASE Northwind
+TO DISK = 'S:\Northwind_001.Bak'
+   WITH FORMAT,
+      MEDIANAME = 'S:\',
+      NAME = 'Full Backup of Northwind';
+GO
+
+BACKUP LOG Northwind
+TO DISK = 'S:\Northwind_001.TRN'
+   WITH FORMAT,
+      MEDIANAME = 'S:\',
+      NAME = 'Full Log Backup of Northwind';
+GO

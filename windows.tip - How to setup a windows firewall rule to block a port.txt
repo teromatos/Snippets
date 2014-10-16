@@ -1,0 +1,9 @@
+netsh advfirewall firewall add rule name="BlockEmailOut" protocol=TCP dir=out remoteport=25,2525,587,465,110,995 action=block
+
+  name = The name of the rule. (Pick something descriptive)
+  protocol = The protocol we are going to block (UDP or TCP for most cases)
+  dir = The direction of the block. Can be IN or OUT
+  remoteport = The port of the remote host that is going to be blocked
+  action = Could be block or allow. In our case we want to block the connection
+
+netsh advfirewall firewall delete rule name="BlockEmailOut"
